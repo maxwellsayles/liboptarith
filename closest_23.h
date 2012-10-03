@@ -9,20 +9,19 @@
 
 #include <gmp.h>
 #include <stdint.h>
-#include "group.h"
 
+#include "liboptarith/group.h"
 
 /**
  * Representations are the sum of all terms where each term is sign * 2^a * 3^b
  */
 typedef struct {
-    int sign;
-    int a;
-    int b;
+  int sign;
+  int a;
+  int b;
 } two_three_term_t;
 
 void print_two_three_terms(const two_three_term_t* terms, const int term_count);
-
 
 /**
  * Representation is given as an array 'A' such that
@@ -35,14 +34,13 @@ void print_two_three_terms(const two_three_term_t* terms, const int term_count);
  * a 'b' that should be added and a 'b' that should be subtracted.
  */
 typedef struct {
-    uint16_t a;
-    uint16_t b;
+  uint16_t a;
+  uint16_t b;
 } factored_two_three_term16_t;
 
 void print_factored_two_three_term16(
-        const factored_two_three_term16_t* terms,
-        const int term_count);
-
+    const factored_two_three_term16_t* terms,
+    const int term_count);
 
 /**
  * Returns an array of two_three_term_t and the term_count.
@@ -52,11 +50,10 @@ void print_factored_two_three_term16(
  * when we have k reps for x, we return the least costly.
  */
 two_three_term_t* rep_prune_closest(
-        int* term_count,
-        const mpz_t x,
-        const group_cost_t* costs,
-        const int keep_count);
-
+    int* term_count,
+    const mpz_t x,
+    const group_cost_t* costs,
+    const int keep_count);
 
 /**
  * Computes the factored representation of a 2,3 number.
@@ -64,9 +61,9 @@ two_three_term_t* rep_prune_closest(
  * The two-three representation passed in is also sorted by the 'a' component.
  */
 factored_two_three_term16_t* factored_rep(
-        int* term_count,
-        two_three_term_t* rep,
-        int rep_count);
+    int* term_count,
+    two_three_term_t* rep,
+    int rep_count);
 
 /**
  * Returns a 2,3 16 bit factored representation of the number x
@@ -78,10 +75,10 @@ factored_two_three_term16_t* factored_rep(
  * and then factored_rep().
  */
 factored_two_three_term16_t* factored_rep_prune_closest(
-        int* term_count,
-        const mpz_t x,
-        const group_cost_t* costs,
-        const int keep_count);
+    int* term_count,
+    const mpz_t x,
+    const group_cost_t* costs,
+    const int keep_count);
 
 #endif
 

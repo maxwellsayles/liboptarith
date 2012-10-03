@@ -9,4 +9,5 @@ if uname[0] == 'Darwin' and uname[4] == 'i386':
 
 StaticLibrary(target='optarith',
               source=glob('*.c'),
+              CPPPATH=['..'],
               CCFLAGS=ccflags)
