@@ -1,8 +1,25 @@
 /**
  * @file gcdext_binary_l2r.h
- * Function for left-to-right binary XGCD.
+ * @brief Compute d=s*a+t*b where d is the greatest common divisor of a and b.
+ *
+ * This algorithm works by maintaining the invariants:
+ * u1*a + u2*b = u3
+ * v1*a + v2*b = v3
+ * u3 >= v3
+ * where initially [u1, u2, u3] = [1, 0, a] and [v1, v2, v3] = [0, 1, b]
+ *
+ * At each step, v3 is shifted left so that the MSB of v3 is the same as the
+ * MSB of u3.  This value is then subtracted from u3, made positive, and stored
+ * back in u3.  The algorithm continues until one v3 is zero and u3 is returned
+ * as the GCD.
+ *
+ * A variation of this is to find k such that dl < u3 <= dh
+ * where dl = v3*2^(k-1)
+ * and dh = v3*2^k
+ * then let u3' = min(dh-u3, u3-dl).
+ *
+ * This variation is not as fast as the method implemented here.
  */
-
 #pragma once
 #ifndef GCDEXT_BINARY_L2R__INCLUDED
 #define GCDEXT_BINARY_L2R__INCLUDED
@@ -12,8 +29,8 @@
 #endif
 #include <stdint.h>
 
-#include "s128.h"
-#include "u128.h"
+#include "liboptarith/s128.h"
+#include "liboptarith/u128.h"
 
 #ifdef __cplusplus
 extern "C" {

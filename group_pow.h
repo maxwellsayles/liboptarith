@@ -13,29 +13,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "closest_23.h"
-#include "group.h"
+#include "liboptarith/closest_23.h"
+#include "liboptarith/group.h"
 
 /**
  * Structure required for group_pow methods.
  */
 typedef struct {
-    group_t* group;
-
-    // used by innermost methods
-    group_elem_t* R;  // temporary result
-    group_elem_t* T;  // temporary value
-    group_elem_t* I;  // inverse
-    group_elem_t* E;  // extra. used by external routines.
-
-    // An array of A^{3^i}.
-    // Indexing this should be done carefully,
-    // using group->elem_size and NOT sizeof(group_elem_t).
-    group_elem_t* cubes;
-    int cubes_size;  // number of elements in cubes. byte size is
-
-    mpz_t ex;
-    mpz_t t;
+  group_t* group;
+  
+  // used by innermost methods
+  group_elem_t* R;  // temporary result
+  group_elem_t* T;  // temporary value
+  group_elem_t* I;  // inverse
+  group_elem_t* E;  // extra. used by external routines.
+  
+  // An array of A^{3^i}.
+  // Indexing this should be done carefully,
+  // using group->elem_size and NOT sizeof(group_elem_t).
+  group_elem_t* cubes;
+  int cubes_size;  // number of elements in cubes. byte size is
+  
+  mpz_t ex;
+  mpz_t t;
 } group_pow_t;
 
 /**
