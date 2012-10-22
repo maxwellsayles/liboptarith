@@ -2,7 +2,6 @@
  * @file math_mpz.h
  * Additional MPZ functions.
  */
-
 #pragma once
 #ifndef MATH_MPZ__INCLUDED
 #define MATH_MPZ__INCLUDED
@@ -91,8 +90,7 @@ static inline void mpz_set_s64(mpz_t x, const int64_t y) {
     mpz_mul_2exp(x, x, 32);
     mpz_add_ui(x, x, (-y)&0xFFFFFFFF);
     mpz_neg(x, x);
-  }
-  else {
+  } else {
     mpz_set_ui(x, y>>32);
     mpz_mul_2exp(x, x, 32);
     mpz_add_ui(x, x, y&0xFFFFFFFF);
@@ -233,7 +231,6 @@ static inline int mpz_mod3(const mpz_t n) {
       "addb %%ah, %%al\n\t"
       "adcb $0, %%al\n\t"
       "andq $255, %%rax\n\t"
-
       : "=&a"(r)
       : "r"(n->_mp_d), "rm"((uint64_t)n->_mp_size)
       : "cc", "rbx", "rcx");

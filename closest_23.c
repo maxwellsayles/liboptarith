@@ -64,10 +64,8 @@ static double ttll_cost(const ttll_t* in_p) {
   }
   
   // store the cost, break const in this case
-  if (n == 0) ((ttll_t*)in_p)->cost = 0;
-  else ((ttll_t*)in_p)->cost =
-	 costs->compose*(n-1) + costs->square*a + costs->cube*b;
-  
+  ((ttll_t*)in_p)->cost =
+      n == 0 ? 0 : costs->compose*(n-1) + costs->square*a + costs->cube*b;
   return in_p->cost;
 }
 

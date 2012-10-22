@@ -2,7 +2,6 @@
  * @file primorial.h
  * Functions for primorials and power primorials.
  */
-
 #pragma once
 #ifndef PRIMORIAL__INCLUDED
 #define PRIMORIAL__INCLUDED
@@ -13,11 +12,10 @@
 /**
  * Computes the product p^(floor(log_p B)) of w primes p <= L.
  */
-void mpz_bounded_power_primorial(
-        int* w,
-        mpz_t primorial,
-        const uint32_t L,
-        const uint32_t B);
+void mpz_bounded_power_primorial(int* w,
+				 mpz_t primorial,
+				 const uint32_t L,
+				 const uint32_t B);
 
 /**
  * Returns an array p^(floor(log_p B)) for all primes p <= B.
@@ -51,11 +49,10 @@ void mpz_primorial_phi(mpz_t phi, int n);
  * Return the product of the primes between i and j inclusive
  * as well as phi of the product of primes.
  */
-void mpz_primorial_range(
-        mpz_t primorial,
-        mpz_t phi,
-        const uint32_t i,
-        const uint32_t j);
+void mpz_primorial_range(mpz_t primorial,
+			 mpz_t phi,
+			 const uint32_t i,
+			 const uint32_t j);
 
 /**
  * Computes n primorials that are for i from 1 to n, the
@@ -64,8 +61,6 @@ void mpz_primorial_range(
  * @return array should be cleared using mpz_clear_array().
  */
 mpz_t* mpz_primorials(const int n, const int first_prime);
-
-
 
 #endif // PRIMORIAL__INCLUDED
 

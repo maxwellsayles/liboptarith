@@ -16,3 +16,4 @@ env.StaticLibrary(target='optarith',
 env.StaticLibrary(target='optarithxx',
                   source=glob('*.c') + glob('*.cc'))
 
+SConscript('tests/SConstruct')

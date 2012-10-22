@@ -55,7 +55,6 @@ void mpz_product_tree_mul(mpz_t o, mpz_t v[], int n) {
   mpz_mul(o, o, v[0]);
 }
 
-
 /**
  * Generate a decimal string. caller must free
  */
@@ -193,7 +192,6 @@ mpz_t* mpz_load_array(int* count, char* filename) {
   FILE* f;
   mpz_t* res;
   mpz_t x;
-
   mpz_init(x);
 
   // count the number of semiprimes
@@ -207,7 +205,6 @@ mpz_t* mpz_load_array(int* count, char* filename) {
     }
     (*count) ++;
   }
-
   fclose(f);
 
   // allocate mpz array

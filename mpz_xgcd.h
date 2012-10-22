@@ -9,8 +9,8 @@
 #include <gmp.h>
 
 typedef struct {
-    mpz_t q, r;
-    mpz_t t1, t2;
+  mpz_t q, r;
+  mpz_t t1, t2;
 } mpz_xgcd_t;
 
 void mpz_xgcd_init(mpz_xgcd_t* this, int nbits);

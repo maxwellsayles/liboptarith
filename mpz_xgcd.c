@@ -62,8 +62,7 @@ void mpz_xgcd_partial(mpz_xgcd_t* this,
       if (i & 1) {
 	if ((rr1 < -B1) || (rr2 - rr1 < A1 - A2))
 	  break;
-      }
-      else {
+      } else {
 	if ((rr1 < -A1) || (rr2 - rr1 < B1 - B2))
 	  break;
       }

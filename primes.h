@@ -28,7 +28,6 @@ int count_primes(int n);
 uint32_t* first_n_primes(int n);
 
 #endif  // NO_GMP
-
 #endif  // PRIME_LIST__INCLUDED
 
 
