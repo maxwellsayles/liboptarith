@@ -11,7 +11,8 @@
 #define __STDC_LIMIT_MACROS
 #endif
 #include <stdint.h>
-#include "s128.h"
+
+#include "liboptarith/s128_t.h"
 
 #ifndef INT32_MIN
 #define INT32_MIN              (-2147483647-1)
@@ -19,10 +20,6 @@
 
 #ifndef INT32_MAX
 #define INT32_MAX              (2147483647)
-#endif
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 /// Absolute.
@@ -434,10 +431,6 @@ void gcdext_partial_divrem_s64(uint64_t* r1, uint64_t* r0, int64_t* C1, int64_t*
 
 /// compute a^e mod m using binary exponentiation
 uint64_t expmod_u64(uint64_t a, uint64_t e, uint64_t m);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // MATH64__INCLUDED
 

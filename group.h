@@ -9,10 +9,6 @@
 #ifndef GROUP__INCLUDED
 #define GROUP__INCLUDED
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -147,11 +143,6 @@ extern const group_cost_t unit_costs;
 
 /// Compose has a cost of 1. Square and Cube have a cost of 0.
 extern const group_cost_t compose_only_costs;
-
-// extern "C" {
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

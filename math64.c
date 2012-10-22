@@ -1,5 +1,6 @@
 #include "liboptarith/math64.h"
-#include "liboptarith/s128.h"
+
+#include "liboptarith/s128_t.h"
 
 /**
  * Integer square root floored by Halleck's method

@@ -29,12 +29,8 @@
 #endif
 #include <stdint.h>
 
-#include "liboptarith/s128.h"
-#include "liboptarith/u128.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "liboptarith/s128_t.h"
+#include "liboptarith/u128_t.h"
 
 uint32_t gcd_binary_l2r_u32(const uint32_t a, const uint32_t b);
 uint64_t gcd_binary_l2r_u64(const uint64_t a, const uint64_t b);
@@ -48,8 +44,5 @@ void gcdext_partial_binary_l2r_s32(uint32_t* R1, uint32_t* R0, int32_t* C1, int3
 void gcdext_partial_binary_l2r_s64(uint64_t* R1, uint64_t* R0, int64_t* C1, int64_t* C0, uint64_t bound);
 void gcdext_shortpartial_binary_l2r_s128(s128_t* R1, s128_t* R0, int64_t* C1, int64_t* C0, int64_t bound);
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif // GCDEXT_BINARY_L2R__INCLUDED
+

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "liboptarith/s128.h"
+#include "liboptarith/s128_t.h"
 
 // trickery to swap two values
 #define swap(a,b) { (a)^=(b); (b)^=(a); (a)^=(b); }

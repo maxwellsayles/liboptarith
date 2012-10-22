@@ -14,10 +14,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /// Round up to the nearest power of 2.
 static inline uint32_t ceil_pow2_u32(uint32_t x) {
   x --;
@@ -375,10 +371,6 @@ static inline void gcdext_partial_divrem_s32(uint32_t* r1, uint32_t* r0, int32_t
   }
 #endif
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // MATH32__INCLUDED
 

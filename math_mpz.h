@@ -10,8 +10,8 @@
 #include <gmp.h>
 #include <stdint.h>
 
-#include "liboptarith/s128.h"
-#include "liboptarith/u128.h"
+#include "liboptarith/s128_t.h"
+#include "liboptarith/u128_t.h"
 
 /// Allocate and initialize an mpz_t[size]
 static inline mpz_t* mpz_init_array(const int size) {

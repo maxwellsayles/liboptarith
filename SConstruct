@@ -7,7 +7,12 @@ uname = os.uname()
 if uname[0] == 'Darwin' and uname[4] == 'i386':
     ccflags.append('-mdynamic-no-pic')
 
-StaticLibrary(target='optarith',
-              source=glob('*.c'),
-              CPPPATH=['..'],
-              CCFLAGS=ccflags)
+env = Environment(CCFLAGS=ccflags,
+                  CPPPATH='..')
+
+env.StaticLibrary(target='optarith',
+                  source=glob('*.c'))
+    
+env.StaticLibrary(target='optarithxx',
+                  source=glob('*.c') + glob('*.cc'))
+
