@@ -1,20 +1,20 @@
 #include "liboptarith/mpz_xgcd.h"
 
-void mpz_xgcd_init(mpz_xgcd_t* this, int nbits) {
-  mpz_init2(this->q, nbits);
-  mpz_init2(this->r, nbits);
-  mpz_init2(this->t1, nbits);
-  mpz_init2(this->t2, nbits);
+void mpz_xgcd_init(mpz_xgcd_t* inst, int nbits) {
+  mpz_init2(inst->q, nbits);
+  mpz_init2(inst->r, nbits);
+  mpz_init2(inst->t1, nbits);
+  mpz_init2(inst->t2, nbits);
 }
 
-void mpz_xgcd_clear(mpz_xgcd_t* this) {
-  mpz_clear(this->q);
-  mpz_clear(this->r);
-  mpz_clear(this->t1);
-  mpz_clear(this->t2);
+void mpz_xgcd_clear(mpz_xgcd_t* inst) {
+  mpz_clear(inst->q);
+  mpz_clear(inst->r);
+  mpz_clear(inst->t1);
+  mpz_clear(inst->t2);
 }
 
-void mpz_xgcd_partial(mpz_xgcd_t* this,
+void mpz_xgcd_partial(mpz_xgcd_t* inst,
 		      mpz_t R2,
 		      mpz_t R1,
 		      mpz_t C2,
@@ -24,10 +24,10 @@ void mpz_xgcd_partial(mpz_xgcd_t* this,
   int i;
 
   A2 = A1 = B2 = B1 = T = T1 = rr2 = rr1 = qq = bb = 0;
-  mpz_set_ui(this->q, 0);
-  mpz_set_ui(this->r, 0);
-  mpz_set_ui(this->t1, 0);
-  mpz_set_ui(this->t2, 0);
+  mpz_set_ui(inst->q, 0);
+  mpz_set_ui(inst->r, 0);
+  mpz_set_ui(inst->t1, 0);
+  mpz_set_ui(inst->t2, 0);
 
   mpz_set_si(C1, -1);
   mpz_set_si(C2, 0);
@@ -38,14 +38,14 @@ void mpz_xgcd_partial(mpz_xgcd_t* this,
     if (T < T1) T = T1;
     if (T < 0)  T = 0;
 
-    mpz_tdiv_q_2exp(this->r, R2, T);
-    rr2 = mpz_get_si(this->r);
+    mpz_tdiv_q_2exp(inst->r, R2, T);
+    rr2 = mpz_get_si(inst->r);
 
-    mpz_tdiv_q_2exp(this->r, R1, T);
-    rr1 = mpz_get_si(this->r);
+    mpz_tdiv_q_2exp(inst->r, R1, T);
+    rr1 = mpz_get_si(inst->r);
 
-    mpz_tdiv_q_2exp(this->r, bound, T);
-    bb = mpz_get_si(this->r);
+    mpz_tdiv_q_2exp(inst->r, bound, T);
+    bb = mpz_get_si(inst->r);
 
     A2 = 0;  A1 = 1;
     B2 = 1;  B1 = 0;
@@ -71,35 +71,35 @@ void mpz_xgcd_partial(mpz_xgcd_t* this,
 
     if (i == 0) {
       // multiprecision step
-      mpz_fdiv_qr(this->q, this->r, R2, R1);
+      mpz_fdiv_qr(inst->q, inst->r, R2, R1);
       mpz_set(R2, R1);
-      mpz_set(R1, this->r);
-      mpz_mul(this->r, this->q, C1);
-      mpz_sub(C2, C2, this->r);
+      mpz_set(R1, inst->r);
+      mpz_mul(inst->r, inst->q, C1);
+      mpz_sub(C2, C2, inst->r);
       mpz_swap(C2, C1);
     } else {
       // recombination
       // r = R2*B2 + R1*A2;  R1 = R2*B1 + R1*A1;  R2 = r;
-      mpz_mul_si(this->t1, R2, B2);
-      mpz_mul_si(this->t2, R1, A2);
-      mpz_add(this->r, this->t1, this->t2);
+      mpz_mul_si(inst->t1, R2, B2);
+      mpz_mul_si(inst->t2, R1, A2);
+      mpz_add(inst->r, inst->t1, inst->t2);
 
-      mpz_mul_si(this->t1, R2, B1);
-      mpz_mul_si(this->t2, R1, A1);
-      mpz_add(R1, this->t1, this->t2);
+      mpz_mul_si(inst->t1, R2, B1);
+      mpz_mul_si(inst->t2, R1, A1);
+      mpz_add(R1, inst->t1, inst->t2);
 
-      mpz_set(R2, this->r);
+      mpz_set(R2, inst->r);
 
       // r = C2*B2 + C1*A2;  C1 = C2*B1 + C1*A1;  C2 = r;
-      mpz_mul_si(this->t1, C2, B2);
-      mpz_mul_si(this->t2, C1, A2);
-      mpz_add(this->r, this->t1, this->t2);
+      mpz_mul_si(inst->t1, C2, B2);
+      mpz_mul_si(inst->t2, C1, A2);
+      mpz_add(inst->r, inst->t1, inst->t2);
 
-      mpz_mul_si(this->t1, C2, B1);
-      mpz_mul_si(this->t2, C1, A1);
-      mpz_add(C1, this->t1, this->t2);
+      mpz_mul_si(inst->t1, C2, B1);
+      mpz_mul_si(inst->t2, C1, A1);
+      mpz_add(C1, inst->t1, inst->t2);
 
-      mpz_set(C2, this->r);
+      mpz_set(C2, inst->r);
 
       // make sure R1 and R2 are positive
       if (mpz_sgn(R1) < 0) {
