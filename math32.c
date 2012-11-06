@@ -504,7 +504,7 @@ int32_t gcdext_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
  */
 int32_t gcdext_left_divrem_s32(int32_t* u, int32_t m, int32_t n) {
   int32_t a;
-  int sm, sn;
+  int sm;
   
   // make inputs positive
   if (m < 0) {
@@ -514,10 +514,7 @@ int32_t gcdext_left_divrem_s32(int32_t* u, int32_t m, int32_t n) {
     sm = 1;
   }
   if (n < 0) {
-    sn = -1;
     n = -n;
-  } else {
-    sn = 1;
   }
   
   a = 0;
