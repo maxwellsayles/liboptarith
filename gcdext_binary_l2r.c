@@ -463,85 +463,91 @@ void gcdext_binary_l2r_s128(
 }
 
 void gcdext_partial_binary_l2r_s32(
-    uint32_t* R1, uint32_t* R0, int32_t* C1, int32_t* C0, uint32_t bound) {
+    uint32_t* pR1, uint32_t* pR0, int32_t* pC1, int32_t* pC0, uint32_t bound) {
+  uint32_t R1 = *pR1;
+  uint32_t R0 = *pR0;
+  int32_t C1 = 0;
+  int32_t C0 = -1;
   int k = 0;
   int msb_1 = 0;
   int msb_0 = 0;
   uint32_t t = 0;
   
-  (*C1) = 0;
-  (*C0) = -1;
-  
-  if ((*R1) < (*R0)) {
-    swap((*R1), (*R0));
-    swap((*C1), (*C0));
+  if (R1 < R0) {
+    swap(R1, R0);
+    swap(C1, C0);
   }
-  msb_1 = msb_u32(*R1);
-  msb_0 = msb_u32(*R0);
+  msb_1 = msb_u32(R1);
+  msb_0 = msb_u32(R0);
   
-  while ((*R0) > bound) {
+  while (R0 > bound) {
     k = msb_1 - msb_0;
-    t = (*R0) << k;
-    
-    if (t > (*R1)) {
+    t = R0 << k;
+    if (t > R1) {
       t >>= 1;
       k --;
     }
     
-    (*R1) -= t;
-    (*C1) -= (*C0) << k;
-    
-    msb_1 = msb_u32(*R1);
+    R1 -= t;
+    C1 -= C0 << k;
+    msb_1 = msb_u32(R1);
     
     // maintain invariant R1 >= R0
-    if ((*R1) < (*R0)) {
-      swap((*R1), (*R0));
-      swap((*C1), (*C0));
+    if (R1 < R0) {
+      swap(R1, R0);
+      swap(C1, C0);
       swap(msb_1, msb_0);
     }
   }
   // TODO: Reduce C1 and C0 ?
+  *pR1 = R1;
+  *pR0 = R0;
+  *pC1 = C1;
+  *pC0 = C0;
 }
 
 void gcdext_partial_binary_l2r_s64(
-    uint64_t* R1, uint64_t* R0, int64_t* C1, int64_t* C0, uint64_t bound) {
+    uint64_t* pR1, uint64_t* pR0, int64_t* pC1, int64_t* pC0, uint64_t bound) {
+  uint64_t R1 = *pR1;
+  uint64_t R0 = *pR0;
+  int64_t C1 = 0;
+  int64_t C0 = -1;
   int k = 0;
   int msb_1 = 0;
   int msb_0 = 0;
   uint64_t t = 0;
   
-  (*C1) = 0;
-  (*C0) = -1;
-  
-  if ((*R1) < (*R0)) {
-    swap((*R1), (*R0));
-    swap((*C1), (*C0));
+  if (R1 < R0) {
+    swap(R1, R0);
+    swap(C1, C0);
   }
-  msb_1 = msb_u64(*R1);
-  msb_0 = msb_u64(*R0);
+  msb_1 = msb_u64(R1);
+  msb_0 = msb_u64(R0);
   
-  while ((*R0) > bound) {
+  while (R0 > bound) {
     k = msb_1 - msb_0;
-    t = (*R0) << k;
-    
-    if (t > (*R1)) {
+    t = R0 << k;
+    if (t > R1) {
       t >>= 1;
       k --;
     }
     
-    (*R1) -= t;
-    (*C1) -= (*C0) << k;
-    
-    msb_1 = msb_u64(*R1);
+    R1 -= t;
+    C1 -= C0 << k;
+    msb_1 = msb_u64(R1);
     
     // maintain invariant R1 >= R0
-    if ((*R1) < (*R0)) {
-      swap((*R1), (*R0));
-      swap((*C1), (*C0));
+    if (R1 < R0) {
+      swap(R1, R0);
+      swap(C1, C0);
       swap(msb_1, msb_0);
     }
   }
   // TODO: Reduce C1 and C0 ?
+  *pR1 = R1;
+  *pR0 = R0;
+  *pC1 = C1;
+  *pC0 = C0;
 }
 
 void gcdext_shortpartial_binary_l2r_s128(
@@ -564,7 +570,6 @@ void gcdext_shortpartial_binary_l2r_s128(
   while (cmp_s128_s64(R0, bound) > 0) {
     k = msb_1 - msb_0;
     shl_s128_s128_int(&t, R0, k);
-    
     if (cmp_s128_s128(&t, R1) > 0) {
       shr_s128(&t);
       k --;
@@ -572,7 +577,6 @@ void gcdext_shortpartial_binary_l2r_s128(
     
     sub_s128_s128(R1, &t);
     (*C1) -= (*C0) << k;
-    
     msb_1 = msb_u128((u128_t*)R1);
     
     // maintain invariant R1 >= R0
