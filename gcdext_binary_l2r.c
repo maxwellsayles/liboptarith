@@ -4,61 +4,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "liboptarith/math32.h"
+#include "liboptarith/math64.h"
 #include "liboptarith/s128_t.h"
 
 // trickery to swap two values
 #define swap(a,b) { (a)^=(b); (b)^=(a); (a)^=(b); }
 
-static inline int is_equal_to_neg_s128_s128(
-    const s128_t* a, const s128_t* b) {
+static inline int is_equal_to_neg_s128_s128(const s128_t* a,
+					    const s128_t* b) {
   s128_t n;
   neg_s128_s128(&n, b);
   return is_equal_s128_s128(a, &n);
-}
-
-static inline int msb_u32(uint32_t x) {
-#if defined(__x86_64) || defined(__i386)
-  int32_t k = -1;
-  asm("bsrl %1, %0\n\t"
-      : "=r"(k)
-      : "r"(x), "0"(k)
-      : "cc");
-  return k;
-#else
-  // a binary search approach to finding the most significant set bit
-  int n = 0;
-  if (x == 0) return -1;
-  if (x > 0xFFFF) { n += 16; x >>= 16; }
-  if (x > 0xFF) { n += 8; x >>= 8; }
-  if (x > 0xF) { n += 4; x >>= 4; }
-  if (x > 0x7) { n += 2; x >>= 2; }
-  if (x > 0x3) { n += 1; x >>= 1; }
-  if (x > 0x1) { n ++; }
-  return n;
-#endif
-}
-
-static inline int msb_u64(uint64_t x) {
-#if defined(__x86_64)
-  int64_t k = -1;
-  asm("bsrq %1, %0\n\t"
-      : "=r"(k)
-      : "r"(x), "0"(k)
-      : "cc");
-  return k;
-#else
-  // a binary search approach to finding the most significant set bit
-  int n = 0;
-  if (x == 0) return -1;
-  if (x > 0xFFFFFFFFULL) { n += 32; x >>= 32; }
-  if (x > 0xFFFF) { n += 16; x >>= 16; }
-  if (x > 0xFF) { n += 8; x >>= 8; }
-  if (x > 0xF) { n += 4; x >>= 4; }
-  if (x > 0x7) { n += 2; x >>= 2; }
-  if (x > 0x3) { n += 1; x >>= 1; }
-  if (x > 0x1) { n ++; }
-  return n;
-#endif
 }
 
 uint32_t gcd_binary_l2r_u32(const uint32_t a, const uint32_t b) {

@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "liboptarith/math64.h"
 #include "liboptarith/u128_t.h"
 
 #ifndef NO_GMP
@@ -517,7 +518,7 @@ static inline void mul_s128_s64_u64(s128_t* res, const int64_t in_a, uint64_t in
 }
 
 static inline void abs_u128_s128(u128_t* res, const s128_t* x) {
-  if (x->v1 < 0) {
+  if (is_negative_s128(x)) {
     neg_s128_s128((s128_t*)res, x);
   } else {
     set_s128_s128((s128_t*)res, x);
@@ -525,7 +526,7 @@ static inline void abs_u128_s128(u128_t* res, const s128_t* x) {
 }
 
 static inline void abs_s128_s128(s128_t* res, const s128_t* x) {
-  if (x->v1 < 0) {
+  if (is_negative_s128(x)) {
     neg_s128_s128(res, x);
   } else {
     set_s128_s128(res, x);
@@ -609,12 +610,16 @@ static inline void mod_s128_s128_s128(s128_t* out_r, const s128_t* in_n, const s
   divrem_s128_s128_s128_s128(&q, out_r, in_n, in_d);
 }
 
+// We have to forward declare abs_s64 because of cyclic dependencies in headers.
+static inline uint64_t abs_s64(int64_t);
+
+/// Compute the nearest remainder to zero (not necessarily positive).
 static inline int64_t mod_s64_s128_s64(const s128_t* in_n, const int64_t in_d) {
   int64_t r;
   u128_t n;
   uint64_t d;
 
-  d = (in_d < 0) ? -in_d : in_d;
+  d = abs_s64(in_d);
   abs_s128_s128((s128_t*)&n, in_n);
   mod_u64_u128_u64((uint64_t*)&r, &n, d);
   if (is_negative_s128(in_n)) {
@@ -624,8 +629,7 @@ static inline int64_t mod_s64_s128_s64(const s128_t* in_n, const int64_t in_d) {
   // let r be the remainder closest to zero
   if (r > (int64_t)(d>>1)) {
     r -= d;
-  }
-  if (r < -(int64_t)(d>>1)) {
+  } else if (r < -(int64_t)(d>>1)) {
     r += d;
   }
   return r;
