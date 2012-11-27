@@ -2,7 +2,6 @@
  * @file math32.h
  * Fast 32 bit arithmetic functions.
  */
-
 #pragma once
 #ifndef MATH32__INCLUDED
 #define MATH32__INCLUDED
@@ -250,35 +249,34 @@ static inline uint32_t mulmod_u32(const uint32_t x,
 static inline int32_t mulmod_s32(const int32_t x,
 				 const int32_t y,
 				 const int32_t m) {
-  int32_t m2 = (m < 0) ? -m : m;
-  int32_t x2 = x;
-  int32_t y2 = y;
-  int32_t r;
-  int s = 0;
+  int32_t m2 = (int32_t)abs_s32(m);
   
-  // make sure x and y are positive
-  if (x < 0) {
-    s = 1;
-    x2 = -x;
-  }
-  if (y < 0) {
-    s = 1-s;
-    y2 = -y;
-  }
+  // Make sure x and y are positive and compute the result sign.
+  // This is a non-branching trick for the following:
+  //  if (x < 0) {
+  //    s = 1;
+  //    x2 = -x;
+  //  }
+  //  if (y < 0) {
+  //    s = 1-s;
+  //    y2 = -y;
+  //  }
+  int32_t xt = x >> 31;  // xt is either 0 or -1
+  int32_t yt = y >> 31;
+  int32_t x2 = (x^xt) - xt;  // negate x if xt==-1
+  int32_t y2 = (y^yt) - yt;
+  int32_t s = (xt^yt);  // s is either all 0s or all 1s
   
   // perform multiply with remainder
-  r = mulmod_u32(x2, y2, m2);
+  int32_t r = (int32_t)mulmod_u32(x2, y2, m2);
   
   // use the remainder that is closest to 0
   if (r > (m2>>1)) {
     r -= m2;
   }
   
-  // correct the sign of the remainder
-  if (s) {
-    r = -r;
-  }
-  return r;
+  // Correct the sign of the remainder
+  return (r^s) - s;  // negates r is s is -1.
 }
 
 /// Compute the largest s such that s^2 <= x.

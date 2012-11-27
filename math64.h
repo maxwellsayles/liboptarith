@@ -2,7 +2,6 @@
  * @file math64.h
  * Fast 64 bit arithmetic functions.
  */
-
 #pragma once
 #ifndef MATH64__INCLUDED
 #define MATH64__INCLUDED
@@ -340,36 +339,34 @@ static inline uint64_t mulmod_u64(const uint64_t x,
 static inline int64_t mulmod_s64(const int64_t x,
 				 const int64_t y,
 				 const int64_t m) {
-  int64_t m2 = (m < 0) ? -m : m;
-  int64_t x2 = x;
-  int64_t y2 = y;
-  int64_t r;
-  int s = 0;
-
-  // make sure x and y are positive
-  if (x < 0) {
-    s = 1;
-    x2 = -x;
-  }
-  if (y < 0) {
-    s = 1-s;
-    y2 = -y;
-  }
-
+  int64_t m2 = (int64_t)abs_s64(m);
+  
+  // Make sure x and y are positive and compute the result sign.
+  // This is a non-branching trick for the following:
+  //  if (x < 0) {
+  //    s = 1;
+  //    x2 = -x;
+  //  }
+  //  if (y < 0) {
+  //    s = 1-s;
+  //    y2 = -y;
+  //  }
+  int64_t xt = x >> 63;  // xt is either 0 or -1
+  int64_t yt = y >> 63;
+  int64_t x2 = (x^xt) - xt;  // negate x if xt==-1
+  int64_t y2 = (y^yt) - yt;
+  int64_t s = (xt^yt);  // s is either all 0s or all 1s
+  
   // perform multiply with remainder
-  r = mulmod_u64(x2, y2, m2);
-
+  int64_t r = (int64_t)mulmod_u64(x2, y2, m2);
+  
   // use the remainder that is closest to 0
   if (r > (m2>>1)) {
     r -= m2;
   }
-
-  // correct the sign of the remainder
-  if (s) {
-    r = -r;
-  }
-
-  return r;
+  
+  // Correct the sign of the remainder
+  return (r^s) - s;  // negates r is s is -1.
 }
 
 /// res = f1*f2+f3*f4
