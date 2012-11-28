@@ -1,0 +1,39 @@
+import os
+
+def buildTestU128():
+    libs = []
+    sources = ['test_u128.cc', '../liboptarithxx.a']
+    
+    if os.path.isfile('/usr/local/lib/libgmp.a'):
+        sources.append('/usr/local/lib/libgmp.a')
+    elif os.path.isfile('/usr/lib/libgmp.a'):
+        sources.append('/usr/lib/libgmp.a')
+    else:
+        libs.append('gmp')
+
+    Program(target='test_u128',
+            source=sources,
+            CCFLAGS=['-Wall', '-Werror', '-DNDEBUG', '-O3'],
+            CPPPATH='../..',
+            LIBS=libs)
+
+def buildTestGCD():
+    libs = []
+    sources = ['test_gcd.c', '../liboptarith.a']
+    
+    if os.path.isfile('/usr/local/lib/libgmp.a'):
+        sources.append('/usr/local/lib/libgmp.a')
+    elif os.path.isfile('/usr/lib/libgmp.a'):
+        sources.append('/usr/lib/libgmp.a')
+    else:
+        libs.append('gmp')
+
+    Program(target='test_gcd',
+            source=sources,
+            CCFLAGS=['-Wall', '-Werror', '-DNDEBUG', '-O3'],
+            CPPPATH='../..',
+            LIBS=libs)
+    libs = []
+
+buildTestU128()
+buildTestGCD()

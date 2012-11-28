@@ -174,5 +174,5 @@ extern const short sqrtmod_983[];
 extern const short sqrtmod_991[];
 extern const short sqrtmod_997[];
 
-#endif // SQRTMODP_LIST__INCLUDED
+#endif  // SQRTMODP_LIST__INCLUDED
 

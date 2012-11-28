@@ -125,8 +125,8 @@ void gcd_binary_l2r_u128(u128_t* d, const u128_t* a, const u128_t* b) {
   *d = u3;
 }
 
-int32_t gcdext_binary_l2r_s32(
-    int32_t* s, int32_t* t, const int32_t a, const int32_t b) {
+int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
+			      const int32_t a, const int32_t b) {
   int k = 0;
   int msb_u = 0;
   int msb_v = 0;
@@ -134,12 +134,11 @@ int32_t gcdext_binary_l2r_s32(
   int32_t u2 = 0;
   int32_t v1 = 0;
   int32_t v2 = 1;
-  uint32_t u3 = (a > 0) ? a : -a;
-  uint32_t v3 = (b > 0) ? b : -b;
-  uint32_t t3 = 0;
+  uint32_t u3 = abs_s32(a);
+  uint32_t v3 = abs_s32(b);
   int32_t d = 0;
 
-  // invariants:
+  // Invariants:
   // u1*a + u2*b = u3
   // v1*a + v2*b = v3
   // u3 >= v3
@@ -154,30 +153,82 @@ int32_t gcdext_binary_l2r_s32(
   // l2r binary gcd
   while (v3 != 0) {
     k = msb_u - msb_v;
-    t3 = v3 << k;
-    if (t3 < u3) {
-      u3 -= t3;
+#if defined(__x86_64)
+    // A branch free version of the #else section.
+    // Clobbers the local variable d.
+    asm("subl %10, %2\n\t"
+	"sbbl $0, %3\n\t"
+	"subl %8, %0\n\t"
+	"subl %9, %1\n\t"
+	"xorl %3, %0\n\t"
+	"xorl %3, %1\n\t"
+	"xorl %3, %2\n\t"
+	"subl %3, %0\n\t"
+	"subl %3, %1\n\t"
+	"subl %3, %2\n\t"
+	: "=r"(u1), "=r"(u2), "=r"(u3), "=r"(d)
+	: "0"(u1), "1"(u2), "2"(u3), "3"(0),
+	  "r"(v1<<k), "r"(v2<<k), "r"(v3<<k)
+	: "cc");
+#else
+    uint32_t t3 = v3 << k;
+    if (t3 <= u3) {
       u1 -= v1 << k;
       u2 -= v2 << k;
+      u3 -= t3;
     } else {
-      u3 = t3 - u3;
       u1 = (v1 << k) - u1;
       u2 = (v2 << k) - u2;
+      u3 = t3 - u3;
     }
+#endif
     msb_u = msb_u32(u3);
 
-    // maintain invariant u3 >= v3
+    // Maintain invariant u3 >= v3
+#if defined(__x86_64)
+    // A branch free version of the #else section.
+    // Clobbers the local variable d.
+    uint32_t m;
+    int32_t d1, d2, d3, d4;
+    asm("subl %6, %10\n\t"
+	"sbbl $0, %12\n\t"
+	"subl %4, %8\n\t"
+	"subl %5, %9\n\t"
+	"subl %7, %11\n\t"
+	"andl %12, %8\n\t"
+	"andl %12, %9\n\t"
+	"andl %12, %10\n\t"
+	"andl %12, %11\n\t"
+	"subl %8, %0\n\t"
+	"subl %9, %1\n\t"
+	"subl %10, %2\n\t"
+	"subl %11, %3\n\t"
+	"addl %8, %4\n\t"
+	"addl %9, %5\n\t"
+	"addl %10, %6\n\t"
+	"addl %11, %7\n\t"
+	: "=r"(u1), "=r"(u2), "=r"(u3), "=r"(msb_u),
+	  "=r"(v1), "=r"(v2), "=r"(v3), "=r"(msb_v),
+	  "=r"(d1), "=r"(d2), "=r"(d3), "=r"(d4),
+	  "=r"(m)
+	: "0"(u1), "1"(u2), "2"(u3), "3"(msb_u),
+	  "4"(v1), "5"(v2), "6"(v3), "7"(msb_v),
+	  "8"(u1), "9"(u2), "10"(u3), "11"(msb_u),
+	  "12"(0)
+	: "cc");
+#else
     if (u3 < v3) {
       swap(u1, v1);
       swap(u2, v2);
       swap(u3, v3);
       swap(msb_u, msb_v);
     }
+#endif
   }
 
   // setup return values
-  if (s) (*s) = u1;
-  if (t) (*t) = u2;
+  if (s) *s = u1;
+  if (t) *t = u2;
   d = u3;
   
   // special case if a|b or b|a
@@ -205,14 +256,13 @@ int32_t gcdext_binary_l2r_s32(
   // reduce s (mod b/d) and t (mod a/d)
   // and correct for sign
   if (s) {
-    (*s) %= b / d;
-    if (a < 0) (*s) = -(*s);
+    *s %= b / d;
+    *s = cond_negate_s32_s32(a, *s);
   }
   if (t) {
-    (*t) %= a / d;
-    if (b < 0) (*t) = -(*t);
+    *t %= a / d;
+    *t = cond_negate_s32_s32(b, *t);
   }
-  
   return d;
 }
 

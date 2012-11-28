@@ -1,8 +1,8 @@
 import os
 
-libs = []
-sources = ['test_u128.cc', '../liboptarithxx.a']
-
+libs = ['rt']
+sources = ['timegcd.cc', '../liboptarithxx.a']
+    
 if os.path.isfile('/usr/local/lib/libgmp.a'):
     sources.append('/usr/local/lib/libgmp.a')
 elif os.path.isfile('/usr/lib/libgmp.a'):
@@ -10,7 +10,7 @@ elif os.path.isfile('/usr/lib/libgmp.a'):
 else:
     libs.append('gmp')
 
-Program(target='test_u128',
+Program(target='timegcd',
         source=sources,
         CCFLAGS=['-Wall', '-Werror', '-DNDEBUG', '-O3'],
         CPPPATH='../..',

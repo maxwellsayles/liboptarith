@@ -26,11 +26,18 @@ static inline uint32_t ceil_pow2_u32(uint32_t x) {
 }
 
 /// Absolute value.
-static inline uint32_t abs_s32(int32_t x) {
+static inline uint32_t abs_s32(const int32_t x) {
   // t is either all 0s or all 1s
   // in which case either t == 0 or t == -1
-  int64_t t = x >> 31;
+  int32_t t = x >> 31;
   return (x^t) - t;
+}
+
+/// Negate x when c < 0
+static inline int32_t cond_negate_s32_s32(const int32_t c,
+					  const int32_t x) {
+  int32_t t = c >> 31;
+  return (x ^ t) - t;
 }
 
 /// Most significant bit.
@@ -43,7 +50,7 @@ static inline int msb_u32(uint32_t x) {
       : "cc");
   return k;
 #else
-  // a binary search approach to finding the most significant set bit
+  // Binary search the most significant set bit.
   int n = 0;
   if (x == 0) return -1;
   if (x > 0xFFFF) { n += 16; x >>= 16; }
@@ -56,7 +63,8 @@ static inline int msb_u32(uint32_t x) {
 #endif
 }
 
-/// Computes the index of the least significant set bit, starting at index 0.
+/// The index of the least significant set bit,
+/// starting at index 0.
 static inline int lsb_u32(uint32_t x) {
 #if defined(__x86_64) || defined(__i386)
   int32_t k = -1;
@@ -261,11 +269,11 @@ static inline int32_t mulmod_s32(const int32_t x,
   //    s = 1-s;
   //    y2 = -y;
   //  }
-  int32_t xt = x >> 31;  // xt is either 0 or -1
+  int32_t xt = x >> 31;      // xt is either 0 or -1
   int32_t yt = y >> 31;
   int32_t x2 = (x^xt) - xt;  // negate x if xt==-1
   int32_t y2 = (y^yt) - yt;
-  int32_t s = (xt^yt);  // s is either all 0s or all 1s
+  int32_t s = (xt^yt);       // s is either all 0s or all 1s
   
   // perform multiply with remainder
   int32_t r = (int32_t)mulmod_u32(x2, y2, m2);
