@@ -18,6 +18,26 @@ static inline int is_equal_to_neg_s128_s128(const s128_t* a,
   return is_equal_s128_s128(a, &n);
 }
 
+/// Conditionally swap u with v if u3 < v3.
+static inline void cond_swap3_s32(int32_t* u1,
+				  int32_t* u2,
+				  int32_t* u3,
+				  int32_t* v1,
+				  int32_t* v2,
+				  int32_t* v3) {
+  uint32_t m;
+  int32_t d3 = sub_with_mask_u32(&m, *u3, *v3);
+  int32_t d1 = (*u1 - *v1) & m;
+  int32_t d2 = (*u2 - *v2) & m;
+  d3 &= m;
+  *u1 -= d1;
+  *u2 -= d2;
+  *u3 -= d3;
+  *v1 += d1;
+  *v2 += d2;
+  *v3 += d3;
+}
+
 uint32_t gcd_binary_l2r_u32(const uint32_t a, const uint32_t b) {
   int k = 0;
   int msb_u = 0;
@@ -127,6 +147,10 @@ void gcd_binary_l2r_u128(u128_t* d, const u128_t* a, const u128_t* b) {
 
 int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
 			      const int32_t a, const int32_t b) {
+  // Invariants:
+  // u1*a + u2*b = u3
+  // v1*a + v2*b = v3
+  // u3 >= v3
   int32_t u1 = 1;
   int32_t u2 = 0;
   int32_t u3 = abs_s32(a);
@@ -134,15 +158,8 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
   int32_t v2 = 1;
   int32_t v3 = abs_s32(b);
 
-  // Invariants:
-  // u1*a + u2*b = u3
-  // v1*a + v2*b = v3
-  // u3 >= v3
-  if (u3 < v3) {
-    swap(u1, v1);
-    swap(u2, v2);
-    swap(u3, v3);
-  }
+  // Swap u with v if u3 < v3.
+  cond_swap3_s32(&u1, &u2, &u3, &v1, &v2, &v3);
   while (v3 != 0) {
     int k = msb_u32(u3) - msb_u32(v3);
 
@@ -156,36 +173,25 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
     u3 = (u3 ^ m) - m;
 
     // Swap u with v if u3 < v3.
-    int32_t d3 = sub_with_mask_u32(&m, u3, v3);
-    int32_t d1 = (u1 - v1) & m;
-    int32_t d2 = (u2 - v2) & m;
-    d3 &= m;
-    u1 -= d1;
-    u2 -= d2;
-    u3 -= d3;
-    v1 += d1;
-    v2 += d2;
-    v3 += d3;
+    cond_swap3_s32(&u1, &u2, &u3, &v1, &v2, &v3);
   }
 
-  // special case if a|b or b|a
-  int32_t at = a >> 31;
+  const int32_t at = a >> 31;
+  const int32_t bt = b >> 31;
   if (u3 == (a^at)-at) {
+    // a divides b.
     if (s) *s = (1^at)-at;
     if (t) *t = 0;
-    return u3;
-  }
-  int32_t bt = b >> 31;
-  if (u3 == (b^bt)-bt) {
+  } else if (u3 == (b^bt)-bt) {
+    // b divides a.
     if (s) *s = 0;
     if (t) *t = (1^bt)-bt;
-    return u3;
+  } else {
+    // Reduce u1 (mod b/u3) and u2 (mod a/u3)
+    // and correct for sign.
+    if (s) *s = cond_negate_s32(a, u1 % (b / u3));
+    if (t) *t = cond_negate_s32(b, u2 % (a / u3));
   }
-
-  // reduce u1 (mod b/u3) and u2 (mod a/u3)
-  // and correct for sign
-  if (s) *s = cond_negate_s32(a, u1 % (b / u3));
-  if (t) *t = cond_negate_s32(b, u2 % (a / u3));
   return u3;
 }
 
@@ -386,8 +392,9 @@ void gcdext_binary_l2r_s128(
   }
 }
 
-void gcdext_partial_binary_l2r_s32(
-    uint32_t* pR1, uint32_t* pR0, int32_t* pC1, int32_t* pC0, uint32_t bound) {
+void gcdext_partial_binary_l2r_s32(uint32_t* pR1, uint32_t* pR0,
+				   int32_t* pC1, int32_t* pC0,
+				   uint32_t bound) {
   uint32_t R1 = *pR1;
   uint32_t R0 = *pR0;
   int32_t C1 = 0;
