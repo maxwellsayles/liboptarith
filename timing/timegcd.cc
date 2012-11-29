@@ -315,6 +315,9 @@ int main(int argc, char** argv) {
   cout << "Priming CPU for 3 seconds." << endl;
   full_cpu_load(3);
 
+  // Reinitialize the random number generator for testing.
+  srand(atoi(argv[1]));
+
   ofstream f[4];
   if (dump) {
     f[0].open("divrem.dat");
@@ -324,8 +327,9 @@ int main(int argc, char** argv) {
   }
 
   // iterate
-  int i = 1;
-  while (i < 128) {
+  //  int i = 1;
+  //  while (i < 128) {
+  int i = 28;
     uint64_t res[4];
     time_gcd_bits(res, i, pairs);
     cout << "bits=" << i << ' ' << res[0] << ' '
@@ -339,7 +343,7 @@ int main(int argc, char** argv) {
       }
     }		
     i ++;
-  }
+    //  }
   
   if (dump) {
     f[0].close();

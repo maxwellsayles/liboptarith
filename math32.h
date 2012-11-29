@@ -25,19 +25,38 @@ static inline uint32_t ceil_pow2_u32(uint32_t x) {
   return x;
 }
 
-/// Absolute value.
-static inline uint32_t abs_s32(const int32_t x) {
-  // t is either all 0s or all 1s
-  // in which case either t == 0 or t == -1
-  int32_t t = x >> 31;
-  return (x^t) - t;
+/// Compute a - b and let m = -1 if a < b and 0 otherwise.
+static inline uint32_t sub_with_mask_u32(uint32_t* m,
+					 const uint32_t a,
+					 const uint32_t b) {
+#if defined(__x86_64) || defined(__i386)
+  uint32_t r;
+  uint32_t t;
+  asm("subl %4, %0\n\t"
+      "sbbl $0, %1\n\t"
+      : "=r"(r), "=r"(t)
+      : "0"(a), "1"(0), "r"(b)
+      : "cc");
+  *m = t;
+  return r;
+#else
+  *m = a < b ? -1 : 0;
+  return a - b;
+#endif
 }
 
 /// Negate x when c < 0
-static inline int32_t cond_negate_s32_s32(const int32_t c,
+static inline int32_t cond_negate_s32(const int32_t c,
 					  const int32_t x) {
+  // t is either all 0s or all 1s
+  // in which case either t == 0 or t == -1
   int32_t t = c >> 31;
   return (x ^ t) - t;
+}
+
+/// Absolute value.
+static inline uint32_t abs_s32(const int32_t x) {
+  return cond_negate_s32(x, x);
 }
 
 /// Most significant bit.

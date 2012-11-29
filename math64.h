@@ -21,12 +21,18 @@
 #define INT32_MAX              (2147483647)
 #endif
 
-/// Absolute.
-static inline uint64_t abs_s64(int64_t x) {
+/// Negate x when c < 0.
+static inline int64_t cond_negate_s64_s64(const int64_t c,
+					  const int64_t x) {
   // t is either all 0s or all 1s
   // in which case either t == 0 or t == -1
-  int64_t t = x >> 63;
-  return (x^t) - t;
+  int64_t t = c >> 63;
+  return (x ^ t) - t;
+}
+
+/// Absolute.
+static inline uint64_t abs_s64(const int64_t x) {
+  return cond_negate_s64_s64(x, x);
 }
 
 /// true if x fits in a signed 32-bit integer
