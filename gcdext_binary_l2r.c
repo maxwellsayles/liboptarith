@@ -129,10 +129,10 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
 			      const int32_t a, const int32_t b) {
   int32_t u1 = 1;
   int32_t u2 = 0;
+  int32_t u3 = abs_s32(a);
   int32_t v1 = 0;
   int32_t v2 = 1;
-  uint32_t u3 = abs_s32(a);
-  uint32_t v3 = abs_s32(b);
+  int32_t v3 = abs_s32(b);
 
   // Invariants:
   // u1*a + u2*b = u3
@@ -148,7 +148,7 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
 
     // Subtract 2^k times v from u, and make sure u3 >= 0.
     uint32_t m;
-    u3 = sub_with_mask_u32((uint32_t*)&m, u3, v3 << k);
+    u3 = sub_with_mask_s32(&m, u3, v3 << k);
     u1 -= v1 << k;
     u2 -= v2 << k;
     u1 = (u1 ^ m) - m;  // negate u depending on mask
@@ -169,33 +169,24 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
   }
 
   // special case if a|b or b|a
-  int32_t d = u3;
-  if (d == a) {
-    if (s) *s = 1;
+  int32_t at = a >> 31;
+  if (u3 == (a^at)-at) {
+    if (s) *s = (1^at)-at;
     if (t) *t = 0;
-    return d;
+    return u3;
   }
-  if (d == -a) {
-    if (s) *s = -1;
-    if (t) *t = 0;
-    return d;
-  }
-  if (d == b) {
+  int32_t bt = b >> 31;
+  if (u3 == (b^bt)-bt) {
     if (s) *s = 0;
-    if (t) *t = 1;
-    return d;
-  }
-  if (d == -b) {
-    if (s) *s = 0;
-    if (t) *t = -1;
-    return d;
+    if (t) *t = (1^bt)-bt;
+    return u3;
   }
 
-  // reduce s (mod b/d) and t (mod a/d)
+  // reduce u1 (mod b/u3) and u2 (mod a/u3)
   // and correct for sign
-  if (s) *s = cond_negate_s32(a, u1 % (b / d));
-  if (t) *t = cond_negate_s32(b, u2 % (a / d));
-  return d;
+  if (s) *s = cond_negate_s32(a, u1 % (b / u3));
+  if (t) *t = cond_negate_s32(b, u2 % (a / u3));
+  return u3;
 }
 
 int64_t gcdext_binary_l2r_s64(int64_t* s, int64_t* t,

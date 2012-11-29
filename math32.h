@@ -45,6 +45,26 @@ static inline uint32_t sub_with_mask_u32(uint32_t* m,
 #endif
 }
 
+/// Compute a - b and let m = -1 if a < b and 0 otherwise.
+static inline int32_t sub_with_mask_s32(uint32_t* m,
+					 const int32_t a,
+					 const int32_t b) {
+#if defined(__x86_64) || defined(__i386)
+  int32_t r;
+  uint32_t t;
+  asm("subl %4, %0\n\t"
+      "sbbl $0, %1\n\t"
+      : "=r"(r), "=r"(t)
+      : "0"(a), "1"(0), "r"(b)
+      : "cc");
+  *m = t;
+  return r;
+#else
+  *m = a < b ? -1 : 0;
+  return a - b;
+#endif
+}
+
 /// Negate x when c < 0
 static inline int32_t cond_negate_s32(const int32_t c,
 					  const int32_t x) {
