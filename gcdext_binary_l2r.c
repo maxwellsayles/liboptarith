@@ -18,26 +18,6 @@ static inline int is_equal_to_neg_s128_s128(const s128_t* a,
   return is_equal_s128_s128(a, &n);
 }
 
-/// Conditionally swap u with v if u3 < v3.
-static inline void cond_swap3_s32(int32_t* u1,
-				  int32_t* u2,
-				  int32_t* u3,
-				  int32_t* v1,
-				  int32_t* v2,
-				  int32_t* v3) {
-  uint32_t m;
-  int32_t d3 = sub_with_mask_u32(&m, *u3, *v3);
-  int32_t d1 = (*u1 - *v1) & m;
-  int32_t d2 = (*u2 - *v2) & m;
-  d3 &= m;
-  *u1 -= d1;
-  *u2 -= d2;
-  *u3 -= d3;
-  *v1 += d1;
-  *v2 += d2;
-  *v3 += d3;
-}
-
 uint32_t gcd_binary_l2r_u32(const uint32_t a, const uint32_t b) {
   int k = 0;
   int msb_u = 0;
@@ -145,6 +125,8 @@ void gcd_binary_l2r_u128(u128_t* d, const u128_t* a, const u128_t* b) {
   *d = u3;
 }
 
+/// Computes g = s*a + t*b where g=gcd(a,b).
+/// s and t may be NULL.
 int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
 			      const int32_t a, const int32_t b) {
   // Invariants:
