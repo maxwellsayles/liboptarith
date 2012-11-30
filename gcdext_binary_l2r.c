@@ -177,6 +177,8 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
   return u3;
 }
 
+/// Computes g = s*a + t*b where g=gcd(a,b).
+/// s and t may be NULL.
 int64_t gcdext_binary_l2r_s64(int64_t* s, int64_t* t,
 			      const int64_t a, const int64_t b) {
   int k = 0;
@@ -399,44 +401,25 @@ void gcdext_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
   *pC0 = C0;
 }
 
-void gcdext_partial_binary_l2r_s64(
-    uint64_t* pR1, uint64_t* pR0, int64_t* pC1, int64_t* pC0, uint64_t bound) {
-  uint64_t R1 = *pR1;
-  uint64_t R0 = *pR0;
+void gcdext_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
+				   int64_t* pC1, int64_t* pC0,
+				   const uint64_t bound) {
+  int64_t R1 = *pR1;
+  int64_t R0 = *pR0;
   int64_t C1 = 0;
   int64_t C0 = -1;
-  int k = 0;
-  int msb_1 = 0;
-  int msb_0 = 0;
-  uint64_t t = 0;
-  
-  if (R1 < R0) {
-    swap(R1, R0);
-    swap(C1, C0);
-  }
-  msb_1 = msb_u64(R1);
-  msb_0 = msb_u64(R0);
-  
+  cond_swap2_s64(&C1, &R1, &C0, &R0);
   while (R0 > bound) {
-    k = msb_1 - msb_0;
-    t = R0 << k;
-    if (t > R1) {
-      t >>= 1;
-      k --;
-    }
-    
-    R1 -= t;
-    C1 -= C0 << k;
-    msb_1 = msb_u64(R1);
-    
-    // maintain invariant R1 >= R0
-    if (R1 < R0) {
-      swap(R1, R0);
-      swap(C1, C0);
-      swap(msb_1, msb_0);
-    }
+    // Compute R1 -= R0 << k and C1 -= C0 << k.
+    // If R1 underflows, use k-1 instead.
+    int k = msb_u64(R1) - msb_u64(R0);
+    uint64_t t = R0 << k;
+    uint64_t m;  // either 0 or -1
+    R1 = sub_with_mask_s64(&m, R1, t);
+    R1 += (t >> 1) & m;
+    C1 -= C0 << (k + m);
+    cond_swap2_s64(&C1, &R1, &C0, &R0);
   }
-  // TODO: Reduce C1 and C0 ?
   *pR1 = R1;
   *pR0 = R0;
   *pC1 = C1;

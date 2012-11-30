@@ -21,6 +21,68 @@
 #define INT32_MAX              (2147483647)
 #endif
 
+/// Compute a - b and let m = -1 if a < b and 0 otherwise.
+static inline int64_t sub_with_mask_s64(uint64_t* m,
+					const int64_t a,
+					const int64_t b) {
+#if defined(__x86_64)
+  int64_t r;
+  uint64_t t;
+  asm("subq %4, %0\n\t"
+      "sbbq $0, %1\n\t"
+      : "=r"(r), "=r"(t)
+      : "0"(a), "1"(0), "r"(b)
+      : "cc");
+  *m = t;
+  return r;
+#else
+  *m = a < b ? -1 : 0;
+  return a - b;
+#endif
+}
+
+/// Conditionally swap u with v if u < v.
+static inline void cond_swap_s64(int64_t* u, int64_t* v) {
+  uint64_t m;
+  int64_t d = sub_with_mask_s64(&m, *u, *v);
+  d &= m;
+  *u -= d;
+  *v += d;
+}
+
+/// Conditionally swap u with v if u2 < v2.
+static inline void cond_swap2_s64(int64_t* u1, int64_t* u2,
+				  int64_t* v1, int64_t* v2) {
+  uint64_t m;
+  int64_t d2 = sub_with_mask_s64(&m, *u2, *v2);
+  int64_t d1 = (*u1 - *v1) & m;
+  d2 &= m;
+  *u1 -= d1;
+  *u2 -= d2;
+  *v1 += d1;
+  *v2 += d2;
+}
+
+/// Conditionally swap u with v if u3 < v3.
+static inline void cond_swap3_s64(int64_t* u1,
+				  int64_t* u2,
+				  int64_t* u3,
+				  int64_t* v1,
+				  int64_t* v2,
+				  int64_t* v3) {
+  uint64_t m;
+  int64_t d3 = sub_with_mask_s64(&m, *u3, *v3);
+  int64_t d1 = (*u1 - *v1) & m;
+  int64_t d2 = (*u2 - *v2) & m;
+  d3 &= m;
+  *u1 -= d1;
+  *u2 -= d2;
+  *u3 -= d3;
+  *v1 += d1;
+  *v2 += d2;
+  *v3 += d3;
+}
+
 /// Negate x when c < 0.
 static inline int64_t cond_negate_s64_s64(const int64_t c,
 					  const int64_t x) {

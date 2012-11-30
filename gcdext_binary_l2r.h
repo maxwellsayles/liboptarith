@@ -43,9 +43,9 @@ void gcdext_binary_l2r_s128(s128_t* d, s128_t* s, s128_t* t, const s128_t* a, co
 void gcdext_partial_binary_l2r_s32(int32_t* R1, int32_t* R0,
 				   int32_t* C1, int32_t* C0,
 				   const uint32_t bound);
-void gcdext_partial_binary_l2r_s64(uint64_t* R1, uint64_t* R0,
+void gcdext_partial_binary_l2r_s64(int64_t* R1, int64_t* R0,
 				   int64_t* C1, int64_t* C0,
-				   uint64_t bound);
+				   const uint64_t bound);
 void gcdext_shortpartial_binary_l2r_s128(s128_t* R1, s128_t* R0,
 					 int64_t* C1, int64_t* C0,
 					 int64_t bound);

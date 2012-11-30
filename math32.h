@@ -47,8 +47,8 @@ static inline uint32_t sub_with_mask_u32(uint32_t* m,
 
 /// Compute a - b and let m = -1 if a < b and 0 otherwise.
 static inline int32_t sub_with_mask_s32(uint32_t* m,
-					 const int32_t a,
-					 const int32_t b) {
+					const int32_t a,
+					const int32_t b) {
 #if defined(__x86_64) || defined(__i386)
   int32_t r;
   uint32_t t;
@@ -68,7 +68,7 @@ static inline int32_t sub_with_mask_s32(uint32_t* m,
 /// Conditionally swap u with v if u < v.
 static inline void cond_swap_s32(int32_t* u, int32_t* v) {
   uint32_t m;
-  int32_t d = sub_with_mask_u32(&m, *u, *v);
+  int32_t d = sub_with_mask_s32(&m, *u, *v);
   d &= m;
   *u -= d;
   *v += d;
@@ -78,7 +78,7 @@ static inline void cond_swap_s32(int32_t* u, int32_t* v) {
 static inline void cond_swap2_s32(int32_t* u1, int32_t* u2,
 				  int32_t* v1, int32_t* v2) {
   uint32_t m;
-  int32_t d2 = sub_with_mask_u32(&m, *u2, *v2);
+  int32_t d2 = sub_with_mask_s32(&m, *u2, *v2);
   int32_t d1 = (*u1 - *v1) & m;
   d2 &= m;
   *u1 -= d1;
@@ -95,7 +95,7 @@ static inline void cond_swap3_s32(int32_t* u1,
 				  int32_t* v2,
 				  int32_t* v3) {
   uint32_t m;
-  int32_t d3 = sub_with_mask_u32(&m, *u3, *v3);
+  int32_t d3 = sub_with_mask_s32(&m, *u3, *v3);
   int32_t d1 = (*u1 - *v1) & m;
   int32_t d2 = (*u2 - *v2) & m;
   d3 &= m;
@@ -109,7 +109,7 @@ static inline void cond_swap3_s32(int32_t* u1,
 
 /// Negate x when c < 0
 static inline int32_t cond_negate_s32(const int32_t c,
-					  const int32_t x) {
+				      const int32_t x) {
   // t is either all 0s or all 1s
   // in which case either t == 0 or t == -1
   int32_t t = c >> 31;
