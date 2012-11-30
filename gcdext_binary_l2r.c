@@ -344,7 +344,7 @@ void gcdext_binary_l2r_s128(
 
 void gcdext_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
 				   int32_t* pC1, int32_t* pC0,
-				   const uint32_t bound) {
+				   const int32_t bound) {
   int32_t R1 = *pR1;
   int32_t R0 = *pR0;
   int32_t C1 = 0;
@@ -354,7 +354,7 @@ void gcdext_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
     // Compute R1 -= R0 << k and C1 -= C0 << k.
     // If R1 underflows, use k-1 instead.
     int k = msb_u32(R1) - msb_u32(R0);
-    uint32_t t = R0 << k;
+    int32_t t = R0 << k;
     uint32_t m;  // either 0 or -1
     R1 = sub_with_mask_s32(&m, R1, t);
     R1 += (t >> 1) & m;
@@ -369,7 +369,7 @@ void gcdext_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
 
 void gcdext_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
 				   int64_t* pC1, int64_t* pC0,
-				   const uint64_t bound) {
+				   const int64_t bound) {
   int64_t R1 = *pR1;
   int64_t R0 = *pR0;
   int64_t C1 = 0;
@@ -379,7 +379,7 @@ void gcdext_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
     // Compute R1 -= R0 << k and C1 -= C0 << k.
     // If R1 underflows, use k-1 instead.
     int k = msb_u64(R1) - msb_u64(R0);
-    uint64_t t = R0 << k;
+    int64_t t = R0 << k;
     uint64_t m;  // either 0 or -1
     R1 = sub_with_mask_s64(&m, R1, t);
     R1 += (t >> 1) & m;
@@ -392,8 +392,46 @@ void gcdext_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
   *pC0 = C0;
 }
 
-void gcdext_shortpartial_binary_l2r_s128(
-    s128_t* R1, s128_t* R0, int64_t* C1, int64_t* C0, int64_t bound) {
+
+void gcdext_shortpartial_binary_l2r_s128(s128_t* pR1, s128_t* pR0,
+					 int64_t* pC1, int64_t* pC0,
+					 const int64_t bound) {
+  s128_t R1 = *pR1;
+  s128_t R0 = *pR0;
+  int64_t C1 = 0;
+  int64_t C0 = -1;
+  s128_t t;
+
+  if (cmp_s128_s128(&R1, &R0) < 0) {
+    swap_s128_s128(&R1, &R0);
+    swap(C1, C0);
+  }
+  while (cmp_s128_s64(&R0, bound) > 0) {
+    int k = msb_u128((u128_t*)&R1) - msb_u128((u128_t*)&R0);
+    shl_s128_s128_int(&t, &R0, k);
+    if (cmp_s128_s128(&t, &R1) > 0) {
+      shr_s128(&t);
+      k --;
+    }
+
+    sub_s128_s128(&R1, &t);
+    C1 -= C0 << k;
+
+    // maintain invariant R1 >= R0
+    if (cmp_s128_s128(&R1, &R0) < 0) {
+      swap_s128_s128(&R1, &R0);
+      swap(C1, C0);
+    }
+  }
+  *pR1 = R1;
+  *pR0 = R0;
+  *pC1 = C1;
+  *pC0 = C0;
+}
+/*
+void gcdext_shortpartial_binary_l2r_s128(s128_t* R1, s128_t* R0,
+					 int64_t* C1, int64_t* C0,
+					 const int64_t bound) {
   int k = 0;
   int msb_1 = 0;
   int msb_0 = 0;
@@ -430,4 +468,4 @@ void gcdext_shortpartial_binary_l2r_s128(
   }
   // TODO: Reduce C1 and C0 ?
 }
-
+*/
