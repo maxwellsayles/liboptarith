@@ -107,13 +107,16 @@ static inline void cond_swap3_s32(int32_t* u1,
   *v3 += d3;
 }
 
+/// Negate using a mask. m must be either -1 or 0.
+static inline int32_t negate_using_mask_s32(const uint32_t m,
+					    const int32_t x) {
+  return (x ^ m) - m;
+}
+
 /// Negate x when c < 0
 static inline int32_t cond_negate_s32(const int32_t c,
 				      const int32_t x) {
-  // t is either all 0s or all 1s
-  // in which case either t == 0 or t == -1
-  int32_t t = c >> 31;
-  return (x ^ t) - t;
+  return negate_using_mask_s32(c >> 31, x);
 }
 
 /// Absolute value.

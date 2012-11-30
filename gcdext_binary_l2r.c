@@ -158,21 +158,21 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
     cond_swap3_s32(&u1, &u2, &u3, &v1, &v2, &v3);
   }
 
-  const int32_t at = a >> 31;
-  const int32_t bt = b >> 31;
-  if (u3 == (a^at)-at) {
+  const int32_t am = a >> 31;
+  const int32_t bm = b >> 31;
+  if (u3 == negate_using_mask_s32(am, a)) {
     // a divides b.
-    if (s) *s = (1^at)-at;
+    if (s) *s = negate_using_mask_s32(am, 1);
     if (t) *t = 0;
-  } else if (u3 == (b^bt)-bt) {
+  } else if (u3 == negate_using_mask_s32(bm, b)) {
     // b divides a.
     if (s) *s = 0;
-    if (t) *t = (1^bt)-bt;
+    if (t) *t = negate_using_mask_s32(bm, 1);
   } else {
     // Reduce u1 (mod b/u3) and u2 (mod a/u3)
     // and correct for sign.
-    if (s) *s = cond_negate_s32(a, u1 % (b / u3));
-    if (t) *t = cond_negate_s32(b, u2 % (a / u3));
+    if (s) *s = negate_using_mask_s32(am, u1 % (b / u3));
+    if (t) *t = negate_using_mask_s32(bm, u2 % (a / u3));
   }
   return u3;
 }
@@ -181,86 +181,52 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
 /// s and t may be NULL.
 int64_t gcdext_binary_l2r_s64(int64_t* s, int64_t* t,
 			      const int64_t a, const int64_t b) {
-  int k = 0;
-  int msb_u = 0;
-  int msb_v = 0;
-  int64_t u1 = 1;
-  int64_t u2 = 0;
-  int64_t v1 = 0;
-  int64_t v2 = 1;
-  uint64_t u3 = abs_s64(a);
-  uint64_t v3 = abs_s64(b);
-  uint64_t t3 = 0;
-  int64_t d = 0;
-  
-  // invariants:
+  // Invariants:
   // u1*a + u2*b = u3
   // v1*a + v2*b = v3
   // u3 >= v3
-  if (u3 < v3) {
-    swap(u1, v1);
-    swap(u2, v2);
-    swap(u3, v3);
-  }
-  msb_u = msb_u64(u3);
-  msb_v = msb_u64(v3);
+  int64_t u1 = 1;
+  int64_t u2 = 0;
+  int64_t u3 = abs_s64(a);
+  int64_t v1 = 0;
+  int64_t v2 = 1;
+  int64_t v3 = abs_s64(b);
   
-  // l2r binary gcd
+  // Swap u with v if u3 < v3.
+  cond_swap3_s64(&u1, &u2, &u3, &v1, &v2, &v3);
   while (v3 != 0) {
-    k = msb_u - msb_v;
-    t3 = v3 << k;
-    if (t3 < u3) {
-      u3 -= t3;
-      u1 -= v1 << k;
-      u2 -= v2 << k;
-    } else {
-      u3 = t3 - u3;
-      u1 = (v1 << k) - u1;
-      u2 = (v2 << k) - u2;
-    }
-    msb_u = msb_u64(u3);
+    int k = msb_u64(u3) - msb_u64(v3);
+
+    // Subtract 2^k times v from u, and make sure u3 >= 0.
+    uint64_t m;
+    u3 = sub_with_mask_s64(&m, u3, v3 << k);
+    u1 -= v1 << k;
+    u2 -= v2 << k;
+    u1 = (u1 ^ m) - m;  // negate u depending on mask
+    u2 = (u2 ^ m) - m;
+    u3 = (u3 ^ m) - m;
     
-    // maintain invariant u3 >= v3
-    if (u3 < v3) {
-      swap(u1, v1);
-      swap(u2, v2);
-      swap(u3, v3);
-      swap(msb_u, msb_v);
-    }
-  }
-  
-  // setup return values
-  if (s) *s = u1;
-  if (t) *t = u2;
-  d = u3;
-  
-  // special case if a|b or b|a
-  if (d == a) {
-    if (s) *s = 1;
-    if (t) *t = 0;
-    return d;
-  }
-  if (d == -a) {
-    if (s) *s = -1;
-    if (t) *t = 0;
-    return d;
-  }
-  if (d == b) {
-    if (s) *s = 0;
-    if (t) *t = 1;
-    return d;
-  }
-  if (d == -b) {
-    if (s) *s = 0;
-    if (t) *t = -1;
-    return d;
+    // Swap u with v if u3 < v3.
+    cond_swap3_s64(&u1, &u2, &u3, &v1, &v2, &v3);
   }
 
-  // reduce s (mod b/d) and t (mod a/d)
-  // and correct for sign
-  if (s) *s = cond_negate_s64_s64(a, *s % (b / d));
-  if (t) *t = cond_negate_s64_s64(b, *t % (a / d));
-  return d;
+  const int64_t am = a >> 63;
+  const int64_t bm = b >> 63;
+  if (u3 == negate_using_mask_s64(am, a)) {
+    // a divides b.
+    if (s) *s = negate_using_mask_s64(am, 1);
+    if (t) *t = 0;
+  } else if (u3 == negate_using_mask_s64(bm, b)) {
+    // b divides a.
+    if (s) *s = 0;
+    if (t) *t = negate_using_mask_s64(bm, 1);
+  } else {
+    // Reduce u1 (mod b/u3) and u2 (mod a/u3)
+    // and correct for sign.
+    if (s) *s = negate_using_mask_s64(am, u1 % (b / u3));
+    if (t) *t = negate_using_mask_s64(bm, u2 % (a / u3));
+  }
+  return u3;
 }
 
 void gcdext_binary_l2r_s128(

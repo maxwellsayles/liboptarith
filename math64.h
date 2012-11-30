@@ -83,18 +83,21 @@ static inline void cond_swap3_s64(int64_t* u1,
   *v3 += d3;
 }
 
+/// Negate using a mask. m must be either -1 or 0.
+static inline int64_t negate_using_mask_s64(const uint64_t m,
+					    const int64_t x) {
+  return (x ^ m) - m;
+}
+
 /// Negate x when c < 0.
-static inline int64_t cond_negate_s64_s64(const int64_t c,
-					  const int64_t x) {
-  // t is either all 0s or all 1s
-  // in which case either t == 0 or t == -1
-  int64_t t = c >> 63;
-  return (x ^ t) - t;
+static inline int64_t cond_negate_s64(const int64_t c,
+				      const int64_t x) {
+  return negate_using_mask_s64(c >> 63, x);
 }
 
 /// Absolute.
 static inline uint64_t abs_s64(const int64_t x) {
-  return cond_negate_s64_s64(x, x);
+  return cond_negate_s64(x, x);
 }
 
 /// true if x fits in a signed 32-bit integer
