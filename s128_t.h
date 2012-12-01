@@ -232,61 +232,12 @@ static inline void sub_s128_s128(s128_t* x, const s128_t* y) {
 
 /// x <<= 1
 static inline void shl_s128(s128_t* x) {
-#if defined(__i386)
-  asm volatile("shll $1, (%0)\n\t"
-	       "rcll $1, 4(%0)\n\t"
-	       "rcll $1, 8(%0)\n\t"
-	       "rcll $1, 12(%0)\n\t"
-	       :
-	       : "r"(x)
-	       : "cc", "memory");
-#elif defined(__x86_64)
-  asm("shlq $1, %0\n\t"
-      "rclq $1, %1\n\t"
-      : "=r"(x->v0), "=r"(x->v1)
-      : "0"(x->v0), "1"(x->v1)
-      : "cc");
-#endif
+  shl_u128((u128_t*)x);
 }
 
 /// x <<= i
 static inline void shl_s128_int(s128_t* x, int i) {
-#if defined(__i386)
-  asm volatile("0:\n\t"
-	       "movl %0, %%ecx\n\t"
-	       "cmpl $31, %%ecx\n\t"
-	       "jle 1f\n\t"
-	       "movl $31, %%ecx\n\t"
-	       "1:\n\t"
-	       "movl 8(%1), %%eax\n\t"
-	       "movl 4(%1), %%edx\n\t"
-	       "shldl %%cl, %%eax, 12(%1)\n\t"
-	       "movl (%1), %%eax\n\t"
-	       "shldl %%cl, %%edx, 8(%1)\n\t"
-	       "shll %%cl, (%1)\n\t"
-	       "shldl %%cl, %%eax, 4(%1)\n\t"
-	       "\n\t"
-	       "subl %%ecx, %0\n\t"
-	       "jnz 0b\n\t"
-	       : "=r"(i)
-	       : "r"(x), "0"(i)
-	       : "eax", "ecx", "edx", "cc", "memory");
-#elif defined(__x86_64)
-  asm("cmpb $63, %%cl\n\t"
-      "jg 0f\n\t"
-      "shldq %%cl, %0, %1\n\t"
-      "shlq %%cl, %0\n\t"
-      "jmp 9f\n\t"
-      "0:\n\t"
-      "subb $64, %%cl\n\t"
-      "movq %0, %1\n\t"
-      "xorq %0, %0\n\t"
-      "shlq %%cl, %1\n\t"
-      "9:\n\t"
-      : "=r"(x->v0), "=r"(x->v1), "=c"(i)
-      : "0"(x->v0), "1"(x->v1), "2"(i)
-      : "cc");
-#endif
+  shl_u128_int((u128_t*)x, i);
 }
 
 static inline void shl_s128_s128_int(s128_t* res, const s128_t* src, int k) {
@@ -334,19 +285,20 @@ static inline void shr_s128_int(s128_t* x, int i) {
 	       : "r"(x), "0"(i)
 	       : "eax", "ecx", "edx", "cc", "memory");
 #elif defined(__x86_64)
-  asm("cmpb $63, %%cl\n\t"
-      "jg 0f\n\t"
+  uint64_t m;
+  uint64_t t;
+  asm("cmpb $64, %%cl\n\t"
+      "sbbq %2, %2\n\t"  // -1 if i < 64
       "shrdq %%cl, %1, %0\n\t"
       "sarq %%cl, %1\n\t"
-      "jmp 9f\n\t"
-      "0:\n\t"
-      "subb $64, %%cl\n\t"
-      "movq %1, %0\n\t"
-      "sarq $63, %1\n\t"
-      "sarq %%cl, %0\n\t"
-      "9:\n\t"
-      : "=r"(x->v0), "=r"(x->v1), "=c"(i)
-      : "0"(x->v0), "1"(x->v1), "2"(i)
+      "movq %1, %3\n\t"
+      "andq %2, %0\n\t"
+      "andq %2, %1\n\t"
+      "notq %2\n\t"
+      "andq %2, %3\n\t"
+      "orq %3, %0\n\t"
+      : "=r"(x->v0), "=r"(x->v1), "=&r"(m), "=&r"(t)
+      : "0"(x->v0), "1"(x->v1), "c"(i)
       : "cc");
 #endif
 }

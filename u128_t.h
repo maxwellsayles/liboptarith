@@ -217,37 +217,38 @@ static inline void shl_u128(u128_t* x) {
 
 static inline void shl_u128_int(u128_t* x, int i) {
 #if defined(__x86_64)
-  asm("cmpb $63, %%cl\n"
-      "jg 0f\n"
-      "shldq %%cl, %0, %1\n"
-      "shlq %%cl, %0\n"
-      "jmp 9f\n"
-      "0:\n"
-      "subb $64, %%cl\n"
-      "movq %0, %1\n"
-      "xorq %0, %0\n"
-      "shlq %%cl, %1\n"
-      "9:\n"
-      : "=r"(x->v0), "=r"(x->v1), "=c"(i)
-      : "0"(x->v0), "1"(x->v1), "2"(i)
+  uint64_t m;
+  uint64_t t;
+  asm("cmpb $64, %%cl\n\t"
+      "sbbq %2, %2\n\t"  // -1 if i < 64
+      "shldq %%cl, %0, %1\n\t"
+      "shlq %%cl, %0\n\t"
+      "movq %0, %3\n\t"
+      "andq %2, %0\n\t"
+      "andq %2, %1\n\t"
+      "notq %2\n\t"
+      "andq %2, %3\n\t"
+      "orq %3, %1\n\t"
+      : "=r"(x->v0), "=r"(x->v1), "=&r"(m), "=&r"(t)
+      : "0"(x->v0), "1"(x->v1), "c"(i)
       : "cc");
 #elif defined(__i386)
-  asm volatile("0:\n"
-	       "movl %0, %%ecx\n"
-	       "cmpl $31, %%ecx\n"
-	       "jle 1f\n"
-	       "movl $31, %%ecx\n"
-	       "1:\n"
-	       "movl 8(%1), %%eax\n"
-	       "movl 4(%1), %%edx\n"
-	       "shld %%cl, %%eax, 12(%1)\n"
-	       "movl (%1), %%eax\n"
-	       "shld %%cl, %%edx, 8(%1)\n"
-	       "shll %%cl, (%1)\n"
-	       "shld %%cl, %%eax, 4(%1)\n"
-	       "\n"
-	       "subl %%ecx, %0\n"
-	       "jnz 0b\n"
+  asm volatile("0:\n\t"
+	       "movl %0, %%ecx\n\t"
+	       "cmpl $31, %%ecx\n\t"
+	       "jle 1f\n\t"
+	       "movl $31, %%ecx\n\t"
+	       "1:\n\t"
+	       "movl 8(%1), %%eax\n\t"
+	       "movl 4(%1), %%edx\n\t"
+	       "shldl %%cl, %%eax, 12(%1)\n\t"
+	       "movl (%1), %%eax\n\t"
+	       "shldl %%cl, %%edx, 8(%1)\n\t"
+	       "shll %%cl, (%1)\n\t"
+	       "shldl %%cl, %%eax, 4(%1)\n\t"
+	       "\n\t"
+	       "subl %%ecx, %0\n\t"
+	       "jnz 0b\n\t"
 	       : "=r"(i)
 	       : "r"(x), "0"(i)
 	       : "eax", "ecx", "edx", "cc", "memory");
@@ -292,19 +293,20 @@ static inline void shr_u128(u128_t* x) {
 
 static inline void shr_u128_int(u128_t* x, int i) {
 #if defined(__x86_64)
-  asm("cmpb $63, %%cl\n\t"
-      "jg 0f\n\t"
+  uint64_t m;
+  uint64_t t;
+  asm("cmpb $64, %%cl\n\t"
+      "sbbq %2, %2\n\t"  // -1 if i < 64
       "shrdq %%cl, %1, %0\n\t"
       "shrq %%cl, %1\n\t"
-      "jmp 9f\n\t"
-      "0:\n\t"
-      "subb $64, %%cl\n\t"
-      "movq %1, %0\n\t"
-      "xorq %1, %1\n\t"
-      "shrq %%cl, %0\n\t"
-      "9:\n\t"
-      : "=r"(x->v0), "=r"(x->v1), "=c"(i)
-      : "0"(x->v0), "1"(x->v1), "2"(i)
+      "movq %1, %3\n\t"
+      "andq %2, %0\n\t"
+      "andq %2, %1\n\t"
+      "notq %2\n\t"
+      "andq %2, %3\n\t"
+      "orq %3, %0\n\t"
+      : "=r"(x->v0), "=r"(x->v1), "=&r"(m), "=&r"(t)
+      : "0"(x->v0), "1"(x->v1), "c"(i)
       : "cc");
 #elif defined(__i386)
   asm volatile("0:\n\t"
