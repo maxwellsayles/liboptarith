@@ -6,9 +6,7 @@
 #ifndef MATH32__INCLUDED
 #define MATH32__INCLUDED
 
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,6 +106,7 @@ static inline void cond_swap3_s32(int32_t* u1,
 /// Negate using a mask. m must be either -1 or 0.
 static inline int32_t negate_using_mask_s32(const uint32_t m,
 					    const int32_t x) {
+  assert(m == 0 || m == -1);
   return (x ^ m) - m;
 }
 

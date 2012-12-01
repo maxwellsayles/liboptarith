@@ -60,6 +60,11 @@ static inline void set_s128_u64(s128_t* res, uint64_t v) {
   res->v1 = 0;
 }
 
+static inline void setzero_s128(s128_t* res) {
+  res->v0 = 0;
+  res->v1 = 0;
+}
+
 static inline void swap_s128_s128(s128_t* x, s128_t* y) {
   // swappery trickery
   x->v0 ^= y->v0;
@@ -524,17 +529,22 @@ static inline void mul_s128_s64_u64(s128_t* res, const int64_t in_a, uint64_t in
   }
 }
 
+/// Return 0 if x >= 0, and -1 otherwise
+static inline uint64_t mask_s128(const s128_t* a) {
+  return a->v1 >> 63;
+}
+
 /// Compute a - b and let m = -1 if a < b and 0 otherwise.
 static inline void sub_with_mask_s128(uint64_t* m,
 				      s128_t* r,
 				      const s128_t* a,
 				      const s128_t* b) {
 #if defined(__x86_64)
-  asm("subq %6, %0\n\t"
-      "sbbq %7, %1\n\t"
-      "sbbq $0, %2\n\t"
-      : "=r"(r->v0), "=r"(r->v1), "=r"(*m)
-      : "0"(a->v0), "1"(a->v1), "2"(0), "r"(b->v0), "r"(b->v1)
+  asm("subq %5, %0\n\t"
+      "sbbq %6, %1\n\t"
+      "sbbq %2, %2\n\t"
+      : "=r"(r->v0), "=r"(r->v1), "=&r"(*m)
+      : "0"(a->v0), "1"(a->v1), "r"(b->v0), "r"(b->v1)
       : "cc");
 #else
   *m = cmp_s128_s128(a, b) < 0 ? -1 : 0;
@@ -603,6 +613,7 @@ static inline void cond_swap3_s128(s128_t* u1,
 /// Negate using a mask. m must be either -1 or 0.
 static inline void negate_using_mask_s128(const uint64_t m,
 					  s128_t* x) {
+  assert(m == 0 || m == -1);
   x->v0 ^= m;
   x->v1 ^= m;
   sub_s128_s64(x, m);

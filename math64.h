@@ -6,9 +6,7 @@
 #ifndef MATH64__INCLUDED
 #define MATH64__INCLUDED
 
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
+#include <assert.h>
 #include <stdint.h>
 
 #include "liboptarith/s128_t.h"
@@ -84,6 +82,7 @@ static inline void cond_swap3_s64(int64_t* u1,
 /// Negate using a mask. m must be either -1 or 0.
 static inline int64_t negate_using_mask_s64(const uint64_t m,
 					    const int64_t x) {
+  assert(m == 0 || m == -1);
   return (x ^ m) - m;
 }
 
