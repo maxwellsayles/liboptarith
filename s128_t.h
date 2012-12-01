@@ -70,6 +70,7 @@ static inline void swap_s128_s128(s128_t* x, s128_t* y) {
   x->v1 ^= y->v1;
 }
 
+/// -1 if x < y, 1 if x > y, 0 if x == y
 static inline int cmp_s128_s128(const s128_t* x, const s128_t* y) {
   if (x->v1 < y->v1) return -1;
   if (x->v1 > y->v1) return 1;
@@ -78,6 +79,7 @@ static inline int cmp_s128_s128(const s128_t* x, const s128_t* y) {
   return 0;
 }
 
+/// -1 if x < y, 1 if x > y, 0 if x == y
 static inline int cmp_s128_s64(const s128_t* x, const int64_t y) {
   int64_t yhi = y >> 63;
   if (x->v1 < yhi) return -1;
@@ -87,6 +89,7 @@ static inline int cmp_s128_s64(const s128_t* x, const int64_t y) {
   return 0;
 }
 
+/// -1 if x < y, 1 if x > y, 0 if x == y
 static inline int cmp_s64_s128(const int64_t x, const s128_t* y) {
   int64_t xhi = x >> 63;
   if (xhi < y->v1) return -1;
@@ -176,6 +179,7 @@ static inline void setbit_s128(u128_t* r, int index) {
   else r->v1 |= (1ULL << (index-64));
 }
 
+/// x += y
 static inline void add_s128_s128(s128_t* x, const s128_t* y) {
 #if defined(__i386)
   asm volatile("movl 0(%1), %%eax\n\t"
@@ -198,6 +202,7 @@ static inline void add_s128_s128(s128_t* x, const s128_t* y) {
 #endif
 }
 
+/// x -= y
 static inline void sub_s128_s128(s128_t* x, const s128_t* y) {
 #if defined(__i386)
   asm volatile("movl 0(%1), %%eax\n\t"
@@ -220,6 +225,7 @@ static inline void sub_s128_s128(s128_t* x, const s128_t* y) {
 #endif
 }
 
+/// x <<= 1
 static inline void shl_s128(s128_t* x) {
 #if defined(__i386)
   asm volatile("shll $1, (%0)\n\t"
@@ -238,6 +244,7 @@ static inline void shl_s128(s128_t* x) {
 #endif
 }
 
+/// x <<= i
 static inline void shl_s128_int(s128_t* x, int i) {
 #if defined(__i386)
   asm volatile("0:\n\t"
@@ -515,6 +522,90 @@ static inline void mul_s128_s64_u64(s128_t* res, const int64_t in_a, uint64_t in
   if (in_a < 0) {
     neg_s128_s128(res, res);
   }
+}
+
+/// Compute a - b and let m = -1 if a < b and 0 otherwise.
+static inline void sub_with_mask_s128(uint64_t* m,
+				      s128_t* r,
+				      const s128_t* a,
+				      const s128_t* b) {
+#if defined(__x86_64)
+  asm("subq %6, %0\n\t"
+      "sbbq %7, %1\n\t"
+      "sbbq $0, %2\n\t"
+      : "=r"(r->v0), "=r"(r->v1), "=r"(*m)
+      : "0"(a->v0), "1"(a->v1), "2"(0), "r"(b->v0), "r"(b->v1)
+      : "cc");
+#else
+  *m = cmp_s128_s128(a, b) < 0 ? -1 : 0;
+  set_s128_s128(r, a);
+  sub_s128_s128(r, b);
+#endif
+}
+
+/// Conditionally swap u with v if u < v.
+static inline void cond_swap_s128(s128_t* u, s128_t* v) {
+  uint64_t m;
+  s128_t d;
+  sub_with_mask_s128(&m, &d, u, v);
+  d.v0 &= m;
+  d.v1 &= m;
+  sub_s128_s128(u, &d);
+  add_s128_s128(v, &d);
+}
+
+/// Conditionally swap u with v if u2 < v2.
+static inline void cond_swap2_s128(s128_t* u1, s128_t* u2,
+				   s128_t* v1, s128_t* v2) {
+  uint64_t m;
+  s128_t d2;
+  sub_with_mask_s128(&m, &d2, u2, v2);
+  s128_t d1 = *u1;
+  sub_s128_s128(&d1, v1);
+  d1.v0 &= m;
+  d1.v1 &= m;
+  d2.v0 &= m;
+  d2.v1 &= m;
+  sub_s128_s128(u1, &d1);
+  sub_s128_s128(u2, &d2);
+  add_s128_s128(v1, &d1);
+  add_s128_s128(v2, &d2);
+}
+
+/// Conditionally swap u with v if u3 < v3.
+static inline void cond_swap3_s128(s128_t* u1,
+				   s128_t* u2,
+				   s128_t* u3,
+				   s128_t* v1,
+				   s128_t* v2,
+				   s128_t* v3) {
+  uint64_t m;
+  s128_t d3;
+  sub_with_mask_s128(&m, &d3, u3, v3);
+  s128_t d1 = *u1;
+  sub_s128_s128(&d1, v1);
+  s128_t d2 = *u2;
+  sub_s128_s128(&d2, v2);
+  d1.v0 &= m;
+  d1.v1 &= m;
+  d2.v0 &= m;
+  d2.v1 &= m;
+  d3.v0 &= m;
+  d3.v1 &= m;
+  sub_s128_s128(u1, &d1);
+  sub_s128_s128(u2, &d2);
+  sub_s128_s128(u3, &d3);
+  add_s128_s128(v1, &d1);
+  add_s128_s128(v2, &d2);
+  add_s128_s128(v3, &d3);
+}
+
+/// Negate using a mask. m must be either -1 or 0.
+static inline void negate_using_mask_s128(const uint64_t m,
+					  s128_t* x) {
+  x->v0 ^= m;
+  x->v1 ^= m;
+  sub_s128_s64(x, m);
 }
 
 static inline void abs_u128_s128(u128_t* res, const s128_t* x) {

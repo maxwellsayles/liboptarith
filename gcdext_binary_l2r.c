@@ -162,12 +162,12 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
   const int32_t bm = b >> 31;
   if (u3 == negate_using_mask_s32(am, a)) {
     // a divides b.
-    if (s) *s = negate_using_mask_s32(am, 1);
+    if (s) *s = am | 1;  // either 1 or -1
     if (t) *t = 0;
   } else if (u3 == negate_using_mask_s32(bm, b)) {
     // b divides a.
     if (s) *s = 0;
-    if (t) *t = negate_using_mask_s32(bm, 1);
+    if (t) *t = bm | 1;  // either 1 or -1
   } else {
     // Reduce u1 (mod b/u3) and u2 (mod a/u3)
     // and correct for sign.
@@ -214,12 +214,12 @@ int64_t gcdext_binary_l2r_s64(int64_t* s, int64_t* t,
   const int64_t bm = b >> 63;
   if (u3 == negate_using_mask_s64(am, a)) {
     // a divides b.
-    if (s) *s = negate_using_mask_s64(am, 1);
+    if (s) *s = am | 1;  // either 1 or -1
     if (t) *t = 0;
   } else if (u3 == negate_using_mask_s64(bm, b)) {
     // b divides a.
     if (s) *s = 0;
-    if (t) *t = negate_using_mask_s64(bm, 1);
+    if (t) *t = bm | 1;  // either 1 or -1
   } else {
     // Reduce u1 (mod b/u3) and u2 (mod a/u3)
     // and correct for sign.
@@ -392,6 +392,20 @@ void gcdext_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
   *pC0 = C0;
 }
 
+/// Conditionally swap R1 and C1 with R0 and C0 if R1 < R0.
+inline void cond_swap2_mixed(s128_t* R1, int64_t* C1,
+			     s128_t* R0, int64_t* C0) {
+  uint64_t m;
+  s128_t d2;
+  sub_with_mask_s128(&m, &d2, R1, R0);
+  d2.v0 &= m;
+  d2.v1 &= m;
+  sub_s128_s128(R1, &d2);
+  add_s128_s128(R0, &d2);
+  int64_t d1 = (*C1 - *C0) & m;
+  *C1 -= d1;
+  *C0 += d1;
+}
 
 void gcdext_shortpartial_binary_l2r_s128(s128_t* pR1, s128_t* pR0,
 					 int64_t* pC1, int64_t* pC0,
@@ -401,71 +415,24 @@ void gcdext_shortpartial_binary_l2r_s128(s128_t* pR1, s128_t* pR0,
   int64_t C1 = 0;
   int64_t C0 = -1;
   s128_t t;
-
-  if (cmp_s128_s128(&R1, &R0) < 0) {
-    swap_s128_s128(&R1, &R0);
-    swap(C1, C0);
-  }
+  cond_swap2_mixed(&R1, &C1, &R0, &C0);
   while (cmp_s128_s64(&R0, bound) > 0) {
+    // Compute R1 -= R0 << k and C1 -= C0 << k.
+    // If R1 underflows, use k-1 instead.
     int k = msb_u128((u128_t*)&R1) - msb_u128((u128_t*)&R0);
     shl_s128_s128_int(&t, &R0, k);
-    if (cmp_s128_s128(&t, &R1) > 0) {
-      shr_s128(&t);
-      k --;
-    }
-
-    sub_s128_s128(&R1, &t);
-    C1 -= C0 << k;
-
-    // maintain invariant R1 >= R0
-    if (cmp_s128_s128(&R1, &R0) < 0) {
-      swap_s128_s128(&R1, &R0);
-      swap(C1, C0);
-    }
+    uint64_t m;
+    sub_with_mask_s128(&m, &R1, &R1, &t);
+    shr_s128(&t);
+    t.v0 &= m;
+    t.v1 &= m;
+    add_s128_s128(&R1, &t);
+    C1 -= C0 << (k + m);
+    cond_swap2_mixed(&R1, &C1, &R0, &C0);
   }
   *pR1 = R1;
   *pR0 = R0;
   *pC1 = C1;
   *pC0 = C0;
 }
-/*
-void gcdext_shortpartial_binary_l2r_s128(s128_t* R1, s128_t* R0,
-					 int64_t* C1, int64_t* C0,
-					 const int64_t bound) {
-  int k = 0;
-  int msb_1 = 0;
-  int msb_0 = 0;
-  s128_t t;
-  
-  (*C1) = 0;
-  (*C0) = -1;
-  
-  if (cmp_s128_s128(R1, R0) < 0) {
-    swap_s128_s128(R1, R0);
-    swap((*C1), (*C0));
-  }
-  msb_1 = msb_u128((u128_t*)R1);
-  msb_0 = msb_u128((u128_t*)R0);
-  
-  while (cmp_s128_s64(R0, bound) > 0) {
-    k = msb_1 - msb_0;
-    shl_s128_s128_int(&t, R0, k);
-    if (cmp_s128_s128(&t, R1) > 0) {
-      shr_s128(&t);
-      k --;
-    }
-    
-    sub_s128_s128(R1, &t);
-    (*C1) -= (*C0) << k;
-    msb_1 = msb_u128((u128_t*)R1);
-    
-    // maintain invariant R1 >= R0
-    if (cmp_s128_s128(R1, R0) < 0) {
-      swap_s128_s128(R1, R0);
-      swap((*C1), (*C0));
-      swap(msb_1, msb_0);
-    }
-  }
-  // TODO: Reduce C1 and C0 ?
-}
-*/
+

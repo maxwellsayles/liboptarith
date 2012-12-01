@@ -270,16 +270,16 @@ static inline void shl_u128_u128_int(u128_t* res, const u128_t* src, int k) {
 
 static inline void shr_u128(u128_t* x) {
 #if defined(__x86_64)
-  asm("shrq $1, %1\n"
-      "rcrq $1, %0\n"
+  asm("shrq $1, %1\n\t"
+      "rcrq $1, %0\n\t"
       : "=r"(x->v0), "=r"(x->v1)
       : "0"(x->v0), "1"(x->v1)
       : "cc");
 #elif defined(__i386)
-  asm volatile("shrl $1, 12(%0)\n"
-	       "rcrl $1, 8(%0)\n"
-	       "rcrl $1, 4(%0)\n"
-	       "rcrl $1, (%0)\n"
+  asm volatile("shrl $1, 12(%0)\n\t"
+	       "rcrl $1, 8(%0)\n\t"
+	       "rcrl $1, 4(%0)\n\t"
+	       "rcrl $1, (%0)\n\t"
 	       :
 	       : "r"(x)
 	       : "cc", "memory");
@@ -292,37 +292,37 @@ static inline void shr_u128(u128_t* x) {
 
 static inline void shr_u128_int(u128_t* x, int i) {
 #if defined(__x86_64)
-  asm("cmpb $63, %%cl\n"
-      "jg 0f\n"
-      "shrdq %%cl, %1, %0\n"
-      "shrq %%cl, %1\n"
-      "jmp 9f\n"
-      "0:\n"
-      "subb $64, %%cl\n"
-      "movq %1, %0\n"
-      "xorq %1, %1\n"
-      "shrq %%cl, %0\n"
-      "9:\n"
+  asm("cmpb $63, %%cl\n\t"
+      "jg 0f\n\t"
+      "shrdq %%cl, %1, %0\n\t"
+      "shrq %%cl, %1\n\t"
+      "jmp 9f\n\t"
+      "0:\n\t"
+      "subb $64, %%cl\n\t"
+      "movq %1, %0\n\t"
+      "xorq %1, %1\n\t"
+      "shrq %%cl, %0\n\t"
+      "9:\n\t"
       : "=r"(x->v0), "=r"(x->v1), "=c"(i)
       : "0"(x->v0), "1"(x->v1), "2"(i)
       : "cc");
 #elif defined(__i386)
-  asm volatile("0:\n"
-	       "movl %0, %%ecx\n"
-	       "cmp $31, %%ecx\n"
-	       "jle 1f\n"
-	       "movl $31, %%ecx\n"
-	       "1:\n"
-	       "movl 4(%1), %%eax\n"
-	       "movl 8(%1), %%edx\n"
-	       "shrd %%cl, %%eax, (%1)\n"
-	       "movl 12(%1), %%eax\n"
-	       "shrd %%cl, %%edx, 4(%1)\n"
-	       "shrl %%cl, 12(%1)\n"
-	       "shrd %%cl, %%eax, 8(%1)\n"
-	       "\n"
-	       "subl %%ecx, %0\n"
-	       "jnz 0b\n"
+  asm volatile("0:\n\t"
+	       "movl %0, %%ecx\n\t"
+	       "cmp $31, %%ecx\n\t"
+	       "jle 1f\n\t"
+	       "movl $31, %%ecx\n\t"
+	       "1:\n\t"
+	       "movl 4(%1), %%eax\n\t"
+	       "movl 8(%1), %%edx\n\t"
+	       "shrd %%cl, %%eax, (%1)\n\t"
+	       "movl 12(%1), %%eax\n\t"
+	       "shrd %%cl, %%edx, 4(%1)\n\t"
+	       "shrl %%cl, 12(%1)\n\t"
+	       "shrd %%cl, %%eax, 8(%1)\n\t"
+	       "\n\t"
+	       "subl %%ecx, %0\n\t"
+	       "jnz 0b\n\t"
 	       : "=r"(i)
 	       : "r"(x), "0"(i)
 	       : "eax", "ecx", "edx", "cc", "memory");
@@ -341,37 +341,34 @@ static inline void shr_u128_int(u128_t* x, int i) {
 // returns the index of the most significant set bit
 static inline long msb_u128(const u128_t* x) {
 #if defined(__x86_64)
-  long res = -1;
-  asm("bsrq %2, %0\n"
-      "jz 0f\n"
-      "addq $64, %0\n"
-      "jmp 9f\n"
-      "0:\n"
-      "bsrq %1, %0\n"
-      "9:\n"
-      : "=&r"(res)
+  long r0;
+  long r1;
+  uint64_t m = (!x->v1) - 1;  // m is 0 if x == 0, otherwise m is -1
+  asm("bsrq %2, %0\n\t"
+      "bsrq %3, %1\n\t"
+      : "=&r"(r0), "=&r"(r1)
       : "rm"(x->v0), "rm"(x->v1)
       : "cc");
-  return res;
+  return ((r1 + 64) & m) | (r0 & ~m);
 #elif defined(__i386)
   long res = -1;
-  asm volatile("bsrl 12(%1), %0\n"
-	       "jz 0f\n"
-	       "addl $96, %0\n"
-	       "jmp 9f\n"
-	       "0:\n"
-	       "bsrl 8(%1), %0\n"
-	       "jz 1f\n"
-	       "addl $64, %0\n"
-	       "jmp 9f\n"
-	       "1:\n"
-	       "bsrl 4(%1), %0\n"
-	       "jz 2f\n"
-	       "addl $32, %0\n"
-	       "jmp 9f\n"
-	       "2:\n"
-	       "bsrl (%1), %0\n"
-	       "9:\n"
+  asm volatile("bsrl 12(%1), %0\n\t"
+	       "jz 0f\n\t"
+	       "addl $96, %0\n\t"
+	       "jmp 9f\n\t"
+	       "0:\n\t"
+	       "bsrl 8(%1), %0\n\t"
+	       "jz 1f\n\t"
+	       "addl $64, %0\n\t"
+	       "jmp 9f\n\t"
+	       "1:\n\t"
+	       "bsrl 4(%1), %0\n\t"
+	       "jz 2f\n\t"
+	       "addl $32, %0\n\t"
+	       "jmp 9f\n\t"
+	       "2:\n\t"
+	       "bsrl (%1), %0\n\t"
+	       "9:\n\t"
 	       : "=r"(res)
 	       : "r"(x)
 	       : "cc", "memory");
@@ -402,33 +399,33 @@ static inline long msb_u128(const u128_t* x) {
 static inline long lsb_u128(const u128_t* x) {
 #if defined(__x86_64)
   long res = -1;
-  asm("bsfq %1, %0\n"
-      "jnz 9f\n"
-      "bsfq %2, %0\n"
-      "addq $64, %0\n"
-      "9:\n"
+  asm("bsfq %1, %0\n\t"
+      "jnz 9f\n\t"
+      "bsfq %2, %0\n\t"
+      "addq $64, %0\n\t"
+      "9:\n\t"
       : "=&r"(res)
       : "rm"(x->v0), "rm"(x->v1)
       : "cc");
   return res;
 #elif defined(__i386)
   long res = -1;
-  asm volatile("bsfl (%1), %0\n"
-	       "jnz 9f\n"
-	       "0:\n"
-	       "bsfl 4(%1), %0\n"
-	       "jz 1f\n"
-	       "addl $32, %0\n"
-	       "jmp 9f\n"
-	       "1:\n"
-	       "bsfl 8(%1), %0\n"
-	       "jz 2f\n"
-	       "addl $64, %0\n"
-	       "jmp 9f\n"
-	       "2:\n"
-	       "bsfl 12(%1), %0\n"
-	       "addl $96, %0\n"
-	       "9:\n"
+  asm volatile("bsfl (%1), %0\n\t"
+	       "jnz 9f\n\t"
+	       "0:\n\t"
+	       "bsfl 4(%1), %0\n\t"
+	       "jz 1f\n\t"
+	       "addl $32, %0\n\t"
+	       "jmp 9f\n\t"
+	       "1:\n\t"
+	       "bsfl 8(%1), %0\n\t"
+	       "jz 2f\n\t"
+	       "addl $64, %0\n\t"
+	       "jmp 9f\n\t"
+	       "2:\n\t"
+	       "bsfl 12(%1), %0\n\t"
+	       "addl $96, %0\n\t"
+	       "9:\n\t"
 	       : "=r"(res)
 	       : "r"(x)
 	       : "cc", "memory");

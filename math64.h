@@ -27,13 +27,11 @@ static inline int64_t sub_with_mask_s64(uint64_t* m,
 					const int64_t b) {
 #if defined(__x86_64)
   int64_t r;
-  uint64_t t;
-  asm("subq %4, %0\n\t"
-      "sbbq $0, %1\n\t"
-      : "=r"(r), "=r"(t)
-      : "0"(a), "1"(0), "r"(b)
+  asm("subq %3, %0\n\t"
+      "sbbq %1, %1\n\t"  // %1 is either 0 or -1
+      : "=r"(r), "=&r"(*m)
+      : "0"(a), "r"(b)
       : "cc");
-  *m = t;
   return r;
 #else
   *m = a < b ? -1 : 0;

@@ -31,13 +31,11 @@ static inline uint32_t sub_with_mask_u32(uint32_t* m,
 					 const uint32_t b) {
 #if defined(__x86_64) || defined(__i386)
   uint32_t r;
-  uint32_t t;
-  asm("subl %4, %0\n\t"
-      "sbbl $0, %1\n\t"
-      : "=r"(r), "=r"(t)
-      : "0"(a), "1"(0), "r"(b)
+  asm("subl %3, %0\n\t"
+      "sbbl %1, %1\n\t"  // %1 is either 0 or -1
+      : "=r"(r), "=&r"(*m)
+      : "0"(a), "r"(b)
       : "cc");
-  *m = t;
   return r;
 #else
   *m = a < b ? -1 : 0;
