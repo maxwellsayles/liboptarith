@@ -463,6 +463,40 @@ static inline int64_t muladdmul_s64_4s32(const int32_t f1,
 #endif 
 }
 
+// res = (f1*f2+f3*f4)/d
+// NOTE: possible overflow if the result does not fit within 64bits signed
+static inline int64_t muladdmuldiv_s64(const int64_t f1,
+				       const int64_t f2,
+				       const int64_t f3,
+				       const int64_t f4,
+				       const int64_t d) {
+#if defined(__x86_64)
+  int64_t res, t1, t2;
+  asm("movq %3, %%rax\n\t"
+      "imulq %4\n\t"
+      "movq %%rax, %1\n\t"
+      "movq %5, %%rax\n\t"
+      "movq %%rdx, %2\n\t"
+      "imulq %6\n\t"
+      "addq %1, %%rax\n\t"
+      "adcq %2, %%rdx\n\t"
+      "idivq %7\n\t"
+      : "=&a"(res), "=&r"(t1), "=&r"(t2)
+      : "r"(f1), "r"(f2), "r"(f3), "r"(f4), "r"(d)
+      : "rdx", "cc");
+  return res;
+#else
+  s128_t t1;
+  s128_t t2;
+  s128_t q;
+  mul_s128_s64_s64(&t1, f1, f2);
+  mul_s128_s64_s64(&t2, f3, f4);
+  add_s128_s128(&t1, &t2);
+  div_s128_s128_s64(&q, &t1, d);
+  return get_s64_from_s128(&q);
+#endif
+}
+
 /// the largest s such that s^2 <= x
 uint64_t sqrt_u64(const uint64_t x);
 
