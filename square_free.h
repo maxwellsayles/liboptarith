@@ -5,6 +5,5 @@
 extern unsigned int square_free_count;
 extern unsigned int square_free[];
 
-#endif // SQUARE_FREE__INCLUDED
-
+#endif  // SQUARE_FREE__INCLUDED
 
