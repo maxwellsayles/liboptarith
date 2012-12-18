@@ -247,11 +247,13 @@ int mpz_mod9(const mpz_t n);
 /// Generate a list of non-square semiprimes. Caller should use mpz_clear_array.
 mpz_t* semiprime_list(int count, int bits, int rand_seed);
 
-/// save an mpz array to a file
-void mpz_save_array(mpz_t* array, int count, char* filename);
+/// Save the mpz array one integer per line.
+void mpz_save_array_or_die(mpz_t* array, int count, const char* filename);
 
-/// load an mpz array from a file
-mpz_t* mpz_load_array(int* count, char* filename);
+/** Load a file that contains one integer per line into an mpz_t[].
+ * @return An array that should be released with mpz_clear_array().
+ */
+mpz_t* mpz_load_array_or_die(int* out_count, const char* filename);
 
 /// Returns s bits in n starting the i^th bit.
 static inline uint32_t mpz_get_bit_window(const mpz_t n, const int i, const int s) {

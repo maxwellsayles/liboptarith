@@ -168,14 +168,15 @@ mpz_t* semiprime_list(int count, int bits, int rand_seed) {
   return res;
 }
 
-/**
- * @brief Save the mpz array one integer per line.
- */
-void mpz_save_array(mpz_t* array, int count, char* filename) {
+void mpz_save_array_or_die(mpz_t* array, int count, const char* filename) {
   FILE* f;
   int i;
 
   f = fopen(filename, "w");
+  if (!f) {
+    fprintf(stderr, "Failed to create file for writing \"%s\"\n", filename);
+    exit(-1);
+  }
   for (i = 0;  i < count;  i ++) {
     mpz_out_str(f, 10, array[i]);
     fprintf(f, "\n");
@@ -183,11 +184,7 @@ void mpz_save_array(mpz_t* array, int count, char* filename) {
   fclose(f);
 }
 
-/**
- * @brief Load a file that contains one integer per line into an mpz_t[].
- * @return An array that should be released with mpz_clear_array().
- */
-mpz_t* mpz_load_array(int* count, char* filename) {
+mpz_t* mpz_load_array_or_die(int* count, const char* filename) {
   int i;
   FILE* f;
   mpz_t* res;
@@ -197,6 +194,10 @@ mpz_t* mpz_load_array(int* count, char* filename) {
   // count the number of semiprimes
   *count = 0;
   f = fopen(filename, "r");
+  if (!f) {
+    fprintf(stderr, "Failed to open file \"%s\"\n", filename);
+    exit(-1);
+  }
   while (1) {
     mpz_set_si(x, -1);
     mpz_inp_str(x, f, 10);
@@ -205,14 +206,13 @@ mpz_t* mpz_load_array(int* count, char* filename) {
     }
     (*count) ++;
   }
-  fclose(f);
+  fseek(f, 0, SEEK_SET);
 
   // allocate mpz array
   res = mpz_init_array(*count);
 
   // load numbers
   i = 0;
-  f = fopen(filename, "r");
   while (1) {
     mpz_set_si(x, -1);
     mpz_inp_str(x, f, 10);
@@ -222,7 +222,7 @@ mpz_t* mpz_load_array(int* count, char* filename) {
     mpz_set(res[i], x);
     i ++;
   }
-
+  fclose(f);
   mpz_clear(x);
   return res;
 }
