@@ -150,9 +150,9 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
     u3 = sub_with_mask_s32(&m, u3, v3 << k);
     u1 -= v1 << k;
     u2 -= v2 << k;
-    u1 = (u1 ^ m) - m;  // negate u depending on mask
-    u2 = (u2 ^ m) - m;
-    u3 = (u3 ^ m) - m;
+    u1 = negate_using_mask_s32(m, u1);
+    u2 = negate_using_mask_s32(m, u2);
+    u3 = negate_using_mask_s32(m, u3);
 
     // Swap u with v if u3 < v3.
     cond_swap3_s32(&u1, &u2, &u3, &v1, &v2, &v3);
@@ -202,9 +202,9 @@ int64_t gcdext_binary_l2r_s64(int64_t* s, int64_t* t,
     u3 = sub_with_mask_s64(&m, u3, v3 << k);
     u1 -= v1 << k;
     u2 -= v2 << k;
-    u1 = (u1 ^ m) - m;  // negate u depending on mask
-    u2 = (u2 ^ m) - m;
-    u3 = (u3 ^ m) - m;
+    u1 = negate_using_mask_s64(m, u1);
+    u2 = negate_using_mask_s64(m, u2);
+    u3 = negate_using_mask_s64(m, u3);
     
     // Swap u with v if u3 < v3.
     cond_swap3_s64(&u1, &u2, &u3, &v1, &v2, &v3);

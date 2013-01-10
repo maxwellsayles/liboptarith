@@ -55,5 +55,5 @@ void gcdext_shortpartial_binary_l2r_s128(s128_t* R1, s128_t* R0,
 					 int64_t* C1, int64_t* C0,
 					 const int64_t bound);
 
-#endif // GCDEXT_BINARY_L2R__INCLUDED
+#endif  // GCDEXT_BINARY_L2R__INCLUDED
 
