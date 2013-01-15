@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <stdint.h>
 
+#include "liboptarith/math32.h"
 #include "liboptarith/s128_t.h"
 
 #ifndef INT32_MIN
@@ -182,6 +183,10 @@ static inline int numbits_s64(int64_t x) {
 /// res = n % m
 static inline uint32_t mod_u32_u64_u32(const uint64_t in_n,
 				       const uint32_t in_m) {
+  return in_n % in_m;
+  // We used to have this fancy branching technique, but in
+  // practice, it's faster letting the compiler do it.
+  /*
 #if defined(__x86_64)
   if (in_n < in_m) {
     // zero divides
@@ -211,58 +216,19 @@ static inline uint32_t mod_u32_u64_u32(const uint64_t in_n,
 #else
   return in_n % in_m;
 #endif
+  */
 }
 
-/// res = n % m
+/// Computes the signed remainder (n % m) that is closest to 0.
 static inline int32_t mod_s32_s64_u32(const int64_t in_n,
 				      const uint32_t in_m) {
-  // TODO: Try to reduce the number of branches here.
-  int32_t r;
-  if (in_n >= 0) {
-    r = mod_u32_u64_u32(in_n, in_m);
-
-    if (r < 0) {
-      // subtract m if the MSB of r is set
-      r -= in_m;
-    } else {
-      // use the remainder that is closest to zero
-      if ((uint32_t)r > (in_m>>1)) {
-	r -= in_m;
-      }
-    }
-  } else {
-    r = mod_u32_u64_u32(-in_n, in_m);
-        
-    if (r < 0) {
-      // subtract m if the MSB of r is set
-      r -= in_m;
-    } else {   
-      // use the remainder that is closest to zero
-      if ((uint32_t)r > (in_m>>1)) {
-	r -= in_m;
-      }
-    }
-
-    r = -r;
-  }
-
-  /*
-  // this code worked well, but the above code prevents more overflows
-  int32_t r;
-
-  if (in_n >= 0) {
-  r = mod_u32_u64_u32(in_n, in_m);
-  // conditionally subtract m if the MSB of r is set
-  r -= (r>>31)&in_m; // r is signed, r<0 => 0xFFFFFFFF, r>=0 => 0
-  }
-  else {
-  r = mod_u32_u64_u32(-in_n, in_m);
-  // conditionally invert around 0 or m depending on MSB of r
-  r -= (r>>31)&in_m; // r is signed, r<0 => 0xFFFFFFFF, r>=0 => 0
-  r = -r;
-  }
-  */
-
+  uint64_t m1 = in_n >> 63;
+  uint32_t a1 = mod_u32_u64_u32(negate_using_mask_s64(m1, in_n), in_m);
+  int32_t r1  = negate_using_mask_s32(m1, a1);
+  int32_t r2  = r1 - negate_using_mask_s32(m1, in_m);
+  uint32_t a2 = negate_using_mask_s32(~m1, r2);
+  uint32_t m  = (a1 < a2) - 1;
+  int32_t r   = (r1 & ~m) | (r2 & m);
   return r;
 }
 
