@@ -201,21 +201,18 @@ static inline int numbits_s32(int32_t x) {
 static inline int32_t addmod_s32(const int32_t s1,
 				 const int32_t s2,
 				 const int32_t m) {
-  if (m < 0) {
-    printf("M < 0!!!\n");
-    exit(-1);
-  }
+  assert(m > 0);
 #if defined(__i386) && !defined(__APPLE__)
   int32_t r;
-  asm("movl %2, %%ecx\n"
-      "movl %1, %%edx\n"
-      "movl %2, %%ebx\n"
-      "movl %1, %%eax\n"
-      "sarl $31, %%ecx\n"
-      "sarl $31, %%edx\n"
-      "addl %%ebx, %%eax\n"
-      "adcl %%ecx, %%edx\n"
-      "idivl %3\n"
+  asm("movl %2, %%ecx\n\t"
+      "movl %1, %%edx\n\t"
+      "movl %2, %%ebx\n\t"
+      "movl %1, %%eax\n\t"
+      "sarl $31, %%ecx\n\t"
+      "sarl $31, %%edx\n\t"
+      "addl %%ebx, %%eax\n\t"
+      "adcl %%ecx, %%edx\n\t"
+      "idivl %3\n\t"
       : "=&d"(r)
       : "rm"(s1), "rm"(s2), "rm"(m)
       : "cc", "eax", "ebx", "ecx");
@@ -224,18 +221,12 @@ static inline int32_t addmod_s32(const int32_t s1,
   int32_t r;
   asm("movq %1, %%rax\n\t"
       "addq %2, %%rax\n\t"
-      
-      "0:\n\t"
-      "subq %3, %%rax\n\t"
-      "jge 0b\n\t"
-      
-      "1:\n\t"
-      "addq %3, %%rax\n\t"
-      "jl 1b\n\t"
-      
-      : "=&a"(r)
-      : "r"((int64_t)s1), "r"((int64_t)s2), "r"((int64_t)m)
-      : "cc", "rdx");
+      "movq %%rax, %%rdx\n\t"
+      "sarq $32, %%rdx\n\t"
+      "idivl %3\n\t"
+      : "=&d"(r)
+      : "r"((int64_t)s1), "r"((int64_t)s2), "r"(m)
+      : "cc", "rax");
   return r;
 #else
   return ((int64_t)s1 + (int64_t)s2) % m;
@@ -360,9 +351,9 @@ static inline int32_t mulmod_s32(const int32_t x,
   int32_t r = (int32_t)mulmod_u32(x2, y2, m2);
   
   // use the remainder that is closest to 0
-  if (r > (m2>>1)) {
-    r -= m2;
-  }
+  uint32_t mask;
+  sub_with_mask_s32(&mask, m2 >> 1, r);
+  r -= m2 & mask;
   
   // Correct the sign of the remainder
   return (r^s) - s;  // negates r is s is -1.

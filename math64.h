@@ -182,17 +182,17 @@ static inline int numbits_s64(int64_t x) {
 /// res = n % m
 static inline uint32_t mod_u32_u64_u32(const uint64_t in_n,
 				       const uint32_t in_m) {
-#if defined(__x86_64) || defined(__i386)    
+#if defined(__x86_64)
   if (in_n < in_m) {
     // zero divides
     return in_n;
   }
 
   uint32_t r;
-  uint32_t nhi = in_n >> 32;
-  uint32_t nlo = in_n & 0xFFFFFFFF;
+  const uint32_t nhi = in_n >> 32;
+  const uint32_t nlo = in_n & 0xFFFFFFFF;
   if (in_m > nhi) {
-    // one divide
+    // 32-bit divide, since result will fit.
     asm("movl %1, %%edx\n\t"
 	"movl %2, %%eax\n\t"
 	"divl %3\n\t"
@@ -200,15 +200,12 @@ static inline uint32_t mod_u32_u64_u32(const uint64_t in_n,
 	: "rm"(nhi), "rm"(nlo), "rm"(in_m)
 	: "cc", "eax");
   } else {
-    // two divides
-    asm("xorl %%edx, %%edx\n\t"
-	"movl %1, %%eax\n\t"
-	"divl %3\n\t"
-	"movl %2, %%eax\n\t"
-	"divl %3\n\t"
+    // 64-bit divide.
+    asm("xorq %%rdx, %%rdx\n\t"
+	"divq %2\n\t"
 	: "=&d"(r)
-	: "rm"(nhi), "rm"(nlo), "rm"(in_m)
-	: "cc", "eax");
+	: "a"(in_n), "r"((uint64_t)in_m)
+	: "cc");
   }
   return r;
 #else
@@ -219,6 +216,7 @@ static inline uint32_t mod_u32_u64_u32(const uint64_t in_n,
 /// res = n % m
 static inline int32_t mod_s32_s64_u32(const int64_t in_n,
 				      const uint32_t in_m) {
+  // TODO: Try to reduce the number of branches here.
   int32_t r;
   if (in_n >= 0) {
     r = mod_u32_u64_u32(in_n, in_m);
@@ -272,6 +270,7 @@ static inline int32_t mod_s32_s64_u32(const int64_t in_n,
 static inline int64_t addmod_s64(const int64_t s1,
 				 const int64_t s2,
 				 const int64_t m) {
+  assert(m > 0);
   int64_t r;
 #if defined(__x86_64)
   asm("movq %2, %%r11\n\t"
@@ -429,9 +428,9 @@ static inline int64_t mulmod_s64(const int64_t x,
   int64_t r = (int64_t)mulmod_u64(x2, y2, m2);
   
   // use the remainder that is closest to 0
-  if (r > (m2>>1)) {
-    r -= m2;
-  }
+  uint64_t mask;
+  sub_with_mask_s64(&mask, m2 >> 1, r);
+  r -= m2 & mask;
   
   // Correct the sign of the remainder
   return (r^s) - s;  // negates r is s is -1.
