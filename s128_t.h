@@ -723,17 +723,19 @@ static inline int64_t mod_s64_s128_u64(const s128_t* in_n, const uint64_t in_m) 
 // res = f1*f2+f3*f4
 static inline void muladdmul_s128_4s64(s128_t* res, const int64_t f1, const int64_t f2, const int64_t f3, const int64_t f4) {
 #if defined(__x86_64)
-  asm("movq %2, %%rax\n\t"
-      "imulq %3\n\t"
-      "movq %%rax, %%r10\n\t"
-      "movq %4, %%rax\n\t"
-      "movq %%rdx, %%r11\n\t"
+  int64_t t1;
+  int64_t t2;
+  asm("movq %4, %%rax\n\t"
       "imulq %5\n\t"
-      "addq %%r10, %%rax\n\t"
-      "adcq %%r11, %%rdx\n\t"
-      : "=&d"(res->v1), "=&a"(res->v0)
-      : "rm"(f1), "rm"(f2), "rm"(f3), "rm"(f4)
-      : "r10", "r11", "cc");
+      "movq %%rax, %2\n\t"
+      "movq %6, %%rax\n\t"
+      "movq %%rdx, %3\n\t"
+      "imulq %7\n\t"
+      "addq %2, %%rax\n\t"
+      "adcq %3, %%rdx\n\t"
+      : "=&d"(res->v1), "=&a"(res->v0), "=&r"(t1), "=&r"(t2)
+      : "r"(f1), "r"(f2), "r"(f3), "r"(f4)
+      : "cc");
 #else
   s128_t t;
   mul_s128_s64_s64(res, f1, f2);
