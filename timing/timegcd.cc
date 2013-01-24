@@ -327,9 +327,8 @@ int main(int argc, char** argv) {
   }
 
   // iterate
-  //  int i = 1;
-  //  while (i < 128) {
-  int i = 28;
+  int i = 1;
+  while (i < 128) {
     uint64_t res[4];
     time_gcd_bits(res, i, pairs);
     cout << "bits=" << i << ' ' << res[0] << ' '
@@ -343,7 +342,7 @@ int main(int argc, char** argv) {
       }
     }		
     i ++;
-    //  }
+  }
   
   if (dump) {
     f[0].close();
