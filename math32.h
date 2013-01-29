@@ -418,7 +418,7 @@ int32_t gcdext_blockbinary5_s32(int32_t* u, int32_t* v,
 /// Compute the extended GCD using a 4-bit windowed method.
 static inline int32_t gcdext_blockbinary_s32(int32_t* u, int32_t* v,
 					     int32_t m, int32_t n) {
-  return gcdext_blockbinary4_s32(u, v, m, n);
+  return gcdext_blockbinary3_s32(u, v, m, n);
 }
 
 /// Compute the extended GCD using a divrem method
