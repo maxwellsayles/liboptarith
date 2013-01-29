@@ -2,7 +2,7 @@
 
 set terminal eps
 set output 'blockbinary.eps'
-set title "Timings for windowed binary GCD" 
+#set title "Timings for windowed binary GCD" 
 set xlabel "Bits in GCD arguments" 
 set ylabel "Nanoseconds"
 plot "binary1.dat" with lines title '1 bit window', \
