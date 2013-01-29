@@ -20,6 +20,15 @@
 #define INT32_MAX              (2147483647)
 #endif
 
+/// Random value [0,2^64-1]
+static inline uint64_t rand_u64(void) {
+  uint64_t res;
+  res = rand_u32();
+  res <<= 32;
+  res |= rand_u32();
+  return res;
+}
+
 /// Compute a - b and let m = -1 if a < b and 0 otherwise.
 static inline int64_t sub_with_mask_s64(uint64_t* m,
 					const int64_t a,

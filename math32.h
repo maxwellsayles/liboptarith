@@ -11,6 +11,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/// Random value [0,255]
+static inline uint8_t rand_u8(void) {
+  return (uint8_t)rand();
+}
+
+/// Random value [0,65535]
+static inline uint16_t rand_u16(void) {
+#if (RAND_MAX >= UINT16_MAX)
+  return (uint16_t)rand();
+#else
+  uint16_t res;
+  res = rand_u8();
+  res <<= 8;
+  res |= rand_u8();
+  return res;
+#endif
+}
+
+/// Random value [0,2^32-1]
+static inline uint32_t rand_u32(void) {
+  uint32_t res;
+  res = rand_u16();
+  res <<= 16;
+  res |= rand_u16();
+  return res;
+}
+
 /// Round up to the nearest power of 2.
 static inline uint32_t ceil_pow2_u32(uint32_t x) {
   x --;
@@ -371,8 +398,28 @@ int32_t gcdext_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
 /// Compute the extended GCD using a binary method.
 int32_t gcdext_binary_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
 
+/// Compute the extended GCD using a 2-bit windowed method.
+int32_t gcdext_blockbinary2_s32(int32_t* u, int32_t* v,
+				int32_t m, int32_t n);
+
+/// Compute the extended GCD using a 3-bit windowed method.
+int32_t gcdext_blockbinary3_s32(int32_t* u, int32_t* v,
+				int32_t m, int32_t n);
+
 /// Compute the extended GCD using a 4-bit windowed method.
-int32_t gcdext_blockbinary_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
+int32_t gcdext_blockbinary4_s32(int32_t* u, int32_t* v,
+				int32_t m, int32_t n);
+
+/// Compute the extended GCD using a 5-bit windowed method.
+int32_t gcdext_blockbinary5_s32(int32_t* u, int32_t* v,
+				int32_t m, int32_t n);
+
+
+/// Compute the extended GCD using a 4-bit windowed method.
+static inline int32_t gcdext_blockbinary_s32(int32_t* u, int32_t* v,
+					     int32_t m, int32_t n) {
+  return gcdext_blockbinary4_s32(u, v, m, n);
+}
 
 /// Compute the extended GCD using a divrem method
 /// only computing the left argument.

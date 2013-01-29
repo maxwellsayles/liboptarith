@@ -1,7 +1,9 @@
 #include <fstream>
+#include <iomanip>
+#include <iostream>
+
 #include <gmp.h>
 #include <inttypes.h>
-#include <iostream>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -19,24 +21,11 @@ extern "C" {
 
 using namespace std;
 
-inline uint16_t rand_u16() {
-  return (uint16_t)rand();
-}
-
-inline uint32_t rand_u32() {
-  return ((uint32_t)rand_u16() << 16) | rand_u16();
-}
-
-inline uint64_t rand_u64() {
-  return ((uint64_t)rand_u32() << 32) | rand_u32();
-}
-
-inline u128_t rand_u128() {
-  u128_t res;
-  res.v0 = rand_u64();
-  res.v1 = rand_u64();
-  return res;
-}
+#define GCD_ROUTINE_S32  gcdext_blockbinary4_s32
+#define GCD_ROUTINE_S64  gcdext_divrem_s64
+#define GCD_ROUTINE_S128 gcdext_divrem_s128
+#define GCD_ROUTINE_STR "binary"
+#define GCD_MAX_BITS_TO_TEST 32
 
 // return an array of n elements of b bits
 // caller must delete[] returned array
@@ -69,7 +58,7 @@ u128_t* rands_u128(const int n, const int b) {
   if (b == 64 || b == 128) m = -1;
   u128_t* res = new u128_t[n];
   for (int i = 0;  i < n;  i++) {
-    res[i] = rand_u128();
+    rand_u128(&res[i]);
     if (b > 64) {
       res[i].v1 &= m;
     }
@@ -79,13 +68,6 @@ u128_t* rands_u128(const int n, const int b) {
     }
   }
   return res;
-}
-
-// time in seconds
-inline uint64_t current_secs(void) {
-  struct timeval tv;
-  gettimeofday(&tv, 0);
-  return (uint64_t)tv.tv_sec;
 }
 
 // gives the time from system on in nanoseconds
@@ -101,10 +83,12 @@ inline uint64_t current_nanos(void) {
 #endif
 }
 
-int64_t full_cpu_load(uint64_t secs) {
-  static int64_t sum = 0;
-  uint64_t start = current_secs();
-  while (current_secs() - start < secs) {
+// Perform some gcd computations so that the CPU scales up.
+int64_t full_cpu_load(const uint64_t secs) {
+  const uint64_t nanos = secs * 1000000ULL;
+  int64_t sum = 0;
+  const uint64_t start = current_nanos();
+  while (current_nanos() - start < nanos) {
     int64_t s, t, a, b;
     a = rand_u64() % (1ULL<<59);
     b = rand_u64() % (1ULL<<59);
@@ -113,7 +97,9 @@ int64_t full_cpu_load(uint64_t secs) {
   return sum;
 }
 
-bool sane(int32_t g, int32_t u, int32_t v, int32_t m, int32_t n, const char* type) {
+/// Verify that g = u*m + v*n
+bool sane(int32_t g, int32_t u, int32_t v, int32_t m, int32_t n,
+	  const char* type) {
   int64_t t = muladdmul_s64_4s32(u, m, v, n);
   if (g != t) {
     cout << "Insane in " << type << " xgcd." << endl;
@@ -127,7 +113,9 @@ bool sane(int32_t g, int32_t u, int32_t v, int32_t m, int32_t n, const char* typ
   return true;
 }
 
-bool sane(int64_t g, int64_t u, int64_t v, int64_t m, int64_t n, const char* type) {
+/// Verify that g = u*m + v*n
+bool sane(int64_t g, int64_t u, int64_t v, int64_t m, int64_t n,
+	  const char* type) {
   s128_t t;
   muladdmul_s128_4s64(&t, u, m, v, n);
   if (g != get_s64_from_s128(&t)) {
@@ -142,7 +130,11 @@ bool sane(int64_t g, int64_t u, int64_t v, int64_t m, int64_t n, const char* typ
   return true;
 }
 
-bool sane(const s128_t* g, const s128_t* u, const s128_t* v, const s128_t* m, const s128_t* n, const char* type) {
+/// Verify that g = u*m + v*n
+bool sane(const s128_t* g,
+	  const s128_t* u, const s128_t* v,
+	  const s128_t* m, const s128_t* n,
+	  const char* type) {
   static mpz_t gz, uz, vz, mz, nz;
   static mpz_t t1, t2;
   static bool init = false;
@@ -180,8 +172,10 @@ bool sane(const s128_t* g, const s128_t* u, const s128_t* v, const s128_t* m, co
 }
 
 /// time 32bit gcd set
-template<int32_t xgcd(int32_t* out_s, int32_t* out_t, int32_t in_u, int32_t in_v)>
-uint64_t time_gcd_set(const uint32_t* rands, const int pairs, const char* type) {
+template<int32_t xgcd(int32_t* out_s, int32_t* out_t,
+		      int32_t in_u, int32_t in_v)>
+uint64_t time_gcd_set(const uint32_t* rands, const int pairs,
+		      const char* type) {
   uint64_t start_time, end_time;
   int32_t g, u, v, m, n;
     
@@ -208,8 +202,10 @@ uint64_t time_gcd_set(const uint32_t* rands, const int pairs, const char* type) 
 }
 
 /// time 64bit gcd set
-template<int64_t xgcd(int64_t* out_s, int64_t* out_t, int64_t in_u, int64_t in_v)>
-uint64_t time_gcd_set(const uint64_t* rands, const int pairs, const char* type) {
+template<int64_t xgcd(int64_t* out_s, int64_t* out_t,
+		      int64_t in_u, int64_t in_v)>
+uint64_t time_gcd_set(const uint64_t* rands, const int pairs,
+		      const char* type) {
   uint64_t start_time, end_time;
   int64_t g, u, v, m, n;
     
@@ -236,8 +232,11 @@ uint64_t time_gcd_set(const uint64_t* rands, const int pairs, const char* type) 
 }
 
 /// time 128bit gcd set
-template<void xgcd(s128_t* out_g, s128_t* out_s, s128_t* out_t, const s128_t* in_u, const s128_t* in_v)>
-uint64_t time_gcd_set_s128(const u128_t* rands, const int pairs, const char* type) {
+template<void xgcd(s128_t* out_g,
+		   s128_t* out_s, s128_t* out_t,
+		   const s128_t* in_u, const s128_t* in_v)>
+uint64_t time_gcd_set_s128(const u128_t* rands, const int pairs,
+			   const char* type) {
   uint64_t start_time, end_time;
   s128_t g, u, v, m, n;
     
@@ -263,45 +262,39 @@ uint64_t time_gcd_set_s128(const u128_t* rands, const int pairs, const char* typ
   return end_time;
 }
 
-void time_gcd_bits(uint64_t res[4], const int bits, const int pairs) {
+/// Time a GCD operation for a fixed number of bits.
+uint64_t time_gcd_bits(const int bits, const int pairs) {
+  uint64_t res = 0;
   if (bits < 32) {
     uint32_t* R = rands_u32(pairs*2, bits);
-    res[0] = time_gcd_set<gcdext_divrem_s32>(R, pairs, "divrem");
-    res[1] = time_gcd_set<gcdext_binary_s32>(R, pairs, "binary r2l");
-    res[2] = time_gcd_set<gcdext_binary_l2r_s32>(R, pairs, "binary l2r");
-    res[3] = -1;//time_gcd_set<gcdext_binary_l2r2_s32>(R, pairs, "binary l2r2");
+    res = time_gcd_set<GCD_ROUTINE_S32>(R, pairs, GCD_ROUTINE_STR);
     delete[] R;
   } else if (bits < 64) {
     uint64_t* R = rands_u64(pairs*2, bits);
-    res[0] = time_gcd_set<gcdext_divrem_s64>(R, pairs, "divrem");
-    res[1] = time_gcd_set<gcdext_binary_s64>(R, pairs, "binary r2l");
-    res[2] = time_gcd_set<gcdext_binary_l2r_s64>(R, pairs, "binary l2r");
-    res[3] = -1;//time_gcd_set<gcdext_binary_l2r2_s64>(R, pairs, "binary l2r2");
+    res = time_gcd_set<GCD_ROUTINE_S64>(R, pairs, GCD_ROUTINE_STR);
     delete[] R;
   } else {
     u128_t* R = rands_u128(pairs*2, bits);
-    res[0] = time_gcd_set_s128<gcdext_divrem_s128>(R, pairs, "divrem");
-    res[1] = -1;//time_gcd_set_s128<gcdext_binary_s128>(R, pairs, "binary r2l");
-    res[2] = time_gcd_set_s128<gcdext_binary_l2r_s128>(R, pairs, "binary l2r");
-    res[3] = -1;//time_gcd_set_s128<gcdext_binary_l2r2_s128>(R, pairs, "binary l2r2");
+    res = time_gcd_set_s128<GCD_ROUTINE_S128>(R, pairs, GCD_ROUTINE_STR);
     delete[] R;
-  }	
+  }
+  return res;
 }
 
 void usage(int argc, char** argv) {
-  cout << "Usage: " << argv[0] << " <rand_seed> <pairs> [-d]" << endl;
+  cout << "Usage: " << argv[0] << " <rand_seed> <pairs> [-d dumpfile.txt]" << endl;
   cout << "\t<pairs> is the number of pairs for which to compute the gcd." << endl;
   cout << "\t[-d] is a flag to dump output to files for use with gnuplot." << endl;
   exit(0);
 }
 
 int main(int argc, char** argv) {
-  if (argc != 3 && argc != 4) {
+  if (argc != 3 && argc != 5) {
     usage(argc, argv);
   }
 
   bool dump = false;
-  if (argc == 4) {
+  if (argc == 5) {
     if (strcmp(argv[3], "-d") == 0) {
       dump = true;
     } else {
@@ -309,7 +302,10 @@ int main(int argc, char** argv) {
     }
   }
 
+  // Set rand seed.
   srand(atoi(argv[1]));
+
+  // Get number of pairs.
   int pairs = atoi(argv[2]);
 
   cout << "Priming CPU for 3 seconds." << endl;
@@ -318,37 +314,27 @@ int main(int argc, char** argv) {
   // Reinitialize the random number generator for testing.
   srand(atoi(argv[1]));
 
-  ofstream f[4];
+  ofstream f;
   if (dump) {
-    f[0].open("divrem.dat");
-    f[1].open("binary_r2l.dat");
-    f[2].open("binary_l2r.dat");
-    f[3].open("binary_l2r2.dat");
+    cout << "Writing times to " << argv[4] << endl;
+    f.open(argv[4]);
+    f << setprecision(5);
   }
 
-  // iterate
+  // Iterate
   int i = 1;
-  while (i < 128) {
-    uint64_t res[4];
-    time_gcd_bits(res, i, pairs);
-    cout << "bits=" << i << ' ' << res[0] << ' '
-	 << res[1] << ' ' << res[2] << ' ' << res[3] << endl;
+  while (i < GCD_MAX_BITS_TO_TEST) {
+    uint64_t res = time_gcd_bits(i, pairs);
+    cout << "bits=" << i << ' ' << res << endl;
     if (dump) {
-      for (int j = 0;  j < 4;  j ++) {
-	if (res[j] != 1) {
-	  f[j] << i << ", " << (double)res[j]/(double)pairs << endl;
-	  f[j] << flush;
-	}
-      }
+      f << i << ", " << (double)res/(double)pairs << endl;
+      f << flush;
     }		
     i ++;
   }
   
   if (dump) {
-    f[0].close();
-    f[1].close();
-    f[2].close();
-    f[3].close();
+    f.close();
   }
 }
 
