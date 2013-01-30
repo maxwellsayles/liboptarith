@@ -486,25 +486,28 @@ static inline int is_square_s64(const int64_t x) {
 }
 
 int64_t gcd_binary_s64(int64_t u, int64_t v);
-int64_t gcdext_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
-int64_t gcdext_binary_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
-int64_t gcdext_blockbinary_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
+int64_t xgcd_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
+int64_t xgcd_binary_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
+int64_t xgcd_blockbinary_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
 
-int64_t gcdext_left_divrem_s64(int64_t* u, int64_t m, int64_t n);
-static inline int64_t gcdext_left_binary_s64(int64_t* u, int64_t m, int64_t n) {
+int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n);
+static inline int64_t xgcd_left_binary_s64(int64_t* u,
+					   int64_t m, int64_t n) {
   int64_t v;
-  return gcdext_binary_s64(u, &v, m, n);
+  return xgcd_binary_s64(u, &v, m, n);
 }
-static inline int64_t gcdext_left_blockbinary_s64(int64_t* u, int64_t m, int64_t n) {
+static inline int64_t xgcd_left_blockbinary_s64(int64_t* u,
+						int64_t m, int64_t n) {
   int64_t v;
-  return gcdext_blockbinary_s64(u, &v, m, n);
+  return xgcd_blockbinary_s64(u, &v, m, n);
 }
 
-void gcdext_partial_divrem_s64(uint64_t* r1, uint64_t* r0, int64_t* C1, int64_t* C0, uint64_t bound);
+void xgcd_partial_divrem_s64(uint64_t* r1, uint64_t* r0,
+			     int64_t* C1, int64_t* C0, uint64_t bound);
 
 /// compute a^e mod m using binary exponentiation
 uint64_t expmod_u64(uint64_t a, uint64_t e, uint64_t m);
 
-#endif // MATH64__INCLUDED
+#endif  // MATH64__INCLUDED
 
 

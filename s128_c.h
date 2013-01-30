@@ -281,9 +281,9 @@ class s128 : public s128_t {
     return g;
   }
 
-  s128 gcdext(s128& s, s128& t, const s128& x) {
+  s128 xgcd(s128& s, s128& t, const s128& x) {
     s128 g;
-    gcdext_divrem_s128(&g, &s, &t, this, &x);
+    xgcd_divrem_s128(&g, &s, &t, this, &x);
     return g;
   }
 

@@ -83,10 +83,10 @@ int64_t gcd_binary_s64(int64_t u, int64_t v) {
  * Input:  u, v
  * Output: g, s, t such that g = s*u + t*v
  */
-int64_t gcdext_blockbinary_s64(int64_t* out_s,
-			       int64_t* out_t,
-			       int64_t in_u,
-			       int64_t in_v) {
+int64_t xgcd_blockbinary_s64(int64_t* out_s,
+			     int64_t* out_t,
+			     int64_t in_u,
+			     int64_t in_v) {
   int64_t u1, u2, u3;
   int64_t v2, v3;
   int64_t u, v;
@@ -283,10 +283,10 @@ int64_t gcdext_blockbinary_s64(int64_t* out_s,
  * Input:  u, v
  * Output: g, s, t such that g = s*u + t*v
  */
-int64_t gcdext_binary_s64(int64_t* out_s,
-			  int64_t* out_t,
-			  int64_t in_u,
-			  int64_t in_v) {
+int64_t xgcd_binary_s64(int64_t* out_s,
+			int64_t* out_t,
+			int64_t in_u,
+			int64_t in_v) {
   int64_t u1, u2, u3;
   int64_t v2, v3;
   int64_t u, v;
@@ -433,7 +433,7 @@ int64_t gcdext_binary_s64(int64_t* out_s,
  * Input:  u, v
  * Output: g, s, t such that g = s*u + t*v
  */
-int64_t gcdext_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n) {
+int64_t xgcd_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n) {
   int64_t a, b;
   int sm, sn;
 #if !defined(__x86_64)
@@ -563,7 +563,7 @@ int64_t gcdext_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n) {
   return m;
 }
 
-int64_t gcdext_left_divrem_s64(int64_t* u, int64_t m, int64_t n) {
+int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n) {
   int64_t a;
   int sm;
 #if !defined(__x86_64)
@@ -673,7 +673,9 @@ int64_t gcdext_left_divrem_s64(int64_t* u, int64_t m, int64_t n) {
  *  - C_i sequence from "Solving the Pell Equation" defined as
  *     C_{-1}=0, C_{1}=-1  C_i=C_{i-2}-q_i C_{i-1}
  */
-void gcdext_partial_divrem_s64(uint64_t* r1, uint64_t* r0, int64_t* C1, int64_t* C0, uint64_t bound) {
+void xgcd_partial_divrem_s64(uint64_t* r1, uint64_t* r0,
+			     int64_t* C1, int64_t* C0,
+			     uint64_t bound) {
   // bound should not be zero
   if (bound == 0) {
     bound = 1;

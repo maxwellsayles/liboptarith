@@ -1,5 +1,5 @@
 /**
- * @file gcdext_binary_l2r.h
+ * @file gcd_binary_l2r.h
  * @brief Compute d=s*a+t*b where d is the greatest common divisor of a and b.
  *
  * This header provides the fastest 32, 64, and 128bit extended GCDs tested.

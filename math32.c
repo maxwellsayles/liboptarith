@@ -83,10 +83,10 @@ int32_t gcd_binary_s32(int32_t u, int32_t v) {
  * Input:  u, v
  * Output: g, s, t  such that g = s*u + t*v
  */
-int32_t gcdext_blockbinary2_s32(int32_t* out_s,
-				int32_t* out_t,
-				int32_t in_u,
-				int32_t in_v) {
+int32_t xgcd_blockbinary2_s32(int32_t* out_s,
+			      int32_t* out_t,
+			      int32_t in_u,
+			      int32_t in_v) {
   int32_t u1, u2, u3;
   int32_t v2, v3;
   int32_t u, v;
@@ -243,10 +243,10 @@ int32_t gcdext_blockbinary2_s32(int32_t* out_s,
  * Input:  u, v
  * Output: g, s, t  such that g = s*u + t*v
  */
-int32_t gcdext_blockbinary3_s32(int32_t* out_s,
-				int32_t* out_t,
-				int32_t in_u,
-				int32_t in_v) {
+int32_t xgcd_blockbinary3_s32(int32_t* out_s,
+			      int32_t* out_t,
+			      int32_t in_u,
+			      int32_t in_v) {
   int32_t u1, u2, u3;
   int32_t v2, v3;
   int32_t u, v;
@@ -418,10 +418,10 @@ int32_t gcdext_blockbinary3_s32(int32_t* out_s,
  * Input:  u, v
  * Output: g, s, t  such that g = s*u + t*v
  */
-int32_t gcdext_blockbinary4_s32(int32_t* out_s,
-				int32_t* out_t,
-				int32_t in_u,
-				int32_t in_v) {
+int32_t xgcd_blockbinary4_s32(int32_t* out_s,
+			      int32_t* out_t,
+			      int32_t in_u,
+			      int32_t in_v) {
   int32_t u1, u2, u3;
   int32_t v2, v3;
   int32_t u, v;
@@ -605,10 +605,10 @@ int32_t gcdext_blockbinary4_s32(int32_t* out_s,
  * Input:  u, v
  * Output: g, s, t  such that g = s*u + t*v
  */
-int32_t gcdext_blockbinary5_s32(int32_t* out_s,
-				int32_t* out_t,
-				int32_t in_u,
-				int32_t in_v) {
+int32_t xgcd_blockbinary5_s32(int32_t* out_s,
+			      int32_t* out_t,
+			      int32_t in_u,
+			      int32_t in_v) {
   int32_t u1, u2, u3;
   int32_t v2, v3;
   int32_t u, v;
@@ -805,10 +805,10 @@ int32_t gcdext_blockbinary5_s32(int32_t* out_s,
  * Input:  u, v
  * Output: g, s, t  such that g = s*u + t*v
  */
-int32_t gcdext_binary_s32(int32_t* out_s,
-			  int32_t* out_t,
-			  int32_t in_u,
-			  int32_t in_v) {
+int32_t xgcd_binary_s32(int32_t* out_s,
+			int32_t* out_t,
+			int32_t in_u,
+			int32_t in_v) {
   int32_t u1, u2, u3;
   int32_t v2, v3;
   int32_t u, v;
@@ -950,7 +950,7 @@ int32_t gcdext_binary_s32(int32_t* out_s,
  * Input:  u, v
  * Output: g, s, t  such that g = s*u + t*v
  */
-int32_t gcdext_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
+int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
   int32_t a, b;
   int sm, sn;
   
@@ -1037,7 +1037,7 @@ int32_t gcdext_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
  * Input:  u, v
  * Output: g, s, t  such that g = s*u + t*v
  */
-int32_t gcdext_left_divrem_s32(int32_t* u, int32_t m, int32_t n) {
+int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n) {
   int32_t a;
   int sm;
   

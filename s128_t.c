@@ -83,11 +83,11 @@ void divrem_s128_s128_s128_s128(s128_t* out_q,
   }
 }
 
-void gcdext_divrem_s128(s128_t* out_g,
-			s128_t* out_s,
-			s128_t* out_t,
-			const s128_t* in_u,
-			const s128_t* in_v) {
+void xgcd_divrem_s128(s128_t* out_g,
+		      s128_t* out_s,
+		      s128_t* out_t,
+		      const s128_t* in_u,
+		      const s128_t* in_v) {
   s128_t u;
   s128_t v;
   s128_t s;

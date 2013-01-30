@@ -393,48 +393,49 @@ uint32_t sqrt_u32(const uint32_t x);
 int32_t gcd_binary_s32(int32_t u, int32_t v);
 
 /// Compute the extended GCD using a div/rem method.
-int32_t gcdext_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
+int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
 
 /// Compute the extended GCD using a binary method.
-int32_t gcdext_binary_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
+int32_t xgcd_binary_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
 
 /// Compute the extended GCD using a 2-bit windowed method.
-int32_t gcdext_blockbinary2_s32(int32_t* u, int32_t* v,
-				int32_t m, int32_t n);
+int32_t xgcd_blockbinary2_s32(int32_t* u, int32_t* v,
+			      int32_t m, int32_t n);
 
 /// Compute the extended GCD using a 3-bit windowed method.
-int32_t gcdext_blockbinary3_s32(int32_t* u, int32_t* v,
-				int32_t m, int32_t n);
+int32_t xgcd_blockbinary3_s32(int32_t* u, int32_t* v,
+			      int32_t m, int32_t n);
 
 /// Compute the extended GCD using a 4-bit windowed method.
-int32_t gcdext_blockbinary4_s32(int32_t* u, int32_t* v,
-				int32_t m, int32_t n);
+int32_t xgcd_blockbinary4_s32(int32_t* u, int32_t* v,
+			      int32_t m, int32_t n);
 
 /// Compute the extended GCD using a 5-bit windowed method.
-int32_t gcdext_blockbinary5_s32(int32_t* u, int32_t* v,
-				int32_t m, int32_t n);
+int32_t xgcd_blockbinary5_s32(int32_t* u, int32_t* v,
+			      int32_t m, int32_t n);
 
-
-/// Compute the extended GCD using a 4-bit windowed method.
-static inline int32_t gcdext_blockbinary_s32(int32_t* u, int32_t* v,
-					     int32_t m, int32_t n) {
-  return gcdext_blockbinary3_s32(u, v, m, n);
+/// Compute the extended GCD using the best empirically
+static inline int32_t xgcd_blockbinary_s32(int32_t* u, int32_t* v,
+					   int32_t m, int32_t n) {
+  return xgcd_blockbinary3_s32(u, v, m, n);
 }
 
 /// Compute the extended GCD using a divrem method
 /// only computing the left argument.
-int32_t gcdext_left_divrem_s32(int32_t* u, int32_t m, int32_t n);
+int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n);
 
 /// The left version of the extended gcd using a binary method.
-static inline int32_t gcdext_left_binary_s32(int32_t* u, int32_t m, int32_t n) {
+static inline int32_t xgcd_left_binary_s32(int32_t* u,
+					   int32_t m, int32_t n) {
   int32_t v;
-  return gcdext_binary_s32(u, &v, m, n);
+  return xgcd_binary_s32(u, &v, m, n);
 }
 
 /// The left version of the extended gcd using a 4-bit windowed method.
-static inline int32_t gcdext_left_blockbinary_s32(int32_t* u, int32_t m, int32_t n) {
+static inline int32_t xgcd_left_blockbinary_s32(int32_t* u,
+						int32_t m, int32_t n) {
   int32_t v;
-  return gcdext_blockbinary_s32(u, &v, m, n);
+  return xgcd_blockbinary_s32(u, &v, m, n);
 }
 
 /**
@@ -449,7 +450,9 @@ static inline int32_t gcdext_left_blockbinary_s32(int32_t* u, int32_t m, int32_t
  *  - C_i sequence from "Solving the Pell Equation" defined as
  *     C_{-1}=0, C_{1}=-1  C_i=C_{i-2}-q_i C_{i-1}
  */
-static inline void gcdext_partial_divrem_s32(uint32_t* r1, uint32_t* r0, int32_t* C1, int32_t* C0, uint32_t bound) {
+static inline void xgcd_partial_divrem_s32(uint32_t* r1, uint32_t* r0,
+					   int32_t* C1, int32_t* C0,
+					   uint32_t bound) {
   // bound should not be zero
   if (bound == 0) {
     bound = 1;
@@ -497,6 +500,6 @@ static inline void gcdext_partial_divrem_s32(uint32_t* r1, uint32_t* r0, int32_t
 #endif
 }
 
-#endif // MATH32__INCLUDED
+#endif  // MATH32__INCLUDED
 
 

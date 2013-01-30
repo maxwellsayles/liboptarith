@@ -601,7 +601,8 @@ static inline void gcd_s128(s128_t* g, const s128_t* in_u, const s128_t* in_v) {
   gcd_u128((u128_t*)g, &u, &v);
 }
 
-void gcdext_divrem_s128(s128_t* g, s128_t* s, s128_t* t, const s128_t* u, const s128_t* v);
+void xgcd_divrem_s128(s128_t* g, s128_t* s, s128_t* t,
+		      const s128_t* u, const s128_t* v);
 
 static inline int is_divisible_s128_s128(const s128_t* x, const s128_t* y) {
   s128_t q;

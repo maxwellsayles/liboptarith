@@ -21,11 +21,11 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE_S32  gcdext_blockbinary5_s32
-#define GCD_ROUTINE_S64  gcdext_divrem_s64
-#define GCD_ROUTINE_S128 gcdext_divrem_s128
-#define GCD_ROUTINE_STR "binary"
-#define GCD_MAX_BITS_TO_TEST 32
+#define GCD_ROUTINE_S32  xgcd_divrem_s32
+#define GCD_ROUTINE_S64  xgcd_divrem_s64
+#define GCD_ROUTINE_S128 xgcd_divrem_s128
+#define GCD_ROUTINE_STR "divrem"
+#define GCD_MAX_BITS_TO_TEST 120
 
 // return an array of n elements of b bits
 // caller must delete[] returned array
@@ -92,7 +92,7 @@ int64_t full_cpu_load(const uint64_t secs) {
     int64_t s, t, a, b;
     a = rand_u64() % (1ULL<<59);
     b = rand_u64() % (1ULL<<59);
-    sum += gcdext_divrem_s64(&s, &t, a, b);
+    sum += xgcd_divrem_s64(&s, &t, a, b);
   }
   return sum;
 }
