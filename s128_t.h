@@ -571,20 +571,13 @@ static inline void negate_using_mask_s128(const uint64_t m,
   sub_s128_s64(x, m);
 }
 
-static inline void abs_u128_s128(u128_t* res, const s128_t* x) {
-  if (is_negative_s128(x)) {
-    neg_s128_s128((s128_t*)res, x);
-  } else {
-    set_s128_s128((s128_t*)res, x);
-  }
+static inline void abs_s128_s128(s128_t* res, const s128_t* x) {
+  set_s128_s128(res, x);
+  negate_using_mask_s128(mask_s128(res), res);
 }
 
-static inline void abs_s128_s128(s128_t* res, const s128_t* x) {
-  if (is_negative_s128(x)) {
-    neg_s128_s128(res, x);
-  } else {
-    set_s128_s128(res, x);
-  }
+static inline void abs_u128_s128(u128_t* res, const s128_t* x) {
+  abs_s128_s128((s128_t*)res, x);
 }
 
 static inline void sqrt_s128_s128(s128_t* root, const s128_t* x) {
