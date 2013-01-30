@@ -19,6 +19,7 @@ static inline int is_equal_to_neg_s128_s128(const s128_t* a,
 }
 
 uint32_t gcd_binary_l2r_u32(const uint32_t a, const uint32_t b) {
+  // TODO: Branchless.
   int k = 0;
   int msb_u = 0;
   int msb_v = 0;
@@ -54,6 +55,7 @@ uint32_t gcd_binary_l2r_u32(const uint32_t a, const uint32_t b) {
 }
 
 uint64_t gcd_binary_l2r_u64(const uint64_t a, const uint64_t b) {
+  // TODO: Branchless.
   int k = 0;
   int msb_u = 0;
   int msb_v = 0;
@@ -89,6 +91,7 @@ uint64_t gcd_binary_l2r_u64(const uint64_t a, const uint64_t b) {
 }
 
 void gcd_binary_l2r_u128(u128_t* d, const u128_t* a, const u128_t* b) {
+  // TODO: Branchless.
   int k = 0;
   int msb_u = 0;
   int msb_v = 0;
@@ -126,19 +129,21 @@ void gcd_binary_l2r_u128(u128_t* d, const u128_t* a, const u128_t* b) {
 }
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
-/// s and t may be NULL.
+/// NOTE: s and t cannot be NULL.
 int32_t xgcd_binary_l2r_s32(int32_t* s, int32_t* t,
 			    const int32_t a, const int32_t b) {
-  // Invariants:
-  // u1*a + u2*b = u3
-  // v1*a + v2*b = v3
-  // u3 >= v3
+  assert(s);
+  assert(t);
+
+  const int32_t am = a >> 31;
+  const int32_t bm = b >> 31;
+
   int32_t u1 = 1;
   int32_t u2 = 0;
-  int32_t u3 = abs_s32(a);
+  int32_t u3 = negate_using_mask_s32(am, a);
   int32_t v1 = 0;
   int32_t v2 = 1;
-  int32_t v3 = abs_s32(b);
+  int32_t v3 = negate_using_mask_s32(bm, b);
 
   // Swap u with v if u3 < v3.
   cond_swap3_s32(&u1, &u2, &u3, &v1, &v2, &v3);
@@ -158,40 +163,39 @@ int32_t xgcd_binary_l2r_s32(int32_t* s, int32_t* t,
     cond_swap3_s32(&u1, &u2, &u3, &v1, &v2, &v3);
   }
 
-  const int32_t am = a >> 31;
-  const int32_t bm = b >> 31;
   if (u3 == negate_using_mask_s32(am, a)) {
     // a divides b.
-    if (s) *s = am | 1;  // either 1 or -1
-    if (t) *t = 0;
+    *s = am | 1;  // either 1 or -1
+    *t = 0;
   } else if (u3 == negate_using_mask_s32(bm, b)) {
     // b divides a.
-    if (s) *s = 0;
-    if (t) *t = bm | 1;  // either 1 or -1
+    *s = 0;
+    *t = bm | 1;  // either 1 or -1
   } else {
-    // Reduce u1 (mod b/u3) and u2 (mod a/u3)
-    // and correct for sign.
-    if (s) *s = negate_using_mask_s32(am, u1 % (b / u3));
-    if (t) *t = negate_using_mask_s32(bm, u2 % (a / u3));
+    // Reduce u1 (mod b) and u2 (mod a) and correct for sign.
+    int32_t q = u1 / b;
+    *s = negate_using_mask_s32(am, u1 - q * b);
+    *t = negate_using_mask_s32(bm, u2 + q * b);
   }
   return u3;
 }
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
-/// s and t may be NULL.
-// TODO: s and t cannot be NULL
+/// NOTE: s and t cannot be NULL.
 int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
 			    const int64_t a, const int64_t b) {
-  // Invariants:
-  // u1*a + u2*b = u3
-  // v1*a + v2*b = v3
-  // u3 >= v3
+  assert(s);
+  assert(t);
+
+  const int64_t am = a >> 63;
+  const int64_t bm = b >> 63;
+
   int64_t u1 = 1;
   int64_t u2 = 0;
-  int64_t u3 = abs_s64(a);
+  int64_t u3 = negate_using_mask_s64(am, a);
   int64_t v1 = 0;
   int64_t v2 = 1;
-  int64_t v3 = abs_s64(b);
+  int64_t v3 = negate_using_mask_s64(bm, b);
   
   // Swap u with v if u3 < v3.
   cond_swap3_s64(&u1, &u2, &u3, &v1, &v2, &v3);
@@ -211,35 +215,29 @@ int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
     cond_swap3_s64(&u1, &u2, &u3, &v1, &v2, &v3);
   }
 
-  const int64_t am = a >> 63;
-  const int64_t bm = b >> 63;
   if (u3 == negate_using_mask_s64(am, a)) {
     // a divides b.
-    if (s) *s = am | 1;  // either 1 or -1
-    if (t) *t = 0;
+    *s = am | 1;  // either 1 or -1
+    *t = 0;
   } else if (u3 == negate_using_mask_s64(bm, b)) {
     // b divides a.
-    if (s) *s = 0;
-    if (t) *t = bm | 1;  // either 1 or -1
+    *s = 0;
+    *t = bm | 1;  // either 1 or -1
   } else {
-    // Reduce u1 (mod b/u3) and u2 (mod a/u3)
-    // and correct for sign.
-    // TODO: use int64_t q = u1 / b; s = u1 - q*b; t = u2 + q*a;
-    if (s) *s = negate_using_mask_s64(am, u1 % (b / u3));
-    if (t) *t = negate_using_mask_s64(bm, u2 % (a / u3));
+    // Reduce u1 (mod b) and u2 (mod a) and correct for sign.
+    int64_t q = u1 / b;
+    *s = negate_using_mask_s64(am, u1 - q*b);
+    *t = negate_using_mask_s64(bm, u2 + q*a);
   }
   return u3;
 }
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
-/// s and t may be NULL.
+/// NOTE: s and t cannot be NULL.
 void xgcd_binary_l2r_s128(s128_t* d,
 			  s128_t* s, s128_t* t,
 			  const s128_t* a, const s128_t* b) {
-  // Invariants:
-  // u1*a + u2*b = u3
-  // v1*a + v2*b = v3
-  // u3 >= v3
+  assert(d); assert(s); assert(t); assert(a); assert(b);
   s128_t u1;
   s128_t u2;
   s128_t v1;
@@ -252,7 +250,7 @@ void xgcd_binary_l2r_s128(s128_t* d,
   set_s128_s64(&v1, 0);
   set_s128_s64(&v2, 1);
   abs_s128_s128(&v3, b);
-  
+
   // Swap u with v if u3 < v3.
   cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
   while (!is_zero_s128(&v3)) {
@@ -281,7 +279,7 @@ void xgcd_binary_l2r_s128(s128_t* d,
     // Swap u with v if u3 < v3.
     cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
   }
-  
+
   const uint64_t am = mask_s128(a);
   const uint64_t bm = mask_s128(b);
   s128_t at = *a;
@@ -289,39 +287,80 @@ void xgcd_binary_l2r_s128(s128_t* d,
   negate_using_mask_s128(am, &at);
   negate_using_mask_s128(bm, &bt);
   if (is_equal_s128_s128(&u3, &at)) {
-    if (s) set_s128_s64(s, am | 1);  // either 1 or -1
-    if (t) setzero_s128(t);
+    set_s128_s64(s, am | 1);  // either 1 or -1
+    setzero_s128(t);
   } else if (is_equal_s128_s128(&u3, &bt)) {
-    if (s) setzero_s128(s);
-    if (t) set_s128_s64(t, bm | 1);  // either 1 or -1
+    setzero_s128(s);
+    set_s128_s64(t, bm | 1);  // either 1 or -1
   } else {
-    // Reduce u1 (mod b/u3) and u2 (mod a/u3)
-    // and correct for sign.
+    // Reduce u1 (mod b) and u2 (mod a).
+    s128_t q;
     s128_t tmp;
-    if (s) {
-      div_s128_s128_s128(&tmp, b, &u3);
-      mod_s128_s128_s128(s, &u1, &tmp);
-      negate_using_mask_s128(am, s);
-    }
-    if (t) {
-      div_s128_s128_s128(&tmp, a, &u3);
-      mod_s128_s128_s128(t, &u2, &tmp);
-      negate_using_mask_s128(bm, t);
-    }
+    divrem_s128_s128_s128_s128(&q, &u1, &u1, b);
+    mul_s128_s128_s128(&tmp, &q, a);
+    add_s128_s128(&u2, &tmp);
+
+    // Correct sign of s and t
+    negate_using_mask_s128(am, &u1);
+    negate_using_mask_s128(bm, &u2);
+    set_s128_s128(s, &u1);
+    set_s128_s128(t, &u2);
   }
   *d = u3;
 }
 
+int32_t xgcd_left_binary_l2r_s32(int32_t* s,
+				 const int32_t a, const int32_t b) {
+  assert(s);
+
+  const int32_t am = a >> 31;
+  const int32_t bm = b >> 31;
+
+  int32_t u1 = 1;
+  int32_t u3 = negate_using_mask_s32(am, a);
+  int32_t v1 = 0;
+  int32_t v3 = negate_using_mask_s32(bm, b);
+
+  // Swap u with v if u3 < v3.
+  cond_swap2_s32(&u1, &u3, &v1, &v3);
+  while (v3 != 0) {
+    int k = msb_u32(u3) - msb_u32(v3);
+
+    // Subtract 2^k times v from u, and make sure u3 >= 0.
+    uint32_t m;
+    u3 = sub_with_mask_s32(&m, u3, v3 << k);
+    u1 -= v1 << k;
+    u1 = negate_using_mask_s32(m, u1);
+    u3 = negate_using_mask_s32(m, u3);
+
+    // Swap u with v if u3 < v3.
+    cond_swap2_s32(&u1, &u3, &v1, &v3);
+  }
+
+  if (u3 == negate_using_mask_s32(am, a)) {
+    // a divides b.
+    *s = am | 1;  // either 1 or -1
+  } else if (u3 == negate_using_mask_s32(bm, b)) {
+    // b divides a.
+    *s = 0;
+  } else {
+    // Reduce u1 (mod b) and correct for sign.
+    *s = negate_using_mask_s32(am, u1 % b);
+  }
+  return u3;
+}
+
 int64_t xgcd_left_binary_l2r_s64(int64_t* s,
 				 const int64_t a, const int64_t b) {
-  // Invariants:
-  // u1*a + u2*b = u3
-  // v1*a + v2*b = v3
-  // u3 >= v3
+  assert(s);
+
+  const int64_t am = a >> 63;
+  const int64_t bm = b >> 63;
+
   int64_t u1 = 1;
-  int64_t u3 = abs_s64(a);
+  int64_t u3 = negate_using_mask_s64(am, a);
   int64_t v1 = 0;
-  int64_t v3 = abs_s64(b);
+  int64_t v3 = negate_using_mask_s64(bm, b);
 
   // Swap u with v if u3 < v3.
   cond_swap2_s64(&u1, &u3, &v1, &v3);
@@ -339,8 +378,6 @@ int64_t xgcd_left_binary_l2r_s64(int64_t* s,
     cond_swap2_s64(&u1, &u3, &v1, &v3);
   }
 
-  const int64_t am = a >> 63;
-  const int64_t bm = b >> 63;
   if (u3 == negate_using_mask_s64(am, a)) {
     // a divides b.
     *s = am | 1;  // either 1 or -1
@@ -348,14 +385,69 @@ int64_t xgcd_left_binary_l2r_s64(int64_t* s,
     // b divides a.
     *s = 0;
   } else {
-    // Reduce u1 (mod b/u3) and u2 (mod a/u3)
-    // and correct for sign.
-    // TODO: Check if (u1 % b) still gives enough precision.
-    *s = negate_using_mask_s64(am, u1 % (b / u3));
+    // Reduce u1 (mod b/u3) and correct for sign.
+    *s = negate_using_mask_s64(am, u1 % b);
   }
   return u3;
 }
 
+void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
+			       const s128_t* a, const s128_t* b) {
+  assert(d); assert(s); assert(t); assert(a); assert(b);
+  s128_t u1;
+  s128_t v1;
+  s128_t u3;
+  s128_t v3;
+  set_s128_s64(&u1, 1);
+  abs_s128_s128(&u3, a);
+  set_s128_s64(&v1, 0);
+  abs_s128_s128(&v3, b);
+  
+  // Swap u with v if u3 < v3.
+  cond_swap2_s128(&u1, &u3, &v1, &v3);
+  while (!is_zero_s128(&v3)) {
+    int k = msb_u128((u128_t*)&u3) - msb_u128((u128_t*)&v3);
+
+    // Subtrack 2^k times v from u, and make sure u3 >= 0.
+    s128_t t1;
+    s128_t t3;
+    uint64_t m;
+    shl_s128_s128_int(&t1, &v1, k);
+    shl_s128_s128_int(&t3, &v3, k);
+    sub_s128_s128(&u1, &t1);
+    sub_with_mask_s128(&m, &u3, &u3, &t3);
+    // Negate u with mask: -x = (x^m)-m
+    u1.v0 ^= m;
+    u1.v1 ^= m;
+    u3.v0 ^= m;
+    u3.v1 ^= m;
+    sub_s128_s64(&u1, m);
+    sub_s128_s64(&u3, m);
+
+    // Swap u with v if u3 < v3.
+    cond_swap2_s128(&u1, &u3, &v1, &v3);
+  }
+  
+  const uint64_t am = mask_s128(a);
+  const uint64_t bm = mask_s128(b);
+  s128_t at = *a;
+  s128_t bt = *a;
+  negate_using_mask_s128(am, &at);
+  negate_using_mask_s128(bm, &bt);
+  if (is_equal_s128_s128(&u3, &at)) {
+    set_s128_s64(s, am | 1);  // either 1 or -1
+  } else if (is_equal_s128_s128(&u3, &bt)) {
+    setzero_s128(s);
+  } else {
+    // Reduce u1 (mod b) and correct for sign.
+    mod_s128_s128_s128(s, &u1, b);
+    negate_using_mask_s128(am, s);
+  }
+  *d = u3;
+}
+
+// TODO: We should be able to use the regular l2r gcd since
+// it is unimodular.
 void xgcd_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
 				 int32_t* pC1, int32_t* pC0,
 				 const int32_t bound) {

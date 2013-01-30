@@ -62,6 +62,8 @@ int main(int argc, char** argv) {
   verify(-35, -21);
 
   printf("All tests passed.\n");
+  printf("We also need more comprehensive tests.\n");
+  printf("See timing/timegcd since it does verification of results while timing.\n");
 
   return 0;
 }

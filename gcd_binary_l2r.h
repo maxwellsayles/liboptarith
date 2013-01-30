@@ -50,13 +50,17 @@ void xgcd_binary_l2r_s128(s128_t* d,
 			  s128_t* s, s128_t* t,
 			  const s128_t* a, const s128_t* b);
 
-// TODO: Left only s32
+// Left only s32
+int32_t xgcd_left_binary_l2r_s32(int32_t* s,
+				 const int32_t a, const int32_t b);
 
 // Left only s64
 int64_t xgcd_left_binary_l2r_s64(int64_t* s,
 				 const int64_t a, const int64_t b);
 
-// TODO: Left only s32
+// Left only s128
+void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
+			       const s128_t* a, const s128_t* b);
 
 // Partial s32
 void xgcd_partial_binary_l2r_s32(int32_t* R1, int32_t* R0,
