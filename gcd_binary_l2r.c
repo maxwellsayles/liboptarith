@@ -179,6 +179,7 @@ int32_t xgcd_binary_l2r_s32(int32_t* s, int32_t* t,
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
 /// s and t may be NULL.
+// TODO: s and t cannot be NULL
 int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
 			    const int64_t a, const int64_t b) {
   // Invariants:
@@ -223,6 +224,7 @@ int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
   } else {
     // Reduce u1 (mod b/u3) and u2 (mod a/u3)
     // and correct for sign.
+    // TODO: use int64_t q = u1 / b; s = u1 - q*b; t = u2 + q*a;
     if (s) *s = negate_using_mask_s64(am, u1 % (b / u3));
     if (t) *t = negate_using_mask_s64(bm, u2 % (a / u3));
   }
@@ -308,6 +310,50 @@ void xgcd_binary_l2r_s128(s128_t* d,
     }
   }
   *d = u3;
+}
+
+int64_t xgcd_left_binary_l2r_s64(int64_t* s,
+				 const int64_t a, const int64_t b) {
+  // Invariants:
+  // u1*a + u2*b = u3
+  // v1*a + v2*b = v3
+  // u3 >= v3
+  int64_t u1 = 1;
+  int64_t u3 = abs_s64(a);
+  int64_t v1 = 0;
+  int64_t v3 = abs_s64(b);
+
+  // Swap u with v if u3 < v3.
+  cond_swap2_s64(&u1, &u3, &v1, &v3);
+  while (v3 != 0) {
+    int k = msb_u64(u3) - msb_u64(v3);
+
+    // Subtract 2^k times v from u, and make sure u3 >= 0.
+    uint64_t m;
+    u3 = sub_with_mask_s64(&m, u3, v3 << k);
+    u1 -= v1 << k;
+    u1 = negate_using_mask_s64(m, u1);
+    u3 = negate_using_mask_s64(m, u3);
+
+    // Swap u with v if u3 < v3.
+    cond_swap2_s64(&u1, &u3, &v1, &v3);
+  }
+
+  const int64_t am = a >> 63;
+  const int64_t bm = b >> 63;
+  if (u3 == negate_using_mask_s64(am, a)) {
+    // a divides b.
+    *s = am | 1;  // either 1 or -1
+  } else if (u3 == negate_using_mask_s64(bm, b)) {
+    // b divides a.
+    *s = 0;
+  } else {
+    // Reduce u1 (mod b/u3) and u2 (mod a/u3)
+    // and correct for sign.
+    // TODO: Check if (u1 % b) still gives enough precision.
+    *s = negate_using_mask_s64(am, u1 % (b / u3));
+  }
+  return u3;
 }
 
 void xgcd_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,

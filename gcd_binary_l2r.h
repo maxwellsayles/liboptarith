@@ -37,20 +37,38 @@ uint32_t gcd_binary_l2r_u32(const uint32_t a, const uint32_t b);
 uint64_t gcd_binary_l2r_u64(const uint64_t a, const uint64_t b);
 void gcd_binary_l2r_u128(u128_t* d, const u128_t* a, const u128_t* b);
 
+// xgcd s32
 int32_t xgcd_binary_l2r_s32(int32_t* s, int32_t* t,
 			    const int32_t a, const int32_t b);
+
+// xgcd s64
 int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
 			    const int64_t a, const int64_t b);
+
+// xgcd s128
 void xgcd_binary_l2r_s128(s128_t* d,
 			  s128_t* s, s128_t* t,
 			  const s128_t* a, const s128_t* b);
 
+// TODO: Left only s32
+
+// Left only s64
+int64_t xgcd_left_binary_l2r_s64(int64_t* s,
+				 const int64_t a, const int64_t b);
+
+// TODO: Left only s32
+
+// Partial s32
 void xgcd_partial_binary_l2r_s32(int32_t* R1, int32_t* R0,
 				 int32_t* C1, int32_t* C0,
 				 const int32_t bound);
+
+// Partial s64
 void xgcd_partial_binary_l2r_s64(int64_t* R1, int64_t* R0,
 				 int64_t* C1, int64_t* C0,
 				 const int64_t bound);
+
+// Partial s128
 void xgcd_shortpartial_binary_l2r_s128(s128_t* R1, s128_t* R0,
 				       int64_t* C1, int64_t* C0,
 				       const int64_t bound);
