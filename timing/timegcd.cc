@@ -11,8 +11,8 @@
 #include <sys/time.h>
 
 extern "C" {
-#include "liboptarith/gcdext_binary_l2r.h"
-#include "liboptarith/gcdext_lehmer.h"
+#include "liboptarith/gcd_binary_l2r.h"
+#include "liboptarith/gcd_lehmer.h"
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"
 #include "liboptarith/math_mpz.h"

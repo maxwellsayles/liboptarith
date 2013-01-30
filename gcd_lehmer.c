@@ -19,7 +19,8 @@ extern ABCD_t lehmer_table[256*256];
 /**
  * Computes g = u*m + v*n
  */
-int64_t gcdext_lehmer_s64(int64_t* u, int64_t* v, const int64_t in_m, const int64_t in_n) {
+int64_t xgcd_lehmer_s64(int64_t* u, int64_t* v,
+			const int64_t in_m, const int64_t in_n) {
   int64_t m, n;
   int64_t sm;
   s128_t m2, n2;
@@ -110,7 +111,7 @@ int64_t gcdext_lehmer_s64(int64_t* u, int64_t* v, const int64_t in_m, const int6
   // compute u, v
   *u = a*sm;
 	
-  //*v = (m-(*u)*in_m)/in_n;
+  // *v = (m-(*u)*in_m)/in_n;
   mul_s128_s64_s64(&t128, *u, in_m);
   sub_s128_s64(&t128, m);
   div_s128_s128_s64(&t128, &t128, in_n);

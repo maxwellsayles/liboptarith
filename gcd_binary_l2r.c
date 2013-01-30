@@ -1,4 +1,4 @@
-#include "liboptarith/gcdext_binary_l2r.h"
+#include "liboptarith/gcd_binary_l2r.h"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -127,8 +127,8 @@ void gcd_binary_l2r_u128(u128_t* d, const u128_t* a, const u128_t* b) {
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
 /// s and t may be NULL.
-int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
-			      const int32_t a, const int32_t b) {
+int32_t xgcd_binary_l2r_s32(int32_t* s, int32_t* t,
+			    const int32_t a, const int32_t b) {
   // Invariants:
   // u1*a + u2*b = u3
   // v1*a + v2*b = v3
@@ -179,8 +179,8 @@ int32_t gcdext_binary_l2r_s32(int32_t* s, int32_t* t,
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
 /// s and t may be NULL.
-int64_t gcdext_binary_l2r_s64(int64_t* s, int64_t* t,
-			      const int64_t a, const int64_t b) {
+int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
+			    const int64_t a, const int64_t b) {
   // Invariants:
   // u1*a + u2*b = u3
   // v1*a + v2*b = v3
@@ -231,9 +231,9 @@ int64_t gcdext_binary_l2r_s64(int64_t* s, int64_t* t,
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
 /// s and t may be NULL.
-void gcdext_binary_l2r_s128(s128_t* d,
-			    s128_t* s, s128_t* t,
-			    const s128_t* a, const s128_t* b) {
+void xgcd_binary_l2r_s128(s128_t* d,
+			  s128_t* s, s128_t* t,
+			  const s128_t* a, const s128_t* b) {
   // Invariants:
   // u1*a + u2*b = u3
   // v1*a + v2*b = v3
@@ -310,9 +310,9 @@ void gcdext_binary_l2r_s128(s128_t* d,
   *d = u3;
 }
 
-void gcdext_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
-				   int32_t* pC1, int32_t* pC0,
-				   const int32_t bound) {
+void xgcd_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
+				 int32_t* pC1, int32_t* pC0,
+				 const int32_t bound) {
   int32_t R1 = *pR1;
   int32_t R0 = *pR0;
   int32_t C1 = 0;
@@ -335,9 +335,9 @@ void gcdext_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
   *pC0 = C0;
 }
 
-void gcdext_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
-				   int64_t* pC1, int64_t* pC0,
-				   const int64_t bound) {
+void xgcd_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
+				 int64_t* pC1, int64_t* pC0,
+				 const int64_t bound) {
   int64_t R1 = *pR1;
   int64_t R0 = *pR0;
   int64_t C1 = 0;
@@ -375,9 +375,9 @@ inline void cond_swap2_mixed(s128_t* R1, int64_t* C1,
   *C0 += d1;
 }
 
-void gcdext_shortpartial_binary_l2r_s128(s128_t* pR1, s128_t* pR0,
-					 int64_t* pC1, int64_t* pC0,
-					 const int64_t bound) {
+void xgcd_shortpartial_binary_l2r_s128(s128_t* pR1, s128_t* pR0,
+				       int64_t* pC1, int64_t* pC0,
+				       const int64_t bound) {
   s128_t R1 = *pR1;
   s128_t R0 = *pR0;
   int64_t C1 = 0;

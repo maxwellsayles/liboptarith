@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "liboptarith/gcdext_binary_l2r.h"
+#include "liboptarith/gcd_binary_l2r.h"
 #include "liboptarith/math64.h"
 
 /// Compute the extended gcd of a and b and
@@ -10,7 +10,7 @@
 void verify(const int32_t a, const int32_t b) {
   int32_t s;
   int32_t t;
-  int32_t g = gcdext_binary_l2r_s32(&s, &t, a, b);
+  int32_t g = xgcd_binary_l2r_s32(&s, &t, a, b);
   if (muladdmul_s64_4s32(s, a, t, b) != g) {
     printf("Verification error:\n");
     printf("a = %"PRId32" b = %"PRId32"\n", a, b);
