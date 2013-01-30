@@ -21,7 +21,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE_S32  gcdext_blockbinary4_s32
+#define GCD_ROUTINE_S32  gcdext_blockbinary5_s32
 #define GCD_ROUTINE_S64  gcdext_divrem_s64
 #define GCD_ROUTINE_S128 gcdext_divrem_s128
 #define GCD_ROUTINE_STR "binary"
@@ -85,7 +85,7 @@ inline uint64_t current_nanos(void) {
 
 // Perform some gcd computations so that the CPU scales up.
 int64_t full_cpu_load(const uint64_t secs) {
-  const uint64_t nanos = secs * 1000000ULL;
+  const uint64_t nanos = secs * 1000000000ULL;
   int64_t sum = 0;
   const uint64_t start = current_nanos();
   while (current_nanos() - start < nanos) {
