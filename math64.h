@@ -485,22 +485,9 @@ static inline int is_square_s64(const int64_t x) {
   return is_square_u64(abs_s64(x));
 }
 
-int64_t gcd_binary_s64(int64_t u, int64_t v);
 int64_t xgcd_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
-int64_t xgcd_binary_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
-int64_t xgcd_blockbinary_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
 
 int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n);
-static inline int64_t xgcd_left_binary_s64(int64_t* u,
-					   int64_t m, int64_t n) {
-  int64_t v;
-  return xgcd_binary_s64(u, &v, m, n);
-}
-static inline int64_t xgcd_left_blockbinary_s64(int64_t* u,
-						int64_t m, int64_t n) {
-  int64_t v;
-  return xgcd_blockbinary_s64(u, &v, m, n);
-}
 
 void xgcd_partial_divrem_s64(uint64_t* r1, uint64_t* r0,
 			     int64_t* C1, int64_t* C0, uint64_t bound);

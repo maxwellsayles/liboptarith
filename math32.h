@@ -389,54 +389,12 @@ static inline int32_t mulmod_s32(const int32_t x,
 /// Compute the largest s such that s^2 <= x.
 uint32_t sqrt_u32(const uint32_t x);
 
-/// Compute the GCD of u and v using a binary GCD method.
-int32_t gcd_binary_s32(int32_t u, int32_t v);
-
 /// Compute the extended GCD using a div/rem method.
 int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
-
-/// Compute the extended GCD using a binary method.
-int32_t xgcd_binary_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
-
-/// Compute the extended GCD using a 2-bit windowed method.
-int32_t xgcd_blockbinary2_s32(int32_t* u, int32_t* v,
-			      int32_t m, int32_t n);
-
-/// Compute the extended GCD using a 3-bit windowed method.
-int32_t xgcd_blockbinary3_s32(int32_t* u, int32_t* v,
-			      int32_t m, int32_t n);
-
-/// Compute the extended GCD using a 4-bit windowed method.
-int32_t xgcd_blockbinary4_s32(int32_t* u, int32_t* v,
-			      int32_t m, int32_t n);
-
-/// Compute the extended GCD using a 5-bit windowed method.
-int32_t xgcd_blockbinary5_s32(int32_t* u, int32_t* v,
-			      int32_t m, int32_t n);
-
-/// Compute the extended GCD using the best empirically
-static inline int32_t xgcd_blockbinary_s32(int32_t* u, int32_t* v,
-					   int32_t m, int32_t n) {
-  return xgcd_blockbinary3_s32(u, v, m, n);
-}
 
 /// Compute the extended GCD using a divrem method
 /// only computing the left argument.
 int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n);
-
-/// The left version of the extended gcd using a binary method.
-static inline int32_t xgcd_left_binary_s32(int32_t* u,
-					   int32_t m, int32_t n) {
-  int32_t v;
-  return xgcd_binary_s32(u, &v, m, n);
-}
-
-/// The left version of the extended gcd using a 4-bit windowed method.
-static inline int32_t xgcd_left_blockbinary_s32(int32_t* u,
-						int32_t m, int32_t n) {
-  int32_t v;
-  return xgcd_blockbinary_s32(u, &v, m, n);
-}
 
 /**
  * Partial Euclidean algorithm.
