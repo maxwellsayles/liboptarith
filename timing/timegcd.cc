@@ -13,6 +13,7 @@
 extern "C" {
 #include "liboptarith/gcd_binary_l2r.h"
 #include "liboptarith/gcd_lehmer.h"
+#include "liboptarith/gcd_shallit.h"
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"
 #include "liboptarith/math_mpz.h"
@@ -21,11 +22,12 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE_S32  xgcd_divrem_s32
-#define GCD_ROUTINE_S64  xgcd_divrem_s64
+#define GCD_ROUTINE_S32  xgcd_binary_l2r_s32
+#define GCD_ROUTINE_S64  xgcd_binary_l2r_s64
 #define GCD_ROUTINE_S128 xgcd_divrem_s128
-#define GCD_ROUTINE_STR "divrem"
-#define GCD_MAX_BITS_TO_TEST 120
+#define GCD_ROUTINE_STR "shallit"
+#define GCD_MIN_BITS_TO_TEST 1
+#define GCD_MAX_BITS_TO_TEST 63
 
 // return an array of n elements of b bits
 // caller must delete[] returned array
@@ -322,7 +324,7 @@ int main(int argc, char** argv) {
   }
 
   // Iterate
-  int i = 1;
+  int i = GCD_MIN_BITS_TO_TEST;
   while (i < GCD_MAX_BITS_TO_TEST) {
     uint64_t res = time_gcd_bits(i, pairs);
     cout << "bits=" << i << ' ' << res << endl;
