@@ -31,10 +31,22 @@ int32_t xgcd_blockstein5_s32(int32_t* u, int32_t* v,
 			     int32_t m, int32_t n);
 
 /// 64-bit Stein.
-int64_t gcd_binary_s64(int64_t u, int64_t v);
+int64_t gcd_stein_s64(int64_t u, int64_t v);
 
 /// 64-bit extended Stein.
-int64_t xgcd_binary_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
+int64_t xgcd_stein_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
+
+/// 64-bit 3-bit windowed extended Stein.
+int64_t xgcd_blockstein2_s64(int64_t* out_s,
+			     int64_t* out_t,
+			     int64_t in_u,
+			     int64_t in_v);
+
+/// 64-bit 3-bit windowed extended Stein.
+int64_t xgcd_blockstein3_s64(int64_t* out_s,
+			     int64_t* out_t,
+			     int64_t in_u,
+			     int64_t in_v);
 
 /// 64-bit 4-bit windowed extended Stein.
 int64_t xgcd_blockstein4_s64(int64_t* out_s,
@@ -42,6 +54,11 @@ int64_t xgcd_blockstein4_s64(int64_t* out_s,
 			     int64_t in_u,
 			     int64_t in_v);
 
+/// 64-bit 5-bit windowed extended Stein.
+int64_t xgcd_blockstein5_s64(int64_t* out_s,
+			     int64_t* out_t,
+			     int64_t in_u,
+			     int64_t in_v);
 
 #endif  // GCD_STEIN__INCLUDED
 
