@@ -1,5 +1,6 @@
 #include "liboptarith/math64.h"
 
+#include "liboptarith/math32.h"
 #include "liboptarith/s128_t.h"
 
 /**
@@ -36,139 +37,58 @@ uint64_t sqrt_u64(const uint64_t x) {
   return root;
 }
 
-/**
- * Extended GCD
- * Input:  u, v
- * Output: g, s, t such that g = s*u + t*v
- */
-int64_t xgcd_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n) {
-  int64_t a, b;
-  int sm, sn;
-#if !defined(__x86_64)
-  int64_t q, t;
-#endif
-
-  // make sure inputs are positive
-  if (m < 0) {
-    sm = -1;
-    m = -m;
-  } else {
-    sm = 1;
-  }
-  if (n < 0) {
-    sn = -1;
-    n = -n;
-  } else {
-    sn = 1;
-  }
-
-
-  a = 0;
-  b = 1;
-  *u = 1;
-  *v = 0;
-
+/// We run a 64-bit GCD until both args are 32-bit.
+/// Then we run a 32-bit XGCD and combine results.
+int64_t xgcd_divrem_s64(int64_t* out_u, int64_t* out_v,
+			int64_t m, int64_t n) {
+  uint64_t sm = m >> 63;
+  uint64_t sn = n >> 63;
+  m = negate_using_mask_s64(sm, m);
+  n = negate_using_mask_s64(sn, n);
   if (n == 0) {
+    *out_u = 1;
+    *out_v = 0;
     return m;
   }
   if (m == 0) {
-    *u = 0;
-    *v = 1;
+    *out_u = 0;
+    *out_v = 1;
     return n;
   }
 
-#if defined(__x86_64)
-  // 64bit gcd
-  asm("0:\n\t"
-      "xorq %%rdx, %%rdx\n\t"
-      "movq %2, %%rax\n\t"
-      "divq %3\n\t"           // rdx = m%n, rax = m/n
-      "movq %3, %2\n\t"       // m = n
-      "movq %%rdx, %3\n\t"    // n = rdx
+  int64_t u = 1;
+  int64_t v = 0;
+  int64_t a = 0;
+  int64_t b = 1;
 
-      "movq %%rax, %%rdx\n\t"
-      "imulq %4, %%rax\n\t" // rax = a*q
-      "imulq %5, %%rdx\n\t" // rdx = b*q
-      "subq %%rax, %0\n\t" // u -= a*q
-      "subq %%rdx, %1\n\t" // v -= b*q
-
-      // swap a with u
-      // swap b with v
-      "movq %0, %%rax\n\t"
-      "movq %1, %%rdx\n\t"
-      "movq %4, %0\n\t"
-      "movq %5, %1\n\t"
-      "movq %%rax, %4\n\t"
-      "movq %%rdx, %5\n\t"
-
-      "testq %3, %3\n\t"
-      "jz 1f\n\t"
-      "cmpq %6, %2\n\t"   // 64bit constants not permitted in compare
-      "jg 0b\n\t"         // unsigned (ja) did not work
-      "cmpq %6, %3\n\t"
-      "jg 0b\n\t"
-    
-      "1:\n\t"
-      : "=r"(*u), "=r"(*v), "=r"(m), "=r"(n), "=r"(a), "=r"(b)
-      : "0"(*u), "1"(*v), "2"(m), "3"(n), "4"(a), "5"(b), "r"((int64_t)0x7FFFFFFFLL)
-      : "cc", "rax", "rdx");
-  // either n == 0, or both m and n are 32bit
-
-  if (n != 0) {
-    uint32_t m32 = m;
-    uint32_t n32 = n;
-    // 32bit gcd
-    asm("0:\n\t"
-	"xorl %%edx, %%edx\n\t"
-	"movl %2, %%eax\n\t"
-	"divl %3\n\t"           // rdx = m%n, rax = m/n
-	"movl %3, %2\n\t"       // m = n
-	"movl %%edx, %3\n\t"    // n = rdx
-
-	"movq %%rax, %%rdx\n\t"
-	"imulq %4, %%rax\n\t" // rax = a*q
-	"imulq %5, %%rdx\n\t" // rdx = b*q
-	"subq %%rax, %0\n\t" // u -= a*q
-	"subq %%rdx, %1\n\t" // v -= b*q
-
-	// swap a with u
-	// swap b with v
-	"movq %0, %%rax\n\t"
-	"movq %1, %%rdx\n\t"
-	"movq %4, %0\n\t"
-	"movq %5, %1\n\t"
-	"movq %%rax, %4\n\t"
-	"movq %%rdx, %5\n\t"
-
-	"testl %3, %3\n\t"
-	"jnz 0b\n\t"
-	: "=r"(*u), "=r"(*v), "=r"(m32), "=r"(n32), "=r"(a), "=r"(b)
-	: "0"(*u), "1"(*v), "2"(m32), "3"(n32), "4"(a), "5"(b)
-	: "cc", "rax", "rdx");
-    m = m32;
-    n = n32;
-  }
-#else
-  while (n != 0) {
+  // 64-bit GCD.
+  // Invariant: m >= n.
+  cond_swap3_s64(&u, &v, &m, &a, &b, &n);
+  while (n != 0 && m > 0x7FFFFFFFLL) {
+    int64_t q, t;
     q = m / n;
 
     t = n;
-    n = m - q*n;
+    n = m % n;
     m = t;
 
     t = a;
-    a = (*u) - q*a;
-    *u = t;
+    a = u - q*a;
+    u = t;
 
     t = b;
-    b = (*v) - q*b;
-    *v = t;
+    b = v - q*b;
+    v = t;
   }
-#endif
 
-  (*u) *= sm;
-  (*v) *= sn;
-  return m;
+  // Call 32-bit XGCD.
+  int32_t s, t;
+  int32_t g = xgcd_divrem_s32(&s, &t, m, n);
+
+  // Recombing 32-bit gcd with 64-bit gcd.
+  *out_u = negate_using_mask_s64(sm, s*u+t*a);
+  *out_v = negate_using_mask_s64(sn, s*v+t*b);
+  return g;
 }
 
 int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n) {
