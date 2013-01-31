@@ -1,7 +1,9 @@
 /**
- * Lehmer's GCD for 64bit signed integers.
+ * Lehmer's GCD for 32bit and 64bit signed integers.
  * This isn't very fast.
  */
+#include "liboptarith/gcd_lehmer.h"
+
 #include <stdint.h>
 
 #include "liboptarith/math64.h"
@@ -16,9 +18,20 @@ typedef struct {
 
 extern ABCD_t lehmer_table[256*256];
 
-/**
- * Computes g = u*m + v*n
- */
+int32_t xgcd_lehmer_s32(int32_t* u, int32_t* v,
+			const int32_t in_m, const int32_t in_n) {
+  // NOTE: This just runs the s64 version.
+  // I couldn't get the 32-bit version to work as there was
+  // an overflow somewhere (at 16-bits), but this xgcd is clearly
+  // slower than other xgcds, so I didn't spend much time on it.
+  int64_t u64;
+  int64_t v64;
+  int64_t g = xgcd_lehmer_s64(&u64, &v64, in_m, in_n);
+  *u = u64;
+  *v = v64;
+  return g;
+}
+
 int64_t xgcd_lehmer_s64(int64_t* u, int64_t* v,
 			const int64_t in_m, const int64_t in_n) {
   int64_t m, n;

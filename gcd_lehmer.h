@@ -8,6 +8,9 @@
 
 #include <stdint.h>
 
+int32_t xgcd_lehmer_s32(int32_t* u, int32_t* v,
+			const int32_t in_m, const int32_t in_n);
+
 int64_t xgcd_lehmer_s64(int64_t* u, int64_t* v,
 			const int64_t in_m, const int64_t in_n);
 
