@@ -389,7 +389,7 @@ static inline int32_t mulmod_s32(const int32_t x,
 /// Compute the largest s such that s^2 <= x.
 uint32_t sqrt_u32(const uint32_t x);
 
-/// Compute the extended GCD using a div/rem method.
+/// Compute the extended GCD using a divrem method.
 int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
 
 /// Compute the extended GCD using a divrem method
@@ -408,14 +408,14 @@ int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n);
  *  - C_i sequence from "Solving the Pell Equation" defined as
  *     C_{-1}=0, C_{1}=-1  C_i=C_{i-2}-q_i C_{i-1}
  */
-static inline void xgcd_partial_divrem_s32(uint32_t* r1, uint32_t* r0,
+static inline void xgcd_partial_divrem_s32(int32_t* r1, int32_t* r0,
 					   int32_t* C1, int32_t* C0,
-					   uint32_t bound) {
+					   int32_t bound) {
   // bound should not be zero
   if (bound == 0) {
     bound = 1;
   }
-#if defined(__x86_64) || (defined(__i386) && !defined(__APPLE__))
+#if defined(__x86_64)
   asm("movl $0, %3\n\t" // C1 = 0;
       "cmpl %6, %0\n\t"
       "movl $-1, %2\n\t" // C0 = -1;

@@ -36,30 +36,18 @@ uint32_t sqrt_u32(const uint32_t x) {
 }
 
 /**
- * Extended GCD
- * Input:  u, v
- * Output: g, s, t  such that g = s*u + t*v
+ * Extended Euclidean Algorithm.
  */
-int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
-  int32_t a, b;
-  int sm, sn;
-  
-  // make sure inputs are positive
-  if (m < 0) {
-    sm = -1;
-    m = -m;
-  } else {
-    sm = 1;
-  }
-  if (n < 0) {
-    sn = -1;
-    n = -n;
-  } else {
-    sn = 1;
-  }
+int32_t xgcd_divrem_s32(int32_t* u, int32_t* v,
+			int32_t m, int32_t n) {
+  // Make sure the inputs are positive.
+  uint32_t sm = m >> 31;
+  uint32_t sn = n >> 31;
+  m = negate_using_mask_s32(sm, m);
+  n = negate_using_mask_s32(sn, n);
     
-  a = 0;
-  b = 1;
+  int32_t a = 0;
+  int32_t b = 1;
   *u = 1;
   *v = 0;
   
@@ -71,7 +59,7 @@ int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
     *v = 1;
     return n;
   }
-  
+
 #if defined(__x86_64)
   asm("0:\n\t"
       "movl %0, %%eax\n\t"
@@ -88,7 +76,7 @@ int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
       "subl %%eax, %2\n\t"
       "subl %%edx, %3\n\t"
       
-      "testl %1, %1\n\t" // for the branch at the bottom
+      "testl %1, %1\n\t"  // for the branch at the bottom
       
       "xchgl %2, %4\n\t"
       "xchgl %3, %5\n\t"
@@ -117,8 +105,8 @@ int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
   }
 #endif
 
-  (*u) *= sm;
-  (*v) *= sn;
+  *u = negate_using_mask_s32(sm, *u);
+  *v = negate_using_mask_s32(sn, *v);
   return m;
 }
 
@@ -128,21 +116,12 @@ int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n) {
  * Output: g, s, t  such that g = s*u + t*v
  */
 int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n) {
-  int32_t a;
-  int sm;
-  
-  // make inputs positive
-  if (m < 0) {
-    sm = -1;
-    m = -m;
-  } else {
-    sm = 1;
-  }
-  if (n < 0) {
-    n = -n;
-  }
-  
-  a = 0;
+  // Make inputs positive.
+  uint32_t sm = m >> 31;
+  m = negate_using_mask_s32(sm, m);
+  n = abs_s32(n);
+
+  int32_t a = 0;
   *u = 1;
   
   if (n == 0) {
@@ -182,8 +161,8 @@ int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n) {
     *u = t;
   }
 #endif
-  
-  (*u) *= sm;
+
+  *u = negate_using_mask_s32(sm, *u);
   return m;
 }
 
