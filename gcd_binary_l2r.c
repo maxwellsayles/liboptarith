@@ -8,6 +8,14 @@
 #include "liboptarith/math64.h"
 #include "liboptarith/s128_t.h"
 
+// The xgcd computes g = s*a + t*b.
+// s can be reduced (mod b) and t can be reduced (mod a)
+// If REDUCE_OUTPUT == 1, then we perform this reduction,
+// otherwise, we do nothing.
+// NOTE: libqform appears to work correctly without the reduction
+//       so we don't perform the reduction to make the XGCD faster.
+#define REDUCE_OUTPUT 0
+
 // trickery to swap two values
 #define swap(a,b) { (a)^=(b); (b)^=(a); (a)^=(b); }
 
@@ -172,10 +180,15 @@ int32_t xgcd_binary_l2r_s32(int32_t* s, int32_t* t,
     *s = 0;
     *t = bm | 1;  // either 1 or -1
   } else {
+#if (REDUCE_OUTPUT == 1)
     // Reduce u1 (mod b) and u2 (mod a) and correct for sign.
     int32_t q = u1 / b;
     *s = negate_using_mask_s32(am, u1 - q * b);
     *t = negate_using_mask_s32(bm, u2 + q * b);
+#else
+    *s = negate_using_mask_s32(am, u1);
+    *t = negate_using_mask_s32(bm, u2);
+#endif
   }
   return u3;
 }
@@ -224,10 +237,15 @@ int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
     *s = 0;
     *t = bm | 1;  // either 1 or -1
   } else {
+#if (REDUCE_OUTPUT == 1)
     // Reduce u1 (mod b) and u2 (mod a) and correct for sign.
     int64_t q = u1 / b;
     *s = negate_using_mask_s64(am, u1 - q*b);
     *t = negate_using_mask_s64(bm, u2 + q*a);
+#else
+    *s = negate_using_mask_s64(am, u1);
+    *t = negate_using_mask_s64(bm, u2);
+#endif
   }
   return u3;
 }
