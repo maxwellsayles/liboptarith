@@ -20,16 +20,95 @@ extern ABCD_t lehmer_table[256*256];
 
 int32_t xgcd_lehmer_s32(int32_t* u, int32_t* v,
 			const int32_t in_m, const int32_t in_n) {
-  // NOTE: This just runs the s64 version.
-  // I couldn't get the 32-bit version to work as there was
-  // an overflow somewhere (at 16-bits), but this xgcd is clearly
-  // slower than other xgcds, so I didn't spend much time on it.
-  int64_t u64;
-  int64_t v64;
-  int64_t g = xgcd_lehmer_s64(&u64, &v64, in_m, in_n);
-  *u = u64;
-  *v = v64;
-  return g;
+  int32_t m, n;
+  int32_t sm;
+  int64_t m2, n2;
+  int64_t A, B, C, D;
+  int32_t a, c;
+  int64_t a2, c2;
+  int32_t q, t;
+  uint8_t x, y;
+  int shift;
+  int shift2;
+  ABCD_t* p;
+	
+  m = in_m;
+  n = in_n;
+
+  // make sure inputs are positive
+  if (m < 0) {
+    sm = -1;
+    m = -m;
+  } else {
+    sm = 1;
+  }
+  if (n < 0) {
+    n = -n;
+  }
+	
+  // make sure inputs are non-zero
+  if (n == 0) {
+    *u = 1;
+    *v = 0;
+    return m;
+  }
+  if (m == 0) {
+    *u = 0;
+    *v = 1;
+    return n;
+  }
+	
+  a = 1;
+  c = 0;
+
+  // invariants: 
+  // a*in_m + b*in_n = m
+  // c*in_m + d*in_n = n
+  while (n != 0) {
+    shift = msb_u32(m) - 7;
+    shift2 = msb_u32(n) - 7;
+    if (shift2 > shift) 
+      shift = shift2;
+    if (shift < 0) 
+      shift = 0;
+	
+    x = m>>shift;
+    y = n>>shift;
+		
+    p = &lehmer_table[(x<<8)+y];
+    A = p->a;
+    B = p->b;
+    C = p->c;
+    D = p->d;		
+		
+    if (B == 0) {
+      // single step of normal gcd
+      q = m/n;
+
+      t = n;
+      n = m - q*n;
+      m = t;
+
+      t = c;
+      c = a - q*c;
+      a = t;
+    } else {
+      // recombine step
+      a2 = A*a + B*c;
+      c2 = C*a + D*c;
+      m2 = A*m + B*n;
+      n2 = C*m + D*n;
+      a = a2;
+      c = c2;
+      m = m2;
+      n = n2;
+    }
+  }
+
+  // compute u, v
+  *u = a * sm;
+  *v = ((int64_t)m - (int64_t)(*u) * (int64_t)in_m) / (int64_t)in_n;
+  return m;
 }
 
 int64_t xgcd_lehmer_s64(int64_t* u, int64_t* v,

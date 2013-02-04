@@ -14,6 +14,7 @@ extern "C" {
 #include "liboptarith/gcd_binary_l2r.h"
 #include "liboptarith/gcd_lehmer.h"
 #include "liboptarith/gcd_shallit.h"
+#include "liboptarith/gcd_stein.h"
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"
 #include "liboptarith/math_mpz.h"
@@ -22,12 +23,11 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE_S32  xgcd_binary_l2r_s32
-#define GCD_ROUTINE_S64  xgcd_binary_l2r_s64
-#define GCD_ROUTINE_S128 xgcd_divrem_s128
-#define GCD_ROUTINE_STR "shallit"
+#define GCD_ROUTINE xgcd_binary_l2r_s128
+#define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
-#define GCD_MAX_BITS_TO_TEST 63
+#define GCD_MAX_BITS_TO_TEST 128
+#define GCD_SIZE 128
 
 // return an array of n elements of b bits
 // caller must delete[] returned array
@@ -237,8 +237,8 @@ uint64_t time_gcd_set(const uint64_t* rands, const int pairs,
 template<void xgcd(s128_t* out_g,
 		   s128_t* out_s, s128_t* out_t,
 		   const s128_t* in_u, const s128_t* in_v)>
-uint64_t time_gcd_set_s128(const u128_t* rands, const int pairs,
-			   const char* type) {
+uint64_t time_gcd_set(const u128_t* rands, const int pairs,
+		      const char* type) {
   uint64_t start_time, end_time;
   s128_t g, u, v, m, n;
     
@@ -267,19 +267,21 @@ uint64_t time_gcd_set_s128(const u128_t* rands, const int pairs,
 /// Time a GCD operation for a fixed number of bits.
 uint64_t time_gcd_bits(const int bits, const int pairs) {
   uint64_t res = 0;
-  if (bits < 32) {
+#if (GCD_SIZE == 32)
     uint32_t* R = rands_u32(pairs*2, bits);
-    res = time_gcd_set<GCD_ROUTINE_S32>(R, pairs, GCD_ROUTINE_STR);
+    res = time_gcd_set<GCD_ROUTINE>(R, pairs, GCD_ROUTINE_STR);
     delete[] R;
-  } else if (bits < 64) {
+#elif (GCD_SIZE == 64)
     uint64_t* R = rands_u64(pairs*2, bits);
-    res = time_gcd_set<GCD_ROUTINE_S64>(R, pairs, GCD_ROUTINE_STR);
+    res = time_gcd_set<GCD_ROUTINE>(R, pairs, GCD_ROUTINE_STR);
     delete[] R;
-  } else {
+#elif (GCD_SIZE == 128)
     u128_t* R = rands_u128(pairs*2, bits);
-    res = time_gcd_set_s128<GCD_ROUTINE_S128>(R, pairs, GCD_ROUTINE_STR);
+    res = time_gcd_set<GCD_ROUTINE>(R, pairs, GCD_ROUTINE_STR);
     delete[] R;
-  }
+#else
+#error GCD_SIZE must be either 32, 64, or 128.
+#endif
   return res;
 }
 
