@@ -91,7 +91,7 @@ plot "stein1-32.dat" with lines title '1-bit window', \
      "divrem-32.dat" with lines title 'Euclidean'
 set output 'all-64.eps'
 set xrange [32:*]
-plot "stein4-64.dat" with lines title '4-bit window', \
+plot "stein4-64.dat" with lines title '4-bit window' lt 7, \
      "binary_l2r-64.dat" with lines title 'Simplified L2R' lt 3, \
      "divrem-64.dat" with lines title 'Euclidean' lt 4
 set output 'all-128.eps'
