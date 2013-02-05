@@ -13,6 +13,7 @@
 extern "C" {
 #include "liboptarith/gcd_binary_l2r.h"
 #include "liboptarith/gcd_lehmer.h"
+#include "liboptarith/gcd_mpz128.h"
 #include "liboptarith/gcd_shallit.h"
 #include "liboptarith/gcd_stein.h"
 #include "liboptarith/math32.h"
@@ -23,7 +24,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_binary_l2r_s128
+#define GCD_ROUTINE xgcd_mpz_s128
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128

@@ -1,27 +1,101 @@
 #!/usr/bin/gnuplot -persist
 
 set terminal eps
-set output 'blockbinary-32.eps'
-#set title "Timings for windowed binary GCD" 
-set xrange [1:29]
 set xlabel "Bits in GCD arguments" 
 set ylabel "Nanoseconds"
-plot "stein1.dat" with lines title '1 bit window', \
-	"stein2.dat" with lines title '2 bit window', \
-	"stein3.dat" with lines title '3 bit window', \
-	"stein4.dat" with lines title '4 bit window', \
-	"stein5.dat" with lines title '5 bit window'
 
-set terminal eps
-set output 'blockbinary-64.eps'
-#set title "Timings for windowed binary GCD" 
-set xrange [32:61]
-set xlabel "Bits in GCD arguments" 
-set ylabel "Nanoseconds"
-plot "stein1.dat" with lines title '1 bit window', \
-	"stein2.dat" with lines title '2 bit window', \
-	"stein3.dat" with lines title '3 bit window', \
-	"stein4.dat" with lines title '4 bit window', \
-	"stein5.dat" with lines title '5 bit window'
+# Compare divrem sizes
+set output 'divrem-32v64.eps'
+plot "divrem-32.dat" with lines title '32-bit', \
+     "divrem-64.dat" with lines title '64-bit'
+set output 'divrem-64v128.eps'
+plot "divrem-64.dat" with lines title '64-bit', \
+     "divrem-128.dat" with lines title '128-bit'
 
+# Compare lehmer sizes
+set output 'lehmer-32v64.eps'
+plot "lehmer-32.dat" with lines title '32-bit', \
+     "lehmer-64.dat" with lines title '64-bit'
 
+# Compare each stein sizes
+set output 'stein1-32v64.eps'
+plot "stein1-32.dat" with lines title '32-bit', \
+     "stein1-64.dat" with lines title '64-bit'
+set output 'stein2-32v64.eps'
+plot "stein2-32.dat" with lines title '32-bit', \
+     "stein2-64.dat" with lines title '64-bit'
+set output 'stein3-32v64.eps'
+plot "stein3-32.dat" with lines title '32-bit', \
+     "stein3-64.dat" with lines title '64-bit'
+set output 'stein4-32v64.eps'
+plot "stein4-32.dat" with lines title '32-bit', \
+     "stein4-64.dat" with lines title '64-bit'
+set output 'stein5-32v64.eps'
+plot "stein5-32.dat" with lines title '32-bit', \
+     "stein5-64.dat" with lines title '64-bit'
+
+# Compare shallit sizes
+set output 'shallit-32v64.eps'
+plot "shallit-32.dat" with lines title '32-bit', \
+     "shallit-64.dat" with lines title '64-bit'
+
+# Compare binary_l2r sizes
+set output 'binary_l2r-32v64.eps'
+plot "binary_l2r-32.dat" with lines title '32-bit', \
+     "binary_l2r-64.dat" with lines title '64-bit'
+set output 'binary_l2r-64v128.eps'
+plot "binary_l2r-64.dat" with lines title '64-bit', \
+     "binary_l2r-128.dat" with lines title '128-bit'
+
+# Compare steins with each other
+set output 'steins-32.eps'
+plot "stein1-32.dat" with lines title '1-bit window', \
+     "stein2-32.dat" with lines title '2-bit window', \
+     "stein3-32.dat" with lines title '3-bit window', \
+     "stein4-32.dat" with lines title '4-bit window', \
+     "stein5-32.dat" with lines title '5-bit window'
+set output 'steins-64.eps'
+set xrange [30:*]
+plot "stein1-64.dat" with lines title '1-bit window', \
+     "stein2-64.dat" with lines title '2-bit window', \
+     "stein3-64.dat" with lines title '3-bit window', \
+     "stein4-64.dat" with lines title '4-bit window', \
+     "stein5-64.dat" with lines title '5-bit window'
+set xrange [*:*]
+
+# Compare divrem to lehmer
+set output 'divrem-vs-lehmer-32.eps'
+plot "divrem-32.dat" with lines title 'Euclidean', \
+     "lehmer-32.dat" with lines title 'Lehmer'
+set output 'divrem-vs-lehmer-64.eps'
+set xrange [32:*]
+plot "divrem-64.dat" with lines title 'Euclidean', \
+     "lehmer-64.dat" with lines title 'Lehmer'
+set xrange [*:*]
+
+# Compare shallit to binary_l2r
+set output 'shallit-vs-binary_l2r-32.eps'
+plot "shallit-32.dat" with lines title 'Shallit & Sorenson', \
+     "binary_l2r-32.dat" with lines title 'Simplified L2R'
+set output 'shallit-vs-binary_l2r-64.eps'
+set xrange [32:*]
+plot "shallit-64.dat" with lines title 'Shallit & Sorenson', \
+     "binary_l2r-64.dat" with lines title 'Simplified L2R'
+set xrange [*:*]
+
+# Compare all versions
+set output 'all-32.eps'
+plot "stein1-32.dat" with lines title '1-bit window', \
+     "stein3-32.dat" with lines title '3-bit window', \
+     "binary_l2r-32.dat" with lines title 'Simplified L2R', \
+     "divrem-32.dat" with lines title 'Euclidean'
+set output 'all-64.eps'
+set xrange [32:*]
+plot "stein4-64.dat" with lines title '4-bit window', \
+     "divrem-64.dat" with lines title 'Euclidean', \
+     "binary_l2r-64.dat" with lines title 'Simplified L2R'
+set output 'all-128.eps'
+set xrange [64:*]
+plot "divrem-128.dat" with lines title 'Euclidean', \
+     "binary_l2r-128.dat" with lines title 'Simplified L2R'
+set xrange [*:*]
