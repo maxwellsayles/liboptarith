@@ -92,10 +92,16 @@ plot "stein1-32.dat" with lines title '1-bit window', \
 set output 'all-64.eps'
 set xrange [32:*]
 plot "stein4-64.dat" with lines title '4-bit window', \
-     "divrem-64.dat" with lines title 'Euclidean', \
-     "binary_l2r-64.dat" with lines title 'Simplified L2R'
+     "binary_l2r-64.dat" with lines title 'Simplified L2R' lt 3, \
+     "divrem-64.dat" with lines title 'Euclidean' lt 4
 set output 'all-128.eps'
 set xrange [64:*]
-plot "divrem-128.dat" with lines title 'Euclidean', \
-     "binary_l2r-128.dat" with lines title 'Simplified L2R'
+plot "divrem-128.dat" with lines title 'Euclidean' lt 4, \
+     "binary_l2r-128.dat" with lines title 'Simplified L2R' lt 3
 set xrange [*:*]
+
+# Compare with GMP
+set output 'mpzgcd.eps'
+plot "binary_l2r-best.dat" with lines title 'Simplified L2R' lt 3, \
+     "divrem-best.dat" with lines title 'Euclidean' lt 4, \
+     "mpz-128.dat" with lines title 'GMP' lt 5
