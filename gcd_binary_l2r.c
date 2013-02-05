@@ -464,8 +464,9 @@ void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
   *d = u3;
 }
 
-// TODO: We should be able to use the regular l2r gcd since
-// it is unimodular.
+// NOTE: We should be able to use the simplified l2r binary,
+// since it is unimodular, but there is possibly an overflow.
+// This method works in its place.
 void xgcd_partial_binary_l2r_s32(int32_t* pR1, int32_t* pR0,
 				 int32_t* pC1, int32_t* pC0,
 				 const int32_t bound) {
@@ -517,7 +518,7 @@ void xgcd_partial_binary_l2r_s64(int64_t* pR1, int64_t* pR0,
 }
 
 /// Conditionally swap R1 and C1 with R0 and C0 if R1 < R0.
-inline void cond_swap2_mixed(s128_t* R1, int64_t* C1,
+static inline void cond_swap2_mixed(s128_t* R1, int64_t* C1,
 			     s128_t* R0, int64_t* C0) {
   uint64_t m;
   s128_t d2;
