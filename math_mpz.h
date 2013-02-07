@@ -130,12 +130,15 @@ static inline int mpz_cmp_s128(const mpz_t x, const s128_t* y) {
   return -cmp_s128_mpz(y, x);
 }
 
-/// computes the product of v and stores in o
-/// destroys v
+/// Compute the product of a list of uint32_t.  Non-destructive.
+void mpz_product_list_u32(mpz_t o, const uint32_t* xs, const int n);
+
+/// Computes the product of v and stores in o
+/// NOTE: This is destructive to v[].
 void mpz_product_tree(mpz_t o, mpz_t v[], int n);
 
 /// Computes the product of v and multiplies this with o and stores in o
-/// destroys v
+/// NOTE: This is destructive to v[].
 void mpz_product_tree_mul(mpz_t o, mpz_t v[], int n);
 
 /// Generates a random nbit prime

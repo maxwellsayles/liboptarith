@@ -8,6 +8,16 @@
 size_t __gmpz_out_str(FILE* stream, int base, mpz_t op);
 size_t __gmpz_inp_str(mpz_t rop, FILE* stream, int base);
 
+/// Compute the product of a list of uint32_t.  Non-destructive.
+void mpz_product_list_u32(mpz_t o, const uint32_t* xs, const int n) {
+  mpz_set_ui(o, 1);
+  int i;
+  for (i = 0; i < n; i++) {
+    mpz_mul_ui(o, o, xs[i]);
+  }
+}
+
+
 /**
  * Given n integers v[i], computes o = \prod v[i]
  * destroying v[] in the process.
