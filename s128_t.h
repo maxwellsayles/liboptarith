@@ -565,7 +565,7 @@ static inline void cond_swap3_s128(s128_t* u1,
 /// Negate using a mask. m must be either -1 or 0.
 static inline void negate_using_mask_s128(const uint64_t m,
 					  s128_t* x) {
-  assert(m == 0 || m == -1);
+  assert(m == 0 || m == (uint64_t)(-1));
   x->v0 ^= m;
   x->v1 ^= m;
   sub_s128_s64(x, m);

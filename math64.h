@@ -92,7 +92,7 @@ static inline void cond_swap3_s64(int64_t* u1,
 /// Negate using a mask. m must be either -1 or 0.
 static inline int64_t negate_using_mask_s64(const uint64_t m,
 					    const int64_t x) {
-  assert(m == 0 || m == -1);
+  assert(m == 0 || m == (uint64_t)(-1));
   return (x ^ m) - m;
 }
 
