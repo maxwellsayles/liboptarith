@@ -3,6 +3,7 @@
 set terminal eps
 set xlabel "Bits in GCD arguments" 
 set ylabel "Nanoseconds"
+set key left
 
 # Compare divrem sizes
 set output 'divrem-32v64.eps'
