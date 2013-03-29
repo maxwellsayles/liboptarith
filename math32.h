@@ -220,6 +220,12 @@ static inline int lsb_s32(int32_t x) {
 
 /// Return the number of bits in x, i.e. the
 /// smallest k such that 2^k > x.
+static inline int numbits_u32(uint32_t x) {
+  return msb_u32(x) + 1;
+}
+
+/// Return the number of bits in x, i.e. the
+/// smallest k such that 2^k > x.
 static inline int numbits_s32(int32_t x) {
   return msb_u32((uint32_t)abs_s32(x)) + 1;
 }

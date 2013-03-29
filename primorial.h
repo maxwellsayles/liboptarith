@@ -28,7 +28,7 @@ uint32_t* mpz_prime_powers(int* w, const uint32_t B);
 /**
  * Computes the product of the first w primes p_i^(floor(log_(p_i) B)).
  */
-void mpz_power_primorial(mpz_t pow_primorial, const int w, const mpz_t B);
+void mpz_power_primorial(mpz_t pow_primorial, const int w, const uint32_t B);
 
 /**
  * Computes the product of the first w primes such that the product <= B.

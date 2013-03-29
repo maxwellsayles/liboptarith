@@ -161,17 +161,19 @@ uint32_t* mpz_prime_powers(int* w, const uint32_t B) {
 }
 
 /// Returns the product of the first w primes \f$ p_i^{\floor{\log_{p_i} B}} \f$.
-void mpz_power_primorial(mpz_t pow_primorial, const int w, const mpz_t B) {
-  mpz_t p; // prime
-  mpz_t* pps; // prime powers
-  unsigned long e; // exponent
-  unsigned long* exps; // exponents
+void mpz_power_primorial(mpz_t pow_primorial,
+			 const int w,
+			 const uint32_t B) {
+  mpz_t p;              // prime
+  mpz_t* pps;           // prime powers
+  unsigned long e;      // exponent
+  unsigned long* exps;  // exponents
   int b;
   int i;
   double dB;
 
   // check the base cases
-  if ((mpz_cmp_ui(B, 1) <= 0) || (w == 0)) {
+  if (B <= 1 || w == 0) {
     mpz_set_ui(pow_primorial, 0);
     return;
   }
@@ -184,9 +186,9 @@ void mpz_power_primorial(mpz_t pow_primorial, const int w, const mpz_t B) {
   }
     
   // compute the ith root of B, from 2 to log2(B)-1
-  b = mpz_sizeinbase(B, 2);
+  b = numbits_u32(B);
   exps = (unsigned long*)malloc(b * sizeof(unsigned long));
-  dB = mpz_get_d(B);
+  dB = B;
   exps[0] = 0;
   exps[1] = 0;
   for (i = 2;  i < b;  i ++) {
