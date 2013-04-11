@@ -16,6 +16,10 @@ int32_t xgcd_lehmer_s32(int32_t* u, int32_t* v,
 int64_t xgcd_lehmer_s64(int64_t* u, int64_t* v,
 			const int64_t in_m, const int64_t in_n);
 
+/// XGCD for signed 128-bit arguments using a 32-bit inner EEA.
+void xgcd_lehmer_s128_s32eea(s128_t* d, s128_t* u, s128_t* v,
+			     const s128_t* in_m, const s128_t* in_n);
+
 /// XGCD for signed 128-bit arguments using a 64-bit inner EEA.
 void xgcd_lehmer_s128_s64eea(s128_t* d, s128_t* u, s128_t* v,
 			     const s128_t* in_m, const s128_t* in_n);

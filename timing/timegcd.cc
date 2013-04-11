@@ -24,7 +24,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_mpz_s128
+#define GCD_ROUTINE xgcd_lehmer_s128_s32eea
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128
@@ -323,7 +323,7 @@ int main(int argc, char** argv) {
   if (dump) {
     cout << "Writing times to " << argv[4] << endl;
     f.open(argv[4]);
-    f << setprecision(5);
+    f << fixed << setprecision(5);
   }
 
   // Iterate

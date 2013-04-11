@@ -100,3 +100,10 @@ set output 'mpzgcd.eps'
 plot "binary_l2r-best.dat" with lines title 'Simplified L2R' lt 3, \
      "divrem-best.dat" with lines title 'Euclidean' lt 4, \
      "mpz-128.dat" with lines title 'GMP' lt 5
+
+# Lehmer vs GMP
+set output 'lehmer128-vs-mpz.eps'
+plot 'lehmer32eea-128.dat' with lines title 'Lehmer using 32-bit EEA', \
+     'lehmer64eea-128.dat' with lines title 'Lehmer using 64-bit EEA', \
+     'lehmer64l2r-128.dat' with lines title 'Lehmer using 64-bit L2R', \
+     'mpz-128.dat' with lines title 'GMP'
