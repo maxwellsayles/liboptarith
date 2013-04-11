@@ -411,7 +411,7 @@ int64_t xgcd_left_binary_l2r_s64(int64_t* s,
 
 void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
 			       const s128_t* a, const s128_t* b) {
-  assert(d); assert(s); assert(t); assert(a); assert(b);
+  assert(d); assert(s); assert(a); assert(b);
   s128_t u1;
   s128_t v1;
   s128_t u3;
