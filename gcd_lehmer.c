@@ -211,4 +211,241 @@ int64_t xgcd_lehmer_s64(int64_t* u, int64_t* v,
   return m;
 }
 
+static inline void muladdmul_mixed(s128_t* res,
+				   const s128_t* f1,
+				   const int64_t f2,
+				   const s128_t* f3,
+				   const int64_t f4) {
+  s128_t t1;
+  s128_t t2;
+  mul_s128_s128_s64(&t1, f1, f2);
+  mul_s128_s128_s64(&t2, f3, f4);
+  add_s128_s128(&t1, &t2);
+  *res = t1;
+}
 
+
+void xgcd_lehmer_s128_s64eea(s128_t* d, s128_t* u, s128_t* v,
+			     const s128_t* in_m, const s128_t* in_n) {
+  // Invariants:
+  //   u1*in_m + u2*in_n = m
+  //   v1*in_m + v2*in_n = n
+  s128_t m = *in_m;
+  s128_t n = *in_n;
+  s128_t u1, u2, v1, v2;
+
+  set_s128_s64(&u1, 1);
+  set_s128_s64(&u2, 0);
+  set_s128_s64(&v1, 0);
+  set_s128_s64(&v2, 1);
+
+  while (!is_zero_s128(&n)) {
+    int km = numbits_s128(&m) - 63;
+    int kn = numbits_s128(&n) - 63;
+    if (km < kn) km = kn;
+    if (km < 0)  km = 0;
+
+    s128_t tmp = m;
+    shr_s128_int(&tmp, km);
+    int64_t mm = get_s64_from_s128(&tmp);
+    tmp = n;
+    shr_s128_int(&tmp, km);
+    int64_t nn = get_s64_from_s128(&tmp);
+
+    // B2 <=> u1, A2 <=> u2
+    // B1 <=> v1, A1 <=> v2
+    int64_t A2 = 0;
+    int64_t A1 = 1;
+    int64_t B2 = 1;
+    int64_t B1 = 0;
+    int i = 0;
+      
+    // Euclidean Steps (single precision)
+    while (nn != 0) {
+      int64_t qq = mm / nn;
+
+      int64_t tt;
+      tt = mm - qq * nn; mm = nn; nn = tt;
+      tt = A2 - qq * A1; A2 = A1; A1 = tt;
+      tt = B2 - qq * B1; B2 = B1; B1 = tt;
+
+      if (i&1) {
+	if ((nn < -B1) || (mm - nn < A1 - A2))
+	  break;
+      } else {
+	if ((nn < -A1) || (mm - nn < B1 - B2))
+	  break;
+      }
+      i++;
+    }
+      
+    if (i == 0) {
+      // multiprecision step
+      s128_t q;
+      divrem_s128_s128_s128_s128(&q, &m, &m, &n);
+      swap_s128_s128(&m, &n);
+
+      // u - q*v and swap.
+      s128_t t;
+      mul_s128_s128_s128(&t, &v1, &q);
+      sub_s128_s128(&u1, &t);
+      swap_s128_s128(&u1, &v1);
+      mul_s128_s128_s128(&t, &v2, &q);
+      sub_s128_s128(&u2, &t);
+      swap_s128_s128(&u2, &v2);
+    } else {
+      // Recombination.
+      s128_t ta, tb;
+      muladdmul_mixed(&ta, &m, B2, &n, A2);
+      muladdmul_mixed(&tb, &m, B1, &n, A1);
+      m = ta;
+      n = tb;
+
+      muladdmul_mixed(&ta, &u1, B2, &v1, A2);
+      muladdmul_mixed(&tb, &u1, B1, &v1, A1);
+      u1 = ta;
+      v1 = tb;
+
+      muladdmul_mixed(&ta, &u2, B2, &v2, A2);
+      muladdmul_mixed(&tb, &u2, B1, &v2, A1);
+      u2 = ta;
+      v2 = tb;
+
+      if (is_negative_s128(&m)) {
+	neg_s128_s128(&m, &m);
+	neg_s128_s128(&u1, &u1);
+	neg_s128_s128(&u2, &u2);
+      }
+      if (is_negative_s128(&n)) {
+	neg_s128_s128(&n, &n);
+	neg_s128_s128(&v1, &v1);
+	neg_s128_s128(&v2, &v2);
+      }
+    }
+  }
+
+  //  assert(is_positive_s128(&m));
+  if (is_negative_s128(&m)) {
+    neg_s128_s128(&m, &m);
+    neg_s128_s128(&u1, &u1);
+    neg_s128_s128(&u2, &u2);
+  }
+  
+  *d = m;
+  *u = u1;
+  *v = u2;
+}
+
+void xgcd_lehmer_s128_s64l2r(s128_t* d, s128_t* u, s128_t* v,
+			     const s128_t* in_m, const s128_t* in_n) {
+  // Invariants:
+  //   u1*in_m + u2*in_n = m
+  //   v1*in_m + v2*in_n = n
+  s128_t m = *in_m;
+  s128_t n = *in_n;
+  s128_t u1, u2, v1, v2;
+
+  set_s128_s64(&u1, 1);
+  set_s128_s64(&u2, 0);
+  set_s128_s64(&v1, 0);
+  set_s128_s64(&v2, 1);
+
+  while (!is_zero_s128(&n)) {
+    int km = numbits_s128(&m) - 63;
+    int kn = numbits_s128(&n) - 63;
+    if (km < kn) km = kn;
+    if (km < 0)  km = 0;
+
+    s128_t tmp = m;
+    shr_s128_int(&tmp, km);
+    int64_t mm = get_s64_from_s128(&tmp);
+    tmp = n;
+    shr_s128_int(&tmp, km);
+    int64_t nn = get_s64_from_s128(&tmp);
+
+    // B2 <=> u1, A2 <=> u2
+    // B1 <=> v1, A1 <=> v2
+    int64_t A2 = 0;
+    int64_t A1 = 1;
+    int64_t B2 = 1;
+    int64_t B1 = 0;
+    int i = 0;
+      
+    cond_swap3_s64(&B2, &A2, &mm, &B1, &A1, &nn);
+    while (nn != 0) {
+      int k = msb_u64(mm) - msb_u64(nn);
+      uint64_t mask;
+      mm = sub_with_mask_s64(&mask, mm, nn << k);
+      B2 -= B1 << k;
+      A2 -= A1 << k;
+      B2 = negate_using_mask_s64(mask, B2);
+      A2 = negate_using_mask_s64(mask, A2);
+      mm = negate_using_mask_s64(mask, mm);
+      cond_swap3_s64(&B2, &A2, &mm, &B1, &A1, &nn);
+
+      if (i&1) {
+	if ((nn < -B1) || (mm - nn < A1 - A2))
+	  break;
+      } else {
+	if ((nn < -A1) || (mm - nn < B1 - B2))
+	  break;
+      }
+      i++;
+    }
+      
+    if (i == 0) {
+      // multiprecision step
+      s128_t q;
+      divrem_s128_s128_s128_s128(&q, &m, &m, &n);
+      swap_s128_s128(&m, &n);
+
+      // u - q*v and swap.
+      s128_t t;
+      mul_s128_s128_s128(&t, &v1, &q);
+      sub_s128_s128(&u1, &t);
+      swap_s128_s128(&u1, &v1);
+      mul_s128_s128_s128(&t, &v2, &q);
+      sub_s128_s128(&u2, &t);
+      swap_s128_s128(&u2, &v2);
+    } else {
+      // Recombination.
+      s128_t ta, tb;
+      muladdmul_mixed(&ta, &m, B2, &n, A2);
+      muladdmul_mixed(&tb, &m, B1, &n, A1);
+      m = ta;
+      n = tb;
+
+      muladdmul_mixed(&ta, &u1, B2, &v1, A2);
+      muladdmul_mixed(&tb, &u1, B1, &v1, A1);
+      u1 = ta;
+      v1 = tb;
+
+      muladdmul_mixed(&ta, &u2, B2, &v2, A2);
+      muladdmul_mixed(&tb, &u2, B1, &v2, A1);
+      u2 = ta;
+      v2 = tb;
+
+      if (is_negative_s128(&m)) {
+	neg_s128_s128(&m, &m);
+	neg_s128_s128(&u1, &u1);
+	neg_s128_s128(&u2, &u2);
+      }
+      if (is_negative_s128(&n)) {
+	neg_s128_s128(&n, &n);
+	neg_s128_s128(&v1, &v1);
+	neg_s128_s128(&v2, &v2);
+      }
+    }
+  }
+
+  //  assert(is_positive_s128(&m));
+  if (is_negative_s128(&m)) {
+    neg_s128_s128(&m, &m);
+    neg_s128_s128(&u1, &u1);
+    neg_s128_s128(&u2, &u2);
+  }
+  
+  *d = m;
+  *u = u1;
+  *v = u2;
+}

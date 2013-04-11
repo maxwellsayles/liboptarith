@@ -714,6 +714,21 @@ static inline int64_t mod_s64_s128_u64(const s128_t* in_n, const uint64_t in_m) 
   return r;
 }
 
+/// res = f1 * f2 + f3 * f4
+/// NOTE: There is no overflow checking!
+static inline void muladdmul_s128_4s128(s128_t* res,
+					const s128_t* f1,
+					const s128_t* f2,
+					const s128_t* f3,
+					const s128_t* f4) {
+  s128_t t1;
+  s128_t t2;
+  mul_s128_s128_s128(&t1, f1, f2);
+  mul_s128_s128_s128(&t2, f3, f4);
+  add_s128_s128(&t1, &t2);
+  *res = t1;
+}
+
 // res = f1*f2+f3*f4
 static inline void muladdmul_s128_4s64(s128_t* res, const int64_t f1, const int64_t f2, const int64_t f3, const int64_t f4) {
 #if defined(__x86_64)
