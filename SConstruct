@@ -1,6 +1,7 @@
 from glob import glob
 
 ccflags=["-Wall", "-Werror", "-DNDEBUG", "-O3"]
+#ccflags=["-Wall", "-Werror", "-O3"]
 
 import os
 uname = os.uname()

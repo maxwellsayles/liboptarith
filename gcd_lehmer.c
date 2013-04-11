@@ -4,6 +4,7 @@
  */
 #include "liboptarith/gcd_lehmer.h"
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "liboptarith/math64.h"
@@ -558,4 +559,111 @@ void xgcd_lehmer_s128_s64l2r(s128_t* d, s128_t* u, s128_t* v,
   *d = m;
   *u = u1;
   *v = u2;
+}
+
+void xgcd_shortpartial_lehmer_s128_s64l2r(s128_t* pR2, s128_t* pR1,
+					  int64_t* pC2, int64_t* pC1,
+					  const int64_t bound) {
+  s128_t R2 = *pR2;
+  s128_t R1 = *pR1;
+  s128_t C2;
+  s128_t C1;
+  setzero_s128(&C2);
+  set_s128_s64(&C1, -1);
+
+  while (cmp_s128_s64(&R1, bound) > 0) {
+    int km = numbits_s128(&R2) - 63;
+    int kn = numbits_s128(&R1) - 63;
+    if (km < kn) km = kn;
+    if (km < 0)  km = 0;
+
+    s128_t tmp;
+    tmp = R2;
+    shr_s128_int(&tmp, km);
+    int64_t mm = get_s64_from_s128(&tmp);
+    tmp = R1;
+    shr_s128_int(&tmp, km);
+    int64_t nn = get_s64_from_s128(&tmp);
+    int64_t bb = bound >> km;
+
+    // B2 <=> u1, A2 <=> u2
+    // B1 <=> v1, A1 <=> v2
+    int64_t A2 = 0;
+    int64_t A1 = 1;
+    int64_t B2 = 1;
+    int64_t B1 = 0;
+    int i = 0;
+
+    cond_swap3_s64(&B2, &A2, &mm, &B1, &A1, &nn);
+    while (nn > bb) {
+      // NOTE: We do it this way to avoid overflow.
+      // Compute R1 -= R0 << k and C1 -= C0 << k.
+      // If R1 underflows, use k-1 instead.
+      int k = msb_u64(mm) - msb_u64(nn);
+      int64_t t = nn << k;
+      uint64_t mask;  // either 0 or -1
+      mm = sub_with_mask_s64(&mask, mm, t);
+      mm += (t >> 1) & mask;
+      A2 -= A1 << (k + mask);
+      B2 -= B1 << (k + mask);
+      cond_swap3_s64(&B2, &A2, &mm, &B1, &A1, &nn);
+
+      if (i&1) {
+	if ((nn < -B1) || (mm - nn < A1 - A2))
+	  break;
+      } else {
+	if ((nn < -A1) || (mm - nn < B1 - B2))
+	  break;
+      }
+      i++;
+    }
+
+    if (i == 0) {
+      // multiprecision step
+      s128_t q;
+      divrem_s128_s128_s128_s128(&q, &R2, &R2, &R1);
+      swap_s128_s128(&R2, &R1);
+
+      // u - q*v and swap.
+      s128_t t;
+      mul_s128_s128_s128(&t, &C1, &q);
+      sub_s128_s128(&C2, &t);
+      swap_s128_s128(&C2, &C1);
+    } else {
+      // Recombination.
+      s128_t ta, tb;
+      muladdmul_mixed(&ta, &R2, B2, &R1, A2);
+      muladdmul_mixed(&tb, &R2, B1, &R1, A1);
+      R2 = ta;
+      R1 = tb;
+
+      muladdmul_mixed(&ta, &C2, B2, &C1, A2);
+      muladdmul_mixed(&tb, &C2, B1, &C1, A1);
+      C2 = ta;
+      C1 = tb;
+
+      if (is_negative_s128(&R2)) {
+	neg_s128_s128(&R2, &R2);
+	neg_s128_s128(&C2, &C2);
+      }
+      if (is_negative_s128(&R1)) {
+	neg_s128_s128(&R1, &R1);
+	neg_s128_s128(&C1, &C1);
+      }
+    }
+  }
+
+  //  assert(is_positive_s128(&m));
+  if (is_negative_s128(&R2)) {
+    neg_s128_s128(&R2, &R2);
+    neg_s128_s128(&C1, &C1);
+    neg_s128_s128(&C2, &C2);
+  }
+
+  assert(s128_is_s64(&C1));
+  assert(s128_is_s64(&C2));
+  *pR1 = R1;
+  *pR2 = R2;
+  *pC1 = get_s64_from_s128(&C1);
+  *pC2 = get_s64_from_s128(&C2);
 }
