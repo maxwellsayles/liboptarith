@@ -5,12 +5,14 @@
 #include <gmp.h>
 #include <inttypes.h>
 #include <math.h>
+#include <pari/pari.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 
 extern "C" {
+#include "gcd_pari.h"
 #include "liboptarith/gcd_binary_l2r.h"
 #include "liboptarith/gcd_lehmer.h"
 #include "liboptarith/gcd_mpz128.h"
@@ -24,11 +26,12 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_lehmer_s128_s32eea
+#define GCD_ROUTINE xgcd_lehmer_s128_s64l2r
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128
 #define GCD_SIZE 128
+#define GCD_SANITY_TEST 1
 
 // return an array of n elements of b bits
 // caller must delete[] returned array
@@ -242,7 +245,7 @@ uint64_t time_gcd_set(const u128_t* rands, const int pairs,
 		      const char* type) {
   uint64_t start_time, end_time;
   s128_t g, u, v, m, n;
-    
+#if (GCD_SANITY_TEST == 1)
   // sanity check first
   for (int i = 0; i < pairs; i++) {
     set_s128_u128(&m, &rands[(i << 1)  ]);
@@ -252,6 +255,7 @@ uint64_t time_gcd_set(const u128_t* rands, const int pairs,
       return -1;
     }
   }
+#endif
     
   // perform actual timing
   start_time = current_nanos();
@@ -306,6 +310,8 @@ int main(int argc, char** argv) {
       usage(argc, argv);
     }
   }
+
+  pari_init(1 << 24, 1 << 20);
 
   // Set rand seed.
   srand(atoi(argv[1]));
