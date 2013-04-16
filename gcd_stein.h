@@ -8,6 +8,8 @@
 
 #include <stdint.h>
 
+#include "s128_t.h"
+
 /// Compute the GCD of u and v using a binary GCD method.
 int32_t gcd_stein_s32(int32_t u, int32_t v);
 
@@ -60,5 +62,14 @@ int64_t xgcd_blockstein5_s64(int64_t* out_s,
 			     int64_t in_u,
 			     int64_t in_v);
 
-#endif  // GCD_STEIN__INCLUDED
+/// 128-bit String XGCD.
+/// NOTE: This only handles positive inputs as it is only meant for
+/// timing tests.  This will give the incorrect answer for negative inputs.
+void xgcd_stein_s128(s128_t* out_d,
+		     s128_t* out_s,
+		     s128_t* out_t,
+		     const s128_t* in_u,
+		     const s128_t* in_v);
+
+#endif
 

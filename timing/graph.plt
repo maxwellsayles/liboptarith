@@ -92,7 +92,8 @@ plot "stein4-64.dat" with lines title '4-bit window' lt 7, \
 set output 'all-128.eps'
 set xrange [64:*]
 plot "divrem-128.dat" with lines title 'Euclidean' lt 4, \
-     "binary_l2r-128.dat" with lines title 'Simplified L2R' lt 3
+     "binary_l2r-128.dat" with lines title 'Simplified L2R' lt 3, \
+     "stein1-128.dat" with lines title 'Stein' lt 5
 set xrange [*:*]
 
 # Compare with GMP

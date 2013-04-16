@@ -26,7 +26,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_lehmer_s128_s64l2r
+#define GCD_ROUTINE xgcd_stein_s128
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128

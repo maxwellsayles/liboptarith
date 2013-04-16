@@ -1821,3 +1821,118 @@ int64_t xgcd_blockstein5_s64(int64_t* out_s,
   return u3;
 }
 
+/**
+ * NOTE: This implementation does not deal with sign.
+ * This was intentional as this implementation is only intended for
+ * timing purposes and is not expected to perform as well as other
+ * methods.
+ */
+void xgcd_stein_s128(s128_t* out_d,
+		     s128_t* out_s,
+		     s128_t* out_t,
+		     const s128_t* in_a,
+		     const s128_t* in_b) {
+  assert(is_positive_s128(in_a));
+  assert(is_positive_s128(in_b));
+  s128_t u1, u2, u3;
+  s128_t v1, v2, v3;
+  s128_t a = *in_a;
+  s128_t b = *in_b;
+  s128_t t;
+  int shift;
+  int swapped;
+  
+  // make sure none of the inputs are 0
+  if (is_zero_s128(&a)) {
+    setzero_s128(out_s);
+    set_s128_s64(out_t, 1);
+    *out_d = b;
+    return;
+  } else if (is_zero_s128(&b)) {
+    set_s128_s64(out_s, 1);
+    setzero_s128(out_t);
+    *out_d = a;
+    return;
+  }
+  
+  // remove common powers of two from u and v
+  or_s128_s128_s128(&t, &a, &b);
+  shift = lsb_s128(&t);
+  shr_s128_int(&a, shift);
+  shr_s128_int(&b, shift);
+  
+  // let u3 be odd
+  swapped = is_even_s128(&a);
+  if (swapped) {
+    swap_s128_s128(&a, &b);
+  }
+
+  // Invariants:
+  // u3 = u1*a + u2*b
+  // v3 = v1*a + v2*b
+  set_s128_s64(&u1, 1);
+  set_s128_s64(&u2, 0);
+  u3 = a;
+  set_s128_s64(&v1, 0);
+  set_s128_s64(&v2, 1);
+  v3 = b;
+  
+  while (cmpzero_s128(&v3) > 0) {
+    // u3 is odd, v3 is even
+    // (unless this is the first iteration, then v3 is possibly odd)
+    
+    // remove powers of 2 from v3 till v3 is odd
+    int k = lsb_s128(&v3);
+    shr_s128_int(&v3, k);
+    
+    // adjust v1 and v2 so that it is divisible by 2^b
+    for (; k > 0; k--) {
+      uint64_t mask = is_even_s128(&v2) - 1;
+      s128_t ta = a;
+      s128_t tb = b;
+      ta.v0 &= mask;
+      ta.v1 &= mask;
+      tb.v0 &= mask;
+      tb.v1 &= mask;
+      add_s128_s128(&v1, &tb);
+      sub_s128_s128(&v2, &ta);
+      shr_s128(&v1);
+      shr_s128(&v2);
+    }
+    // both u3 and v3 are odd
+
+    // t is the absolute difference between u3 and v3 which is even
+    // u3 = min(u3, v3)
+    // v3 = t
+    if (cmp_s128_s128(&u3, &v3) > 0) {
+      t = u3;
+      sub_s128_s128(&t, &v3);
+      u3 = v3;
+      v3 = t;
+      t = u2;
+      sub_s128_s128(&t, &v2);
+      u2 = v2;
+      v2 = t;
+      t = u1;
+      sub_s128_s128(&t, &v1);
+      u1 = v1;
+      v1 = t;
+    } else {
+      sub_s128_s128(&v3, &u3);
+      sub_s128_s128(&v2, &u2);
+      sub_s128_s128(&v1, &u1);
+    }
+  }
+  
+  // copy to output variables
+  if (swapped) {
+    *out_s = u2;
+    *out_t = u1;
+  } else {
+    *out_s = u1;
+    *out_t = u2;
+  }
+  
+  shl_s128_int(&u3, shift);
+  *out_d = u3;
+}
