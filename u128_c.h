@@ -19,6 +19,8 @@ extern "C" {
 #include "liboptarith/u128_t.h"
 }
 
+class s128;
+
 class u128 : public u128_t {
  public:
   u128() {
@@ -44,6 +46,9 @@ class u128 : public u128_t {
   explicit u128(const char* x) {
     *this = x;
   }
+
+  // Coerce an s128 into a u128.
+  explicit u128(const s128& x);
 
   static u128 rand() {
     u128 t;

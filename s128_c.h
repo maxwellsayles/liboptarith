@@ -35,6 +35,11 @@ class s128 : public s128_t {
     v1 = hi;
   }
 
+  s128(const s128_t& x) {
+    v0 = x.v0;
+    v1 = x.v1;
+  }
+
   s128(const s128& x) {
     v0 = x.v0;
     v1 = x.v1;
