@@ -5,6 +5,14 @@ set xlabel "Bits in GCD arguments"
 set ylabel "Nanoseconds"
 set key left
 
+# Reference implementations
+set output 'reference-impl.eps'
+set xrange [1:127]
+plot 'pari-128.dat' with lines title 'Pari 128-bit', \
+     'mpir-128.dat' with lines title 'MPIR 128-bit', \
+     'gmp-128.dat' with lines title 'GMP 128-bit'
+set xrange [*:*]
+
 # Compare divrem sizes
 set output 'divrem-32v64.eps'
 plot "divrem-32.dat" with lines title '32-bit', \
@@ -18,7 +26,7 @@ set output 'lehmer-32v64.eps'
 plot "lehmer-32.dat" with lines title '32-bit', \
      "lehmer-64.dat" with lines title '64-bit'
 
-# Compare each stein sizes
+# Compare each stein 32v64
 set output 'stein1-32v64.eps'
 plot "stein1-32.dat" with lines title 'Non-Windowed (32-bit)', \
      "stein1-64.dat" with lines title '(64-bit)'
@@ -34,6 +42,23 @@ plot "stein4-32.dat" with lines title '4-bit Window (32-bit)', \
 set output 'stein5-32v64.eps'
 plot "stein5-32.dat" with lines title '5-bit Window (32-bit)', \
      "stein5-64.dat" with lines title '(64-bit)'
+
+# Compare each stein 64v128
+set output 'stein1-64v128.eps'
+plot "stein1-64.dat" with lines title 'Non-Windowed (64-bit)', \
+     "stein1-128.dat" with lines title '(128-bit)'
+set output 'stein2-64v128.eps'
+plot "stein2-64.dat" with lines title '2-bit Window (64-bit)', \
+     "stein2-128.dat" with lines title '(128-bit)'
+set output 'stein3-64v128.eps'
+plot "stein3-64.dat" with lines title '3-bit Window (64-bit)', \
+     "stein3-128.dat" with lines title '(128-bit)'
+set output 'stein4-64v128.eps'
+plot "stein4-64.dat" with lines title '4-bit Window (64-bit)', \
+     "stein4-128.dat" with lines title '(128-bit)'
+set output 'stein5-64v128.eps'
+plot "stein5-64.dat" with lines title '5-bit Window (64-bit)', \
+     "stein5-128.dat" with lines title '(128-bit)'
 
 # Compare shallit sizes
 set output 'shallit-32v64.eps'
@@ -105,14 +130,14 @@ plot "divrem-128.dat" with lines title 'Euclidean' lt 4, \
 set xrange [*:*]
 
 # Compare with GMP
-set output 'mpzgcd.eps'
+set output 'gmpgcd.eps'
 plot "binary_l2r-best.dat" with lines title 'Simplified L2R' lt 3, \
      "divrem-best.dat" with lines title 'Euclidean' lt 4, \
-     "mpz-128.dat" with lines title 'GMP' lt 5
+     "gmp-128.dat" with lines title 'GMP' lt 5
 
 # Lehmer vs GMP
-set output 'lehmer128-vs-mpz.eps'
+set output 'lehmer128-vs-gmp.eps'
 plot 'lehmer32eea-128.dat' with lines title 'Lehmer using 32-bit EEA', \
      'lehmer64eea-128.dat' with lines title 'Lehmer using 64-bit EEA', \
      'lehmer64l2r-128.dat' with lines title 'Lehmer using 64-bit L2R', \
-     'mpz-128.dat' with lines title 'GMP'
+     'gmp-128.dat' with lines title 'GMP'

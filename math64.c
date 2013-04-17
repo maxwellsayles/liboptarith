@@ -37,8 +37,6 @@ uint64_t sqrt_u64(const uint64_t x) {
   return root;
 }
 
-/// We run a 64-bit GCD until both args are 32-bit.
-/// Then we run a 32-bit XGCD and combine results.
 int64_t xgcd_divrem_s64(int64_t* out_u, int64_t* out_v,
 			int64_t m, int64_t n) {
   uint64_t sm = m >> 63;
@@ -61,10 +59,9 @@ int64_t xgcd_divrem_s64(int64_t* out_u, int64_t* out_v,
   int64_t a = 0;
   int64_t b = 1;
 
-  // 64-bit GCD.
   // Invariant: m >= n.
   cond_swap3_s64(&u, &v, &m, &a, &b, &n);
-  while (n != 0 && m > 0x7FFFFFFFLL) {
+  while (n > 0) {
     int64_t q, t;
     q = m / n;
 
@@ -80,15 +77,9 @@ int64_t xgcd_divrem_s64(int64_t* out_u, int64_t* out_v,
     b = v - q*b;
     v = t;
   }
-
-  // Call 32-bit XGCD.
-  int32_t s, t;
-  int32_t g = xgcd_divrem_s32(&s, &t, m, n);
-
-  // Recombing 32-bit gcd with 64-bit gcd.
-  *out_u = negate_using_mask_s64(sm, s*u+t*a);
-  *out_v = negate_using_mask_s64(sn, s*v+t*b);
-  return g;
+  *out_u = negate_using_mask_s64(sm, u);
+  *out_v = negate_using_mask_s64(sn, v);
+  return m;
 }
 
 int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n) {

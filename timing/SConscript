@@ -3,7 +3,6 @@ import os
 libs = ['rt', 'pari']
 sources = ['timegcd.cc',
            'gcd_stein_windowed.cc',
-           'gcd_pari.c',
            '../liboptarithxx.a']
     
 if os.path.isfile('/usr/local/lib/libgmp.a'):
