@@ -24,9 +24,11 @@ extern "C" {
 #include "liboptarith/s128_t.h"
 }
 
+#include "gcd_stein_windowed.h"
+
 using namespace std;
 
-#define GCD_ROUTINE xgcd_stein_s128
+#define GCD_ROUTINE xgcd_blockstein2_s128
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128

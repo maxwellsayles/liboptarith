@@ -3,6 +3,7 @@
 #include <ostream>
 #include <vector>
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "liboptarith/s128_c.h"
@@ -10,6 +11,7 @@
 using namespace std;
 
 u128::u128(const s128& x) {
+  assert(x.is_positive());
   v0 = x.v0;
   v1 = x.v1;
 }

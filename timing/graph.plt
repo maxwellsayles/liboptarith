@@ -63,6 +63,14 @@ plot "stein1-64.dat" with lines title '1-bit window', \
      "stein4-64.dat" with lines title '4-bit window', \
      "stein5-64.dat" with lines title '5-bit window'
 set xrange [*:*]
+set output 'steins-128.eps'
+set xrange [61:*]
+plot "stein1-128.dat" with lines title '1-bit window', \
+     "stein2-128.dat" with lines title '2-bit window', \
+     "stein3-128.dat" with lines title '3-bit window', \
+     "stein4-128.dat" with lines title '4-bit window', \
+     "stein5-128.dat" with lines title '5-bit window'
+set xrange [*:*]
 
 # Compare divrem to lehmer
 set output 'divrem-vs-lehmer.eps'

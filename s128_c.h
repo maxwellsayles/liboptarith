@@ -48,7 +48,7 @@ class s128 : public s128_t {
   explicit s128(const u128& x) {
     v0 = x.v0;
     v1 = static_cast<int64_t>(x.v1);
-    assert(is_negative_s128(this) == 0);
+    assert(is_positive());
   }
     
   explicit s128(const char* x) {
@@ -312,6 +312,10 @@ class s128 : public s128_t {
   std::string to_hex() const;
   void from_hex(const char* x);
   void from_dec(const char* x);
+
+  bool is_positive() const {
+    return is_positive_s128(this);
+  }
 
   bool is_zero() const {
     return is_zero_s128(this) != 0;
