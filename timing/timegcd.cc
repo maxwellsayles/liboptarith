@@ -31,7 +31,7 @@ using namespace std;
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128
 #define GCD_SIZE 128
-#define GCD_SANITY_TEST 1
+#define GCD_SANITY_TEST 0
 
 // return an array of n elements of b bits
 // caller must delete[] returned array
