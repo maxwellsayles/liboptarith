@@ -330,11 +330,8 @@ void xgcd_binary_l2r_s128(s128_t* d,
 
   // Swap u with v if u3 < v3.
   cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
-  //  while (!is_zero_s128(&v3) && u3.v1 != 0) {
-  //  while (!is_zero_s128(&v3) && !s128_is_s64(&u3)) {
   while (!is_zero_s128(&v3) && u3.v1 != 0) {
     int k = msb_s128(&u3) - msb_s128(&v3);
-    //    int k = msb_u64(u3.v1) - msb_u64(v3.v1);
 
     // Subtrack 2^k times v from u, and make sure u3 >= 0.
     s128_t t1, t2, t3;
@@ -373,7 +370,7 @@ void xgcd_binary_l2r_s128(s128_t* d,
   const uint64_t am = mask_s128(a);
   const uint64_t bm = mask_s128(b);
   s128_t at = *a;
-  s128_t bt = *a;
+  s128_t bt = *b;
   negate_using_mask_s128(am, &at);
   negate_using_mask_s128(bm, &bt);
   if (is_equal_s128_s128(&u3, &at)) {
@@ -481,6 +478,8 @@ int64_t xgcd_left_binary_l2r_s64(int64_t* s,
   return u3;
 }
 
+/// Computes g = s*a + t*b where g=gcd(a,b).
+/// NOTE: s and t cannot be NULL.
 void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
 			       const s128_t* a, const s128_t* b) {
   assert(d); assert(s); assert(a); assert(b);
@@ -492,15 +491,14 @@ void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
   abs_s128_s128(&u3, a);
   set_s128_s64(&v1, 0);
   abs_s128_s128(&v3, b);
-  
+
   // Swap u with v if u3 < v3.
   cond_swap2_s128(&u1, &u3, &v1, &v3);
-  while (!is_zero_s128(&v3)) {
-    int k = msb_u128((u128_t*)&u3) - msb_u128((u128_t*)&v3);
+  while (!is_zero_s128(&v3) && u3.v1 != 0) {
+    int k = msb_s128(&u3) - msb_s128(&v3);
 
     // Subtrack 2^k times v from u, and make sure u3 >= 0.
-    s128_t t1;
-    s128_t t3;
+    s128_t t1, t3;
     uint64_t m;
     shl_s128_s128_int(&t1, &v1, k);
     shl_s128_s128_int(&t3, &v3, k);
@@ -517,11 +515,19 @@ void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
     // Swap u with v if u3 < v3.
     cond_swap2_s128(&u1, &u3, &v1, &v3);
   }
-  
+
+  // Run a 64-bit binary if necessary
+  if (!is_zero_s128(&v3)) {
+    int64_t ss, tt;
+    u3.v0 = xgcd_binary_l2r_u64(&ss, &tt, u3.v0, v3.v0);
+    u3.v1 = 0;
+    muladdmul_mixed(&u1, &u1, ss, &v1, tt);
+  }
+
   const uint64_t am = mask_s128(a);
   const uint64_t bm = mask_s128(b);
   s128_t at = *a;
-  s128_t bt = *a;
+  s128_t bt = *b;
   negate_using_mask_s128(am, &at);
   negate_using_mask_s128(bm, &bt);
   if (is_equal_s128_s128(&u3, &at)) {
@@ -529,9 +535,12 @@ void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
   } else if (is_equal_s128_s128(&u3, &bt)) {
     setzero_s128(s);
   } else {
-    // Reduce u1 (mod b) and correct for sign.
-    mod_s128_s128_s128(s, &u1, b);
-    negate_using_mask_s128(am, s);
+    // Reduce u1 (mod b) and u2 (mod a).
+    mod_s128_s128_s128(&u1, &u1, b);
+
+    // Correct sign of s
+    negate_using_mask_s128(am, &u1);
+    set_s128_s128(s, &u1);
   }
   *d = u3;
 }
@@ -613,7 +622,7 @@ void xgcd_shortpartial_binary_l2r_s128(s128_t* pR1, s128_t* pR0,
   int64_t C0 = -1;
   s128_t t;
   cond_swap2_mixed(&R1, &C1, &R0, &C0);
-  while (cmp_s128_s64(&R0, bound) > 0) {
+  while (cmp_s128_s64(&R0, bound) > 0 && !s128_is_s64(&R1)) {
     // Compute R1 -= R0 << k and C1 -= C0 << k.
     // If R1 underflows, use k-1 instead.
     int k = msb_u128((u128_t*)&R1) - msb_u128((u128_t*)&R0);
@@ -627,9 +636,25 @@ void xgcd_shortpartial_binary_l2r_s128(s128_t* pR1, s128_t* pR0,
     C1 -= C0 << (k + m);
     cond_swap2_mixed(&R1, &C1, &R0, &C0);
   }
-  *pR1 = R1;
-  *pR0 = R0;
+
+  // Run 64-bit partial
+  int64_t rr1 = get_s64_from_s128(&R1);
+  int64_t rr0 = get_s64_from_s128(&R0);
+  cond_swap2_s64(&C1, &rr1, &C0, &rr0);
+  while (rr0 > bound) {
+    int k = msb_u64(rr1) - msb_u64(rr0);
+    int64_t t = rr0 << k;
+    uint64_t m;  // either 0 or -1
+    rr1 = sub_with_mask_s64(&m, rr1, t);
+    rr1 += (t >> 1) & m;
+    C1  -= C0 << (k + m);
+    cond_swap2_s64(&C1, &rr1, &C0, &rr0);
+  }
+
+  set_s128_s64(pR1, rr1);
+  set_s128_s64(pR0, rr0);
   *pC1 = C1;
   *pC0 = C0;
 }
+
 
