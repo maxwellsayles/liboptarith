@@ -43,6 +43,7 @@ uint32_t* rands_u32(const int n, const int b) {
   uint32_t* res = new uint32_t[n];
   for (int i = 0;  i < n;  i++) {
     res[i] = rand_u32() & m;
+    res[i] |= 1 << (b - 1);
   }
   return res;
 }
@@ -55,6 +56,7 @@ uint64_t* rands_u64(const int n, const int b) {
   uint64_t* res = new uint64_t[n];
   for (int i = 0;  i < n;  i++) {
     res[i] = rand_u64() & m;
+    res[i] |= 1ULL << (b - 1);
   }
   return res;
 }
@@ -74,6 +76,7 @@ u128_t* rands_u128(const int n, const int b) {
       res[i].v1 = 0;
       res[i].v0 &= m;
     }
+    setbit_u128(&res[i], b - 1);
   }
   return res;
 }
