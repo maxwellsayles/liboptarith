@@ -30,6 +30,25 @@ static inline uint64_t rand_u64(void) {
 }
 
 /// Compute a - b and let m = -1 if a < b and 0 otherwise.
+static inline int64_t sub_with_mask_u64(uint64_t* m,
+					const uint64_t a,
+					const uint64_t b) {
+  //#if defined(__x86_64)
+  //  int64_t r;
+  //  asm("subq %3, %0\n\t"
+  //      "sbbq %1, %1\n\t"  // %1 is either 0 or -1
+  //      : "=r"(r), "=&r"(*m)
+  //      : "0"(a), "r"(b)
+  //      : "cc");
+  //  return r;
+  //#else
+  //*m = a < b ? -1 : 0;
+  *m = (a >= b) - 1;
+  return a - b;
+  //#endif
+}
+
+/// Compute a - b and let m = -1 if a < b and 0 otherwise.
 static inline int64_t sub_with_mask_s64(uint64_t* m,
 					const int64_t a,
 					const int64_t b) {
@@ -78,6 +97,26 @@ static inline void cond_swap3_s64(int64_t* u1,
 				  int64_t* v3) {
   uint64_t m;
   int64_t d3 = sub_with_mask_s64(&m, *u3, *v3);
+  int64_t d1 = (*u1 - *v1) & m;
+  int64_t d2 = (*u2 - *v2) & m;
+  d3 &= m;
+  *u1 -= d1;
+  *u2 -= d2;
+  *u3 -= d3;
+  *v1 += d1;
+  *v2 += d2;
+  *v3 += d3;
+}
+
+/// Conditionally swap u with v if u3 < v3.
+static inline void cond_swap3_s64_mixed(int64_t*  u1,
+					int64_t*  u2,
+					uint64_t* u3,
+					int64_t*  v1,
+					int64_t*  v2,
+					uint64_t* v3) {
+  uint64_t m;
+  int64_t d3 = sub_with_mask_u64(&m, *u3, *v3);
   int64_t d1 = (*u1 - *v1) & m;
   int64_t d2 = (*u2 - *v2) & m;
   d3 &= m;

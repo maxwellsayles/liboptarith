@@ -19,6 +19,19 @@
 // trickery to swap two values
 #define swap(a,b) { (a)^=(b); (b)^=(a); (a)^=(b); }
 
+static inline void muladdmul_mixed(s128_t* res,
+				   const s128_t* f1,
+				   const int64_t f2,
+				   const s128_t* f3,
+				   const int64_t f4) {
+  s128_t t1;
+  s128_t t2;
+  mul_s128_s128_s64(&t1, f1, f2);
+  mul_s128_s128_s64(&t2, f3, f4);
+  add_s128_s128(&t1, &t2);
+  *res = t1;
+}
+
 static inline int is_equal_to_neg_s128_s128(const s128_t* a,
 					    const s128_t* b) {
   s128_t n;
@@ -252,6 +265,52 @@ int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
 /// NOTE: s and t cannot be NULL.
+uint64_t xgcd_binary_l2r_u64(int64_t* s, int64_t* t,
+			     const uint64_t a, const uint64_t b) {
+  assert(s);
+  assert(t);
+  int64_t  u1 = 1;
+  int64_t  u2 = 0;
+  uint64_t u3 = a;
+  int64_t  v1 = 0;
+  int64_t  v2 = 1;
+  uint64_t v3 = b;
+  
+  // Swap u with v if u3 < v3.
+  cond_swap3_s64_mixed(&u1, &u2, &u3, &v1, &v2, &v3);
+  while (v3 != 0) {
+    int k = msb_u64(u3) - msb_u64(v3);
+
+    // Subtract 2^k times v from u, and make sure u3 >= 0.
+    uint64_t m;
+    u3 = sub_with_mask_s64(&m, u3, v3 << k);
+    u1 -= v1 << k;
+    u2 -= v2 << k;
+    u1 = negate_using_mask_s64(m, u1);
+    u2 = negate_using_mask_s64(m, u2);
+    u3 = negate_using_mask_s64(m, u3);
+    
+    // Swap u with v if u3 < v3.
+    cond_swap3_s64_mixed(&u1, &u2, &u3, &v1, &v2, &v3);
+  }
+
+  if (u3 == a) {
+    // a divides b.
+    *s = 1;
+    *t = 0;
+  } else if (u3 == b) {
+    // b divides a.
+    *s = 0;
+    *t = 1;
+  } else {
+    *s = u1;
+    *t = u2;
+  }
+  return u3;
+}
+
+/// Computes g = s*a + t*b where g=gcd(a,b).
+/// NOTE: s and t cannot be NULL.
 void xgcd_binary_l2r_s128(s128_t* d,
 			  s128_t* s, s128_t* t,
 			  const s128_t* a, const s128_t* b) {
@@ -271,8 +330,11 @@ void xgcd_binary_l2r_s128(s128_t* d,
 
   // Swap u with v if u3 < v3.
   cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
-  while (!is_zero_s128(&v3)) {
-    int k = msb_u128((u128_t*)&u3) - msb_u128((u128_t*)&v3);
+  //  while (!is_zero_s128(&v3) && u3.v1 != 0) {
+  //  while (!is_zero_s128(&v3) && !s128_is_s64(&u3)) {
+  while (!is_zero_s128(&v3) && u3.v1 != 0) {
+    int k = msb_s128(&u3) - msb_s128(&v3);
+    //    int k = msb_u64(u3.v1) - msb_u64(v3.v1);
 
     // Subtrack 2^k times v from u, and make sure u3 >= 0.
     s128_t t1, t2, t3;
@@ -296,6 +358,16 @@ void xgcd_binary_l2r_s128(s128_t* d,
 
     // Swap u with v if u3 < v3.
     cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
+  }
+
+  // Run a 64-bit binary if necessary
+  if (!is_zero_s128(&v3)) {
+    int64_t ss, tt;
+    u3.v0 = xgcd_binary_l2r_u64(&ss, &tt, u3.v0, v3.v0);
+    u3.v1 = 0;
+    // Recombine
+    muladdmul_mixed(&u1, &u1, ss, &v1, tt);
+    muladdmul_mixed(&u2, &u2, ss, &v2, tt);
   }
 
   const uint64_t am = mask_s128(a);

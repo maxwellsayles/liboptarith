@@ -88,6 +88,20 @@ static inline int32_t sub_with_mask_s32(uint32_t* m,
 #endif
 }
 
+/// Swap two u32's.  This should be entirely inlined by the compiler.
+static inline void swap_u32(uint32_t* u, uint32_t* v) {
+  *u ^= *v;
+  *v ^= *u;
+  *u ^= *v;
+}
+
+/// Swap two s32's.  This should be entirely inlined by the compiler.
+static inline void swap_s32(int32_t* u, int32_t* v) {
+  *u ^= *v;
+  *v ^= *u;
+  *u ^= *v;
+}
+
 /// Conditionally swap u with v if u < v.
 static inline void cond_swap_s32(int32_t* u, int32_t* v) {
   uint32_t m;
@@ -394,6 +408,9 @@ static inline int32_t mulmod_s32(const int32_t x,
 
 /// Compute the largest s such that s^2 <= x.
 uint32_t sqrt_u32(const uint32_t x);
+
+/// Compute the extended GCD using a divrem method.
+uint32_t xgcd_divrem_u32(int32_t* u, int32_t* v, uint32_t m, uint32_t n);
 
 /// Compute the extended GCD using a divrem method.
 int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);

@@ -33,12 +33,10 @@ u128_t* rands_u128(const int n, const int b) {
     rand_u128(&res[i]);
     if (b > 64) {
       res[i].v1 &= m;
-    }
-    else {
+    } else {
       res[i].v1 = 0;
       res[i].v0 &= m;
     }
-    setbit_u128(&res[i], b - 1);
   }
   return res;
 }

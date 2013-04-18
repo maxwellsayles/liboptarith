@@ -166,8 +166,8 @@ set output 'best-128.eps'
 plot "pari-128.dat" with lines title 'Pari', \
      "gmp-128.dat" with lines title 'GMP', \
      "divrem-128.dat" with lines title 'EEA (128-bit)', \
-     "stein1-128.dat" with lines title 'Stein (128-bit)', \
-     "shallit-128.dat" with lines title 'Shallit and Sorenson (128-bit)', \
-     "binary_l2r-128.dat" with lines title 'Binary L2R (128-bit)', \
-     "lehmer64l2r-128.dat" with lines title 'Lehmer w/ 64-bit L2R (128-bit)'
+     "stein1-128.dat" with lines title 'Stein (128-bit)' lt 6, \
+     "shallit-128.dat" with lines title 'Shallit and Sorenson (128-bit)' lt 4, \
+     "binary_l2r-128.dat" with lines title 'Binary L2R (128-bit)' lt 7, \
+     "lehmer64l2r-128.dat" with lines title 'Lehmer w/ 64-bit L2R (128-bit)' lt 5
 

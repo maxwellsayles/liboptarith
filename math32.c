@@ -35,9 +35,36 @@ uint32_t sqrt_u32(const uint32_t x) {
   return root;
 }
 
-/**
- * Extended Euclidean Algorithm.
- */
+uint32_t xgcd_divrem_u32(int32_t* s, int32_t* t,
+			 const uint32_t m, const uint32_t n) {
+  int32_t  u1 = 1;
+  int32_t  u2 = 0;
+  uint32_t u3 = m;
+  int32_t  v1 = 0;
+  int32_t  v2 = 1;
+  uint32_t v3 = n;
+  
+  if (u3 < v3) {
+    swap_s32(&u1, &v1);
+    swap_s32(&u2, &v2);
+    swap_u32(&u3, &v3);
+  }
+
+  while (v3 != 0) {
+    uint32_t q = u3 / v3;
+    u3 %= v3;
+    u1 -= q * v1;
+    u2 -= q * v2;
+    swap_s32(&u1, &v1);
+    swap_s32(&u2, &v2);
+    swap_u32(&u3, &v3);
+  }
+
+  *s = u1;
+  *t = u2;
+  return u3;
+}
+
 int32_t xgcd_divrem_s32(int32_t* u, int32_t* v,
 			int32_t m, int32_t n) {
   // Make sure the inputs are positive.

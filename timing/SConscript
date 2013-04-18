@@ -1,7 +1,7 @@
 import os
 
 libs = ['rt']
-sources = ['../liboptarithxx.a', '/usr/lib/libpari.a']
+sources = ['../liboptarithxx.a', '/usr/local/lib/libpari.a']
     
 if os.path.isfile('/usr/local/lib/libgmp.a'):
     sources.append('/usr/local/lib/libgmp.a')
