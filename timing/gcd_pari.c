@@ -43,25 +43,50 @@ int64_t xgcd_pari_s64(int64_t* s, int64_t* t,
   return res;
 }
 
-// NOTE: This only supports unsigned integers.
-static inline GEN to_gen(const s128_t* x) {
-  //  GEN r = cgetg(2, t_INT);
-  //  setlgefint(r, 4);
-  //  setsigne(r, 1);
-  //  gel(r, 1) = (GEN)x->v0;
-  //  gel(r, 2) = (GEN)x->v1;
-  //  return r;
-  return mkintn(4,
-		(uint64_t)(x->v1 >> 32) & 0xFFFFFFFF,
-		(uint64_t)x->v1 & 0xFFFFFFFF,
-		(x->v0 >> 32) & 0xFFFFFFFF,
-		x->v0 & 0xFFFFFFFF);
-
+static inline GEN to_gen(const s128_t* x_) {
+  long s = cmp_s128_s64(x_, 0);
+  s128_t x = *x_;
+  if (s < 0) {
+    neg_s128_s128(&x, &x);
+  }
+  GEN r;
+  if (x.v1 == 0) {
+    r = stoi(x.v0);
+  } else {
+    r = mkintn(4,
+	       (uint64_t)(x.v1 >> 32) & 0xFFFFFFFF,
+	       (uint64_t)x.v1 & 0xFFFFFFFF,
+	       (x.v0 >> 32) & 0xFFFFFFFF,
+	       x.v0 & 0xFFFFFFFF);
+  }
+  if (s < 0) setsigne(r, -1);
+  return r;
 }
 
-// xgcd s128
-// NOTE: This does not return any usable values since I coudln't
-// get a GEN to s128_t to work.
+/// Convert a gen into an s128_t
+static void to_s128(s128_t* x, GEN g) {
+  long l = lgefint(g);
+  if (l == 2) {
+    setzero_s128(x);
+  } else if (l == 3) {
+    long* p = int_LSW(g);
+    set_s128_u64(x, *p);
+    if (signe(g) == -1) {
+      neg_s128_s128(x, x);
+    }
+  } else if (l == 4) {
+    long* p = int_LSW(g);
+    x->v0 = *p;
+    p = int_nextW(p);
+    x->v1 = *p;
+    if (signe(g) == -1) {
+      neg_s128_s128(x, x);
+    }
+  } else {
+    assert(false);
+  }
+}
+
 void xgcd_pari_s128(s128_t* d,
 		    s128_t* s, s128_t* t,
 		    const s128_t* a, const s128_t* b) {
@@ -73,9 +98,8 @@ void xgcd_pari_s128(s128_t* d,
 
   GEN g = bezout(x, y, &u, &v);
 
-  //  to_s128(d, g);
-  //  to_s128(s, u);
-  //  to_s128(t, v);
-
+  to_s128(d, g);
+  to_s128(s, u);
+  to_s128(t, v);
   avma = ltop;
 }

@@ -5,12 +5,14 @@
 #include <gmp.h>
 #include <inttypes.h>
 #include <math.h>
+#include <pari/pari.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 
 extern "C" {
+#include "gcd_pari.h"
 #include "liboptarith/gcd_binary_l2r.h"
 #include "liboptarith/gcd_lehmer.h"
 #include "liboptarith/gcd_mpz128.h"
@@ -26,7 +28,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_mpz_s128
+#define GCD_ROUTINE xgcd_pari_s128
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128
@@ -310,6 +312,8 @@ int main(int argc, char** argv) {
       usage(argc, argv);
     }
   }
+
+  pari_init(1<<24, 1<<20);
 
   // Set rand seed.
   srand(atoi(argv[1]));

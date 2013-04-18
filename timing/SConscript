@@ -1,7 +1,7 @@
 import os
 
 libs = ['rt']
-sources = ['../liboptarithxx.a']
+sources = ['../liboptarithxx.a', '/usr/lib/libpari.a']
     
 if os.path.isfile('/usr/local/lib/libgmp.a'):
     sources.append('/usr/local/lib/libgmp.a')
@@ -11,13 +11,15 @@ else:
     libs.append('gmp')
 
 Program(target='timegcd',
-        source=['timegcd.cc', 'gcd_stein_windowed.cc'] + sources,
+        source=['timegcd.cc',
+                'gcd_stein_windowed.cc',
+                'gcd_pari.c'] + sources,
         CCFLAGS=['-Wall', '-DNDEBUG', '-O3'],
         CPPPATH='../..',
         LIBS=libs)
 
 Program(target='timepari',
-        source=['timepari.cc', '/usr/lib/libpari.a'] + sources,
+        source=['timepari.cc'] + sources,
         CCFLAGS=['-Wall', '-DNDEBUG', '-O3'],
         CPPPATH='../..',
         LIBS=libs)
