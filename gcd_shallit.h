@@ -13,11 +13,17 @@
 
 #include <stdint.h>
 
+#include "liboptarith/s128_t.h"
+
 int32_t xgcd_shallit_s32(int32_t* s, int32_t* t,
 			 const int32_t a, const int32_t b);
 
 int64_t xgcd_shallit_s64(int64_t* s, int64_t* t,
 			 const int64_t a, const int64_t b);
+
+void xgcd_shallit_s128(s128_t* d,
+		       s128_t* s, s128_t* t,
+		       const s128_t* a, const s128_t* b);
 
 #endif  // GCD_SHALLIT__INCLUDED
 

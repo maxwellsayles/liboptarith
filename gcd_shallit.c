@@ -149,3 +149,120 @@ int64_t xgcd_shallit_s64(int64_t* s, int64_t* t,
   }
   return u3;
 }
+
+/// Computes g = s*a + t*b where g=gcd(a,b).
+/// NOTE: s and t cannot be NULL.
+void xgcd_shallit_s128(s128_t* d,
+		       s128_t* s, s128_t* t,
+		       const s128_t* a, const s128_t* b) {
+  assert(d); assert(s); assert(t); assert(a); assert(b);
+  s128_t u1;
+  s128_t u2;
+  s128_t v1;
+  s128_t v2;
+  s128_t u3;
+  s128_t v3;
+  set_s128_s64(&u1, 1);
+  set_s128_s64(&u2, 0);
+  abs_s128_s128(&u3, a);
+  set_s128_s64(&v1, 0);
+  set_s128_s64(&v2, 1);
+  abs_s128_s128(&v3, b);
+
+  if (cmpzero_s128(a) == 0) {
+    set_s128_s64(s, 0);
+    set_s128_s64(t, 1);
+    *d = *b;
+  } else if (cmpzero_s128(b) == 0) {
+    set_s128_s64(s, 1);
+    set_s128_s64(t, 0);
+    *d = *a;
+  }
+
+  // Swap u with v if u3 < v3.
+  cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
+  while (!is_zero_s128(&v3)) {
+    int k = msb_u128((u128_t*)&u3) - msb_u128((u128_t*)&v3);
+
+    // Ensure tmp1 >= u3, tmp2 < u3, and tmp2 = v3 << k
+    s128_t tmp1 = v3;
+    s128_t tmp2 = v3;
+    shl_s128_int(&tmp1, k);
+    if (cmp_s128_s128(&tmp1, &u3) > 0) {
+      shl_s128_int(&tmp2, k-1);
+      k--;
+    } else {
+      shl_s128_int(&tmp2, k+1);
+      swap_s128_s128(&tmp1, &tmp2);
+    }
+
+    s128_t v3a = u3;
+    s128_t v3b = tmp1;
+    sub_s128_s128(&v3a, &tmp2);
+    sub_s128_s128(&v3b, &u3);
+    s128_t tmp;
+    if (cmp_s128_s128(&v3a, &v3b) < 0) {
+      u3 = v3;
+      v3 = v3a;
+
+      tmp1 = v1;
+      tmp2 = v2;
+      shl_s128_int(&tmp1, k);
+      shl_s128_int(&tmp2, k);
+
+      tmp = v2;
+      v2 = u2;
+      sub_s128_s128(&v2, &tmp2);
+      u2 = tmp;
+      
+      tmp = v1;
+      v1 = u1;
+      sub_s128_s128(&v1, &tmp1);
+      u1 = tmp;
+    } else {
+      u3 = v3;
+      v3 = v3b;
+
+      tmp = v2;
+      shl_s128_int(&v2, k + 1);
+      sub_s128_s128(&v2, &u2);
+      u2 = tmp;
+
+      tmp = v1;
+      shl_s128_int(&v1, k + 1);
+      sub_s128_s128(&v1, &u1);
+      u1 = tmp;
+    }
+    // Swap u with v if u3 < v3.
+    cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
+  }
+
+  const uint64_t am = mask_s128(a);
+  const uint64_t bm = mask_s128(b);
+  s128_t at = *a;
+  s128_t bt = *a;
+  negate_using_mask_s128(am, &at);
+  negate_using_mask_s128(bm, &bt);
+  if (is_equal_s128_s128(&u3, &at)) {
+    set_s128_s64(s, am | 1);  // either 1 or -1
+    setzero_s128(t);
+  } else if (is_equal_s128_s128(&u3, &bt)) {
+    setzero_s128(s);
+    set_s128_s64(t, bm | 1);  // either 1 or -1
+  } else {
+    // Reduce u1 (mod b) and u2 (mod a).
+    s128_t q;
+    s128_t tmp;
+    divrem_s128_s128_s128_s128(&q, &u1, &u1, b);
+    mul_s128_s128_s128(&tmp, &q, a);
+    add_s128_s128(&u2, &tmp);
+
+    // Correct sign of s and t
+    negate_using_mask_s128(am, &u1);
+    negate_using_mask_s128(bm, &u2);
+    set_s128_s128(s, &u1);
+    set_s128_s128(t, &u2);
+  }
+  *d = u3;
+}
+
