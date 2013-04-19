@@ -60,8 +60,9 @@ plot "binary_l2r-32.dat" with lines title '32-bit', \
      "binary_l2r-128.dat" with lines title '128-bit'
 
 set output 'lehmer-32.eps'
-plot "lehmer-32.dat" with lines title '32-bit with 8-bit lookup', \
-     "lehmer-64.dat" with lines title '64-bit with 8-bit lookup', \
+plot "lehmer8-32.dat" with lines title '32-bit with 8-bit lookup', \
+     "lehmer8-64.dat" with lines title '64-bit with 8-bit lookup', \
+     "lehmer8-128.dat" with lines title '128-bit with 8-bit lookup', \
      "lehmer32eea-128.dat" with lines title '128-bit with 32-bit EEA', \
      "lehmer64eea-128.dat" with lines title '128-bit with 64-bit EEA', \
      "lehmer64l2r-128.dat" with lines title '128-bit with 64-bit L2R'
@@ -73,7 +74,7 @@ plot "pari-128.dat" with lines title 'Pari', \
      "stein3-32.dat" with lines title '3-bit Windowed Stein (32-bit)', \
      "shallit-32.dat" with lines title 'Shallit and Sorenson (32-bit)', \
      "binary_l2r-32.dat" with lines title 'Binary L2R (32-bit)', \
-     "lehmer-32.dat" with lines title 'Lehmer w/ 8bit Lookup (32-bit)'
+     "lehmer8-32.dat" with lines title 'Lehmer w/ 8bit Lookup (32-bit)'
 
 
 
@@ -124,7 +125,8 @@ plot "binary_l2r-64.dat" with lines title '64-bit', \
      "binary_l2r-128.dat" with lines title '128-bit'
 
 set output 'lehmer-64.eps'
-plot "lehmer-64.dat" with lines title '64-bit with 8-bit lookup', \
+plot "lehmer8-64.dat" with lines title '64-bit with 8-bit lookup', \
+     "lehmer8-128.dat" with lines title '128-bit with 8-bit lookup', \
      "lehmer32eea-128.dat" with lines title '128-bit with 32-bit EEA', \
      "lehmer64eea-128.dat" with lines title '128-bit with 64-bit EEA', \
      "lehmer64l2r-128.dat" with lines title '128-bit with 64-bit L2R'
@@ -135,7 +137,7 @@ plot "pari-128.dat" with lines title 'Pari', \
      "stein4-64.dat" with lines title '4-bit Windowed Stein (64-bit)', \
      "shallit-64.dat" with lines title 'Shallit and Sorenson (64-bit)', \
      "binary_l2r-64.dat" with lines title 'Binary L2R (64-bit)', \
-     "lehmer-64.dat" with lines title 'Lehmer w/ 8-bit Lookup (64-bit)'
+     "lehmer8-64.dat" with lines title 'Lehmer w/ 8-bit Lookup (64-bit)'
 
 
 
@@ -158,7 +160,8 @@ plot "stein1-128.dat" with lines title '1-bit window', \
      "stein5-128.dat" with lines title '5-bit window'
 
 set output 'lehmer-128.eps'
-plot "lehmer32eea-128.dat" with lines title '128-bit with 32-bit EEA', \
+plot "lehmer8-128.dat" with lines title '128-bit with 8-bit lookup', \
+     "lehmer32eea-128.dat" with lines title '128-bit with 32-bit EEA', \
      "lehmer64eea-128.dat" with lines title '128-bit with 64-bit EEA', \
      "lehmer64l2r-128.dat" with lines title '128-bit with 64-bit L2R'
 

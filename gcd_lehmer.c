@@ -5,9 +5,11 @@
 #include "liboptarith/gcd_lehmer.h"
 
 #include <assert.h>
+#include <gmp.h>
 #include <stdint.h>
 
 #include "liboptarith/math64.h"
+#include "liboptarith/s128_t.h"
 
 typedef struct {
   int8_t a;
@@ -16,8 +18,20 @@ typedef struct {
   int8_t d;
 } ABCD_t;
 
-
 extern ABCD_t lehmer_table[256*256];
+
+static inline void muladdmul_mixed(s128_t* res,
+				   const s128_t* f1,
+				   const int64_t f2,
+				   const s128_t* f3,
+				   const int64_t f4) {
+  s128_t t1;
+  s128_t t2;
+  mul_s128_s128_s64(&t1, f1, f2);
+  mul_s128_s128_s64(&t2, f3, f4);
+  add_s128_s128(&t1, &t2);
+  *res = t1;
+}
 
 int32_t xgcd_lehmer_s32(int32_t* u, int32_t* v,
 			const int32_t in_m, const int32_t in_n) {
@@ -212,17 +226,120 @@ int64_t xgcd_lehmer_s64(int64_t* u, int64_t* v,
   return m;
 }
 
-static inline void muladdmul_mixed(s128_t* res,
-				   const s128_t* f1,
-				   const int64_t f2,
-				   const s128_t* f3,
-				   const int64_t f4) {
-  s128_t t1;
-  s128_t t2;
-  mul_s128_s128_s64(&t1, f1, f2);
-  mul_s128_s128_s64(&t2, f3, f4);
-  add_s128_s128(&t1, &t2);
-  *res = t1;
+// NOTE: This is meant for timing purposes only and is not coded
+// in a style suitable for actual use!!
+// NOTE: We assume the inputs are positive.
+void xgcd_lehmer_s128(s128_t* d, s128_t* u, s128_t* v,
+		      const s128_t* in_m, const s128_t* in_n) {
+  s128_t m, n;
+  s128_t A, B, C, D;
+  s128_t a, c;
+  static mpz_t a2, c2;
+  s128_t q, t, t2;
+  uint8_t x, y;
+  int shift;
+  int shift2;
+  ABCD_t* p;
+  static mpz_t tt;
+  static int init = 1;
+  
+  // NOTE: I would never abuse 'static' like this in the real world!
+  if (init) {
+    mpz_init(a2);
+    mpz_init(c2);
+    mpz_init(tt);
+    init = 0;
+  }
+	
+  m = *in_m;
+  n = *in_n;
+
+  // make sure inputs are non-zero
+  if (cmpzero_s128(&n) == 0) {
+    set_s128_s64(u, 1);
+    set_s128_s64(v, 0);
+    *d = m;
+    return;
+  } else if (cmpzero_s128(&m) == 0) {
+    set_s128_s64(u, 0);
+    set_s128_s64(v, 1);
+    *d = n;
+    return;
+  }
+
+  set_s128_s64(&a, 1);
+  set_s128_s64(&c, 0);
+
+  // invariants: 
+  // a*in_m + b*in_n = m
+  // c*in_m + d*in_n = n
+  while (cmpzero_s128(&n) != 0) {
+    shift = msb_s128(&m) - 7;
+    shift2 = msb_s128(&n) - 7;
+    if (shift2 > shift) 
+      shift = shift2;
+    if (shift < 0) 
+      shift = 0;
+	
+    t = m;
+    shr_s128_int(&t, shift);
+    x = t.v0;
+    t = n;
+    shr_s128_int(&t, shift);
+    y = t.v0;
+		
+    p = &lehmer_table[(x << 8) + y];
+    set_s128_s64(&A, p->a);
+    set_s128_s64(&B, p->b);
+    set_s128_s64(&C, p->c);
+    set_s128_s64(&D, p->d);
+		
+    if (cmpzero_s128(&B) == 0) {
+      // single step of normal gcd
+      div_s128_s128_s128(&q, &m, &n);
+      //      q = m/n;
+
+      t = n;
+      //      n = m - q*n;
+      mul_s128_s128_s128(&t2, &q, &n);
+      n = m;
+      sub_s128_s128(&n, &t2);
+      m = t;
+
+      t = c;
+      //      c = a - q*c;
+      mul_s128_s128_s128(&t2, &q, &c);
+      c = a;
+      sub_s128_s128(&c, &t2);
+      a = t;
+    } else {
+      // recombine step
+      s128_t aa, cc, mm, nn;
+      muladdmul_mixed(&aa, &a, p->a, &c, p->b);
+      muladdmul_mixed(&cc, &a, p->c, &c, p->d);
+      muladdmul_mixed(&mm, &m, p->a, &n, p->b);
+      muladdmul_mixed(&nn, &m, p->c, &n, p->d);
+      a = aa;
+      c = cc;
+      m = mm;
+      n = nn;
+    }
+  }
+
+  // compute u, v
+  *u = a;
+	
+  // *v = (m-(*u)*in_m)/in_n;
+  s128_to_mpz(&a, a2);
+  s128_to_mpz(in_m, c2);
+  mpz_mul(tt, a2, c2);
+  s128_to_mpz(&m, a2);
+  mpz_sub(tt, a2, tt);
+  s128_to_mpz(in_n, a2);
+  mpz_divexact(tt, tt, a2);
+  s128_from_mpz(v, tt);
+
+  *d = m;
 }
 
 void xgcd_lehmer_s128_s32eea(s128_t* d, s128_t* u, s128_t* v,
