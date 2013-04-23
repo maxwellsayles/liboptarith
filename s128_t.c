@@ -48,39 +48,18 @@ void divrem_s128_s128_s128_s128(s128_t* out_q,
 				s128_t* out_r,
 				const s128_t* in_n,
 				const s128_t* in_d) {
-  s128_t n;
-  s128_t d;
-  int nsign; // numerator sign
-  int dsign; // denominator sign
-
-  // make sure all arguments are positive
-  if (in_n->v1 < 0) {
-    nsign = -1;
-    neg_s128_s128(&n, in_n);
-  } else {
-    nsign = 1;
-    set_s128_s128(&n, in_n);
-  }
-  if (in_d->v1 < 0) {
-    dsign = -1;
-    neg_s128_s128(&d, in_d);
-  } else {
-    dsign = 1;
-    set_s128_s128(&d, in_d);
-  }
+  s128_t n = *in_n;
+  s128_t d = *in_d;
+  uint64_t nmask = mask_s128(in_n);
+  uint64_t dmask = mask_s128(in_d);
+  negate_using_mask_s128(nmask, &n);
+  negate_using_mask_s128(dmask, &d);
 
   // perform unsigned division with remainder
   divrem_u128_u128_u128_u128((u128_t*)out_q, (u128_t*)out_r, (u128_t*)&n, (u128_t*)&d);
 
-  // adjust the sign of the quotient
-  if (nsign * dsign == -1) {
-    neg_s128_s128(out_q, out_q);
-  }
-
-  // adjust the sign of the remainder
-  if (nsign == -1) {
-    neg_s128_s128(out_r, out_r);
-  }
+  negate_using_mask_s128(nmask ^ dmask, out_q);
+  negate_using_mask_s128(nmask, out_r);
 }
 
 void xgcd_divrem_s128(s128_t* out_g,
