@@ -9,6 +9,7 @@ elif os.path.isfile('/usr/lib/libgmp.a'):
     sources.append('/usr/lib/libgmp.a')
 else:
     libs.append('gmp')
+#sources.append('/usr/local/lib/libmpir.a')
 
 Program(target='timegcd',
         source=['timegcd.cc',
