@@ -2,6 +2,17 @@
 
 #include <stdint.h>
 
+void from_decstr_u128(u128_t* x, const char* buffer, const int buffer_n) {
+  u128_t t;
+  setzero_u128(&t);
+  int i;
+  for (i = 0; i < buffer_n; i++) {
+    mul_u128_u128_u64(&t, &t, 10);
+    add_u128_u64(&t, buffer[i] - '0');
+  }
+  set_u128_u128(x, &t);
+}
+
 int to_decstr_u128(char* buffer, int buffer_size, const u128_t* x) {
   u128_t t;
   u128_t q;

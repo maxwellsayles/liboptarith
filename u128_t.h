@@ -33,7 +33,13 @@ static inline uint32_t get_u32_from_u128(const u128_t* x) {
   return (uint32_t)(x->v0 & 0xFFFFFFFF);
 }
 
+void from_decstr_u128(u128_t* x, const char* buffer, const int buffer_n);
 int to_decstr_u128(char* buffer, int buffer_size, const u128_t* x);
+
+static inline void setzero_u128(u128_t* x) {
+  x->v0 = 0;
+  x->v1 = 0;
+}
 
 static inline void set_u128_u128(u128_t* x, const u128_t* y) {
   x->v0 = y->v0;
