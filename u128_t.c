@@ -6,7 +6,9 @@ void from_decstr_u128(u128_t* x, const char* buffer, const int buffer_n) {
   u128_t t;
   setzero_u128(&t);
   int i;
-  for (i = 0; i < buffer_n; i++) {
+  for (i = 0;
+       i < buffer_n && buffer[i] >= '0' && buffer[i] <= '9';
+       i++) {
     mul_u128_u128_u64(&t, &t, 10);
     add_u128_u64(&t, buffer[i] - '0');
   }
