@@ -28,12 +28,12 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_mpz_s128
+#define GCD_ROUTINE xgcd_binary_l2rbranching_s64
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
-#define GCD_MAX_BITS_TO_TEST 128
-#define GCD_SIZE 128
-#define GCD_SANITY_TEST 0
+#define GCD_MAX_BITS_TO_TEST 64
+#define GCD_SIZE 64
+#define GCD_SANITY_TEST 1
 
 // return an array of n elements of b bits
 // caller must delete[] returned array

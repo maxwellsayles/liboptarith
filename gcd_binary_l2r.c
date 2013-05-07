@@ -265,6 +265,64 @@ int64_t xgcd_binary_l2r_s64(int64_t* s, int64_t* t,
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
 /// NOTE: s and t cannot be NULL.
+int64_t xgcd_binary_l2rbranching_s64(int64_t* s, int64_t* t,
+				     const int64_t a, const int64_t b) {
+  assert(s);
+  assert(t);
+
+  int64_t u1 = 1;
+  int64_t u2 = 0;
+  int64_t u3 = a < 0 ? -a : a;
+  int64_t v1 = 0;
+  int64_t v2 = 1;
+  int64_t v3 = b < 0 ? -b : b;
+  
+  // Swap u with v if u3 < v3.
+  if (u3 < v3) {
+    int64_t t;
+    t = u1; u1 = v1; v1 = t;
+    t = u2; u2 = v2; v2 = t;
+    t = u3; u3 = v3; v3 = t;
+  }
+  while (v3 != 0) {
+    int k = msb_u64(u3) - msb_u64(v3);
+
+    // Subtract 2^k times v from u, and make sure u3 >= 0.
+    u1 -= v1 << k;
+    u2 -= v2 << k;
+    u3 -= v3 << k;
+    if (u3 < 0) {
+      u1 = -u1;
+      u2 = -u2;
+      u3 = -u3;
+    }
+    
+    // Swap u with v if u3 < v3.
+    if (u3 < v3) {
+      int64_t t;
+      t = u1; u1 = v1; v1 = t;
+      t = u2; u2 = v2; v2 = t;
+      t = u3; u3 = v3; v3 = t;
+    }
+  }
+
+  if (u3 == (a < 0 ? -a : a)) {
+    // a divides b.
+    *s = a < 0 ? -1 : 1;
+    *t = 0;
+  } else if (u3 == (b < 0 ? -b : b)) {
+    // b divides a.
+    *s = 0;
+    *t = b < 0 ? -1 : 1;
+  } else {
+    *s = a < 0 ? -u1 : u1;
+    *t = b < 0 ? -u2 : u2;
+  }
+  return u3;
+}
+
+/// Computes g = s*a + t*b where g=gcd(a,b).
+/// NOTE: s and t cannot be NULL.
 uint64_t xgcd_binary_l2r_u64(int64_t* s, int64_t* t,
 			     const uint64_t a, const uint64_t b) {
   assert(s);
