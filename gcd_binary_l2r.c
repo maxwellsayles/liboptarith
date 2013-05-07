@@ -279,6 +279,9 @@ int64_t xgcd_binary_l2rbranching_s64(int64_t* s, int64_t* t,
   
   // Swap u with v if u3 < v3.
   if (u3 < v3) {
+    //    u1 ^= v1; v1 ^= u1; u1 ^= v1;
+    //    u2 ^= v2; v2 ^= u2; u2 ^= v2;
+    //    u3 ^= v3; v3 ^= u3; u3 ^= v3;
     int64_t t;
     t = u1; u1 = v1; v1 = t;
     t = u2; u2 = v2; v2 = t;
@@ -299,6 +302,9 @@ int64_t xgcd_binary_l2rbranching_s64(int64_t* s, int64_t* t,
     
     // Swap u with v if u3 < v3.
     if (u3 < v3) {
+      //      u1 ^= v1; v1 ^= u1; u1 ^= v1;
+      //      u2 ^= v2; v2 ^= u2; u2 ^= v2;
+      //      u3 ^= v3; v3 ^= u3; u3 ^= v3;
       int64_t t;
       t = u1; u1 = v1; v1 = t;
       t = u2; u2 = v2; v2 = t;
