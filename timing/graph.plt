@@ -174,3 +174,13 @@ plot "pari-128.dat" with lines title 'Pari', \
      "binary_l2r-128.dat" with lines title 'Binary L2R (128-bit)' lt 7, \
      "lehmer64l2r-128.dat" with lines title 'Lehmer w/ 64-bit L2R (128-bit)' lt 5
 
+###########
+# DEFENCE #
+###########
+
+set xrange [1:63]
+set output 'optimizations-64.eps'
+plot "binary_l2r_noopt-64.dat" with lines t 'No Opts', \
+     "binary_l2r_msbtrick.dat" with lines t 'MSB Trick', \
+     "binary_l2r_swaptrick-64.dat" with lines t 'MSB + Swap Tricks', \
+     "binary_l2r-64.dat" with lines t 'MSB + Swap + Branch Free'
