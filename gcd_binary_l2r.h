@@ -66,20 +66,5 @@ int64_t xgcd_left_binary_l2r_s64(int64_t* s,
 void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
 			       const s128_t* a, const s128_t* b);
 
-// Partial s32
-void xgcd_partial_binary_l2r_s32(int32_t* R1, int32_t* R0,
-				 int32_t* C1, int32_t* C0,
-				 const int32_t bound);
-
-// Partial s64
-void xgcd_partial_binary_l2r_s64(int64_t* R1, int64_t* R0,
-				 int64_t* C1, int64_t* C0,
-				 const int64_t bound);
-
-// Partial s128
-void xgcd_shortpartial_binary_l2r_s128(s128_t* R1, s128_t* R0,
-				       int64_t* C1, int64_t* C0,
-				       const int64_t bound);
-
-#endif  // GCD_BINARY_L2R__INCLUDED
+#endif
 
