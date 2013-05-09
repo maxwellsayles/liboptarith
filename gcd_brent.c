@@ -125,6 +125,48 @@ int64_t xgcd_brent_s64(int64_t* s, int64_t* t,
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
 /// NOTE: s and t cannot be NULL.
+uint64_t xgcd_brent_u64(int64_t* s, int64_t* t,
+			const uint64_t a, const uint64_t b) {
+  assert(s);
+  assert(t);
+  int64_t u1 = 1;
+  int64_t u2 = 0;
+  uint64_t u3 = a;
+  int64_t v1 = 0;
+  int64_t v2 = 1;
+  uint64_t v3 = b;
+  
+  // Swap u with v if u3 < v3.
+  cond_swap3_s64_mixed(&u1, &u2, &u3, &v1, &v2, &v3);
+  while (v3 != 0) {
+    int k = msb_u64(u3) - msb_u64(v3);
+    // If u3 underflows, use k-1 instead.
+    uint64_t t = v3 << k;
+    uint64_t m;
+    u3 = sub_with_mask_s64(&m, u3, t);
+    u3 += (t >> 1) & m;
+    u1 -= v1 << (k + m);
+    u2 -= v2 << (k + m);
+    cond_swap3_s64_mixed(&u1, &u2, &u3, &v1, &v2, &v3);
+  }
+
+  if (u3 == a) {
+    // a divides b.
+    *s = 1;
+    *t = 0;
+  } else if (u3 == b) {
+    // b divides a.
+    *s = 0;
+    *t = 1;
+  } else {
+    *s = u1;
+    *t = u2;
+  }
+  return u3;
+}
+
+/// Computes g = s*a + t*b where g=gcd(a,b).
+/// NOTE: s and t cannot be NULL.
 void xgcd_brent_s128(s128_t* d,
 		     s128_t* s, s128_t* t,
 		     const s128_t* a, const s128_t* b) {
@@ -145,7 +187,7 @@ void xgcd_brent_s128(s128_t* d,
 
   // Swap u with v if u3 < v3.
   cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
-  while (!is_zero_s128(&v3)) {
+  while (!is_zero_s128(&v3) && u3.v1 != 0) {
     int k = msb_s128(&u3) - msb_s128(&v3);
     shl_s128_s128_int(&tmp, &v3, k);
     uint64_t m;
@@ -164,6 +206,16 @@ void xgcd_brent_s128(s128_t* d,
     sub_s128_s128(&u2, &tmp);
 
     cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
+  }
+
+  // Run a 64-bit binary if necessary
+  if (!is_zero_s128(&v3)) {
+    int64_t ss, tt;
+    u3.v0 = xgcd_brent_u64(&ss, &tt, u3.v0, v3.v0);
+    u3.v1 = 0;
+    // Recombine
+    muladdmul_mixed(&u1, &u1, ss, &v1, tt);
+    muladdmul_mixed(&u2, &u2, ss, &v2, tt);
   }
 
   const uint64_t am = mask_s128(a);
