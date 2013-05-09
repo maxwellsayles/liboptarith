@@ -19,6 +19,7 @@ extern "C" {
 #include "liboptarith/gcd_mpz128.h"
 #include "liboptarith/gcd_shallit.h"
 #include "liboptarith/gcd_smallq_case.h"
+#include "liboptarith/gcd_smallq_loop.h"
 #include "liboptarith/gcd_stein.h"
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"
@@ -31,7 +32,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_smallq4_case_s64
+#define GCD_ROUTINE xgcd_smallq4_loop_s64
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 64
