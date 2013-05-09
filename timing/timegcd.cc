@@ -30,11 +30,11 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_flint_s32
+#define GCD_ROUTINE xgcd_divrem_s64
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
-#define GCD_MAX_BITS_TO_TEST 32
-#define GCD_SIZE 32
+#define GCD_MAX_BITS_TO_TEST 64
+#define GCD_SIZE 64
 #define GCD_SANITY_TEST 1
 
 // return an array of n elements of b bits

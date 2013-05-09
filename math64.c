@@ -43,6 +43,12 @@ int64_t xgcd_divrem_s64(int64_t* out_u, int64_t* out_v,
   uint64_t sn = n >> 63;
   m = negate_using_mask_s64(sm, m);
   n = negate_using_mask_s64(sn, n);
+    
+  int64_t a = 0;
+  int64_t b = 1;
+  int64_t u = 1;
+  int64_t v = 0;
+  
   if (n == 0) {
     *out_u = 1;
     *out_v = 0;
@@ -54,29 +60,51 @@ int64_t xgcd_divrem_s64(int64_t* out_u, int64_t* out_v,
     return n;
   }
 
-  int64_t u = 1;
-  int64_t v = 0;
-  int64_t a = 0;
-  int64_t b = 1;
-
-  // Invariant: m >= n.
-  cond_swap3_s64(&u, &v, &m, &a, &b, &n);
-  while (n > 0) {
-    int64_t q, t;
+#if defined(__x86_64)
+  asm("0:\n\t"
+      "movq %0, %%rax\n\t"
+      "xorq %%rdx, %%rdx\n\t"
+      "divq %1\n\t"
+      
+      "movq %1, %0\n\t"
+      "movq %%rdx, %1\n\t"
+      
+      "movq %%rax, %%rdx\n\t"
+      "imul %4, %%rax\n\t"
+      "imul %5, %%rdx\n\t"
+      
+      "subq %%rax, %2\n\t"
+      "subq %%rdx, %3\n\t"
+      
+      "testq %1, %1\n\t"  // for the branch at the bottom
+      
+      "xchgq %2, %4\n\t"
+      "xchgq %3, %5\n\t"
+      
+      "jnz 0b\n\t"
+      
+      : "=r"(m), "=r"(n), "=r"(u), "=r"(v), "=r"(a), "=r"(b)
+      : "0"(m), "1"(n), "2"(u), "3"(v), "4"(a), "5"(b)
+      : "cc", "rax", "rdx");
+#else
+  int64_t q, t;
+  while (n != 0) {
     q = m / n;
-
+    
     t = n;
-    n = m % n;
+    n = m - q*n;
     m = t;
-
+    
     t = a;
     a = u - q*a;
     u = t;
-
+    
     t = b;
     b = v - q*b;
     v = t;
   }
+#endif
+
   *out_u = negate_using_mask_s64(sm, u);
   *out_v = negate_using_mask_s64(sn, v);
   return m;
