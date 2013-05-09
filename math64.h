@@ -66,6 +66,12 @@ static inline int64_t sub_with_mask_s64(uint64_t* m,
 #endif
 }
 
+static inline void swap_s64(int64_t* u, int64_t* v) {
+  *u ^= *v;
+  *v ^= *u;
+  *u ^= *v;
+}
+
 /// Conditionally swap u with v if u < v.
 static inline void cond_swap_s64(int64_t* u, int64_t* v) {
   uint64_t m;
