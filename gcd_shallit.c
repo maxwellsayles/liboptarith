@@ -4,6 +4,19 @@
 
 #include "liboptarith/math64.h"
 
+static inline void muladdmul_mixed(s128_t* res,
+				   const s128_t* f1,
+				   const int64_t f2,
+				   const s128_t* f3,
+				   const int64_t f4) {
+  s128_t t1;
+  s128_t t2;
+  mul_s128_s128_s64(&t1, f1, f2);
+  mul_s128_s128_s64(&t2, f3, f4);
+  add_s128_s128(&t1, &t2);
+  *res = t1;
+}
+
 int32_t xgcd_shallit_s32(int32_t* s, int32_t* t,
 			 const int32_t a, const int32_t b) {
   assert(s);
@@ -181,8 +194,8 @@ void xgcd_shallit_s128(s128_t* d,
 
   // Swap u with v if u3 < v3.
   cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
-  while (!is_zero_s128(&v3)) {
-    int k = msb_u128((u128_t*)&u3) - msb_u128((u128_t*)&v3);
+  while (!is_zero_s128(&v3) && msb_s128(&u3) > 61) {
+    int k = msb_s128(&u3) - msb_s128(&v3);
 
     // Ensure tmp1 >= u3, tmp2 < u3, and tmp2 = v3 << k
     s128_t tmp1 = v3;
@@ -235,6 +248,16 @@ void xgcd_shallit_s128(s128_t* d,
     }
     // Swap u with v if u3 < v3.
     cond_swap3_s128(&u1, &u2, &u3, &v1, &v2, &v3);
+  }
+
+  // Run a 64-bit binary if necessary
+  if (!is_zero_s128(&v3)) {
+    int64_t ss, tt;
+    u3.v0 = xgcd_shallit_s64(&ss, &tt, u3.v0, v3.v0);
+    u3.v1 = 0;
+    // Recombine
+    muladdmul_mixed(&u1, &u1, ss, &v1, tt);
+    muladdmul_mixed(&u2, &u2, ss, &v2, tt);
   }
 
   const uint64_t am = mask_s128(a);
