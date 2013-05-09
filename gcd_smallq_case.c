@@ -1,12 +1,14 @@
-#include "liboptarith/gcd_smallq.h"
+#include "liboptarith/gcd_smallq_case.h"
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"
 
-int32_t xgcd_smallq0_s32(int32_t* out_u1, int32_t* out_u2,
-			 const int32_t in_u3, const int32_t in_v3) {
+int32_t xgcd_smallq0_case_s32(int32_t* out_u1, int32_t* out_u2,
+			      const int32_t in_u3, const int32_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int32_t u1 = 1;
   int32_t u2 = 0;
   int32_t u3 = in_u3;
@@ -31,8 +33,9 @@ int32_t xgcd_smallq0_s32(int32_t* out_u1, int32_t* out_u2,
   return u3;
 }
 
-int32_t xgcd_smallq1_s32(int32_t* out_u1, int32_t* out_u2,
-			 const int32_t in_u3, const int32_t in_v3) {
+int32_t xgcd_smallq1_case_s32(int32_t* out_u1, int32_t* out_u2,
+			      const int32_t in_u3, const int32_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int32_t u1 = 1;
   int32_t u2 = 0;
   int32_t u3 = in_u3;
@@ -71,8 +74,9 @@ int32_t xgcd_smallq1_s32(int32_t* out_u1, int32_t* out_u2,
   return u3;
 }
 
-int32_t xgcd_smallq2_s32(int32_t* out_u1, int32_t* out_u2,
-			 const int32_t in_u3, const int32_t in_v3) {
+int32_t xgcd_smallq2_case_s32(int32_t* out_u1, int32_t* out_u2,
+			      const int32_t in_u3, const int32_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int32_t u1 = 1;
   int32_t u2 = 0;
   int32_t u3 = in_u3;
@@ -115,8 +119,9 @@ int32_t xgcd_smallq2_s32(int32_t* out_u1, int32_t* out_u2,
   return u3;
 }
 
-int32_t xgcd_smallq3_s32(int32_t* out_u1, int32_t* out_u2,
-			 const int32_t in_u3, const int32_t in_v3) {
+int32_t xgcd_smallq3_case_s32(int32_t* out_u1, int32_t* out_u2,
+			      const int32_t in_u3, const int32_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int32_t u1 = 1;
   int32_t u2 = 0;
   int32_t u3 = in_u3;
@@ -163,8 +168,9 @@ int32_t xgcd_smallq3_s32(int32_t* out_u1, int32_t* out_u2,
   return u3;
 }
 
-int32_t xgcd_smallq4_s32(int32_t* out_u1, int32_t* out_u2,
-			 const int32_t in_u3, const int32_t in_v3) {
+int32_t xgcd_smallq4_case_s32(int32_t* out_u1, int32_t* out_u2,
+			      const int32_t in_u3, const int32_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int32_t u1 = 1;
   int32_t u2 = 0;
   int32_t u3 = in_u3;
@@ -215,8 +221,9 @@ int32_t xgcd_smallq4_s32(int32_t* out_u1, int32_t* out_u2,
   return u3;
 }
 
-int32_t xgcd_smallq5_s32(int32_t* out_u1, int32_t* out_u2,
-			 const int32_t in_u3, const int32_t in_v3) {
+int32_t xgcd_smallq5_case_s32(int32_t* out_u1, int32_t* out_u2,
+			      const int32_t in_u3, const int32_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int32_t u1 = 1;
   int32_t u2 = 0;
   int32_t u3 = in_u3;
@@ -271,8 +278,9 @@ int32_t xgcd_smallq5_s32(int32_t* out_u1, int32_t* out_u2,
   return u3;
 }
 
-int64_t xgcd_smallq0_s64(int64_t* out_u1, int64_t* out_u2,
-			 const int64_t in_u3, const int64_t in_v3) {
+int64_t xgcd_smallq0_case_s64(int64_t* out_u1, int64_t* out_u2,
+			      const int64_t in_u3, const int64_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int64_t u1 = 1;
   int64_t u2 = 0;
   int64_t u3 = in_u3;
@@ -297,8 +305,9 @@ int64_t xgcd_smallq0_s64(int64_t* out_u1, int64_t* out_u2,
   return u3;
 }
 
-int64_t xgcd_smallq1_s64(int64_t* out_u1, int64_t* out_u2,
-			 const int64_t in_u3, const int64_t in_v3) {
+int64_t xgcd_smallq1_case_s64(int64_t* out_u1, int64_t* out_u2,
+			      const int64_t in_u3, const int64_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int64_t u1 = 1;
   int64_t u2 = 0;
   int64_t u3 = in_u3;
@@ -337,8 +346,9 @@ int64_t xgcd_smallq1_s64(int64_t* out_u1, int64_t* out_u2,
   return u3;
 }
 
-int64_t xgcd_smallq2_s64(int64_t* out_u1, int64_t* out_u2,
-			 const int64_t in_u3, const int64_t in_v3) {
+int64_t xgcd_smallq2_case_s64(int64_t* out_u1, int64_t* out_u2,
+			      const int64_t in_u3, const int64_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int64_t u1 = 1;
   int64_t u2 = 0;
   int64_t u3 = in_u3;
@@ -381,8 +391,9 @@ int64_t xgcd_smallq2_s64(int64_t* out_u1, int64_t* out_u2,
   return u3;
 }
 
-int64_t xgcd_smallq3_s64(int64_t* out_u1, int64_t* out_u2,
-			 const int64_t in_u3, const int64_t in_v3) {
+int64_t xgcd_smallq3_case_s64(int64_t* out_u1, int64_t* out_u2,
+			      const int64_t in_u3, const int64_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int64_t u1 = 1;
   int64_t u2 = 0;
   int64_t u3 = in_u3;
@@ -429,8 +440,9 @@ int64_t xgcd_smallq3_s64(int64_t* out_u1, int64_t* out_u2,
   return u3;
 }
 
-int64_t xgcd_smallq4_s64(int64_t* out_u1, int64_t* out_u2,
-			 const int64_t in_u3, const int64_t in_v3) {
+int64_t xgcd_smallq4_case_s64(int64_t* out_u1, int64_t* out_u2,
+			      const int64_t in_u3, const int64_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int64_t u1 = 1;
   int64_t u2 = 0;
   int64_t u3 = in_u3;
@@ -481,8 +493,9 @@ int64_t xgcd_smallq4_s64(int64_t* out_u1, int64_t* out_u2,
   return u3;
 }
 
-int64_t xgcd_smallq5_s64(int64_t* out_u1, int64_t* out_u2,
-			 const int64_t in_u3, const int64_t in_v3) {
+int64_t xgcd_smallq5_case_s64(int64_t* out_u1, int64_t* out_u2,
+			      const int64_t in_u3, const int64_t in_v3) {
+  assert(in_u3 >= 0 && in_v3 >= 0);
   int64_t u1 = 1;
   int64_t u2 = 0;
   int64_t u3 = in_u3;
