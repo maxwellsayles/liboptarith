@@ -13,6 +13,7 @@ else:
 
 Program(target='timegcd',
         source=['timegcd.cc',
+		'gcd_flint.c',
                 'gcd_stein_windowed.cc',
                 'gcd_pari.c'] + sources,
         CCFLAGS=['-Wall', '-DNDEBUG', '-O3'],

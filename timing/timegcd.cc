@@ -23,17 +23,18 @@ extern "C" {
 #include "liboptarith/math64.h"
 #include "liboptarith/math_mpz.h"
 #include "liboptarith/s128_t.h"
+#include "liboptarith/timing/gcd_flint.h"
 }
 
 #include "gcd_stein_windowed.h"
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_brent_s128
+#define GCD_ROUTINE xgcd_flint_s32
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
-#define GCD_MAX_BITS_TO_TEST 128
-#define GCD_SIZE 128
+#define GCD_MAX_BITS_TO_TEST 32
+#define GCD_SIZE 32
 #define GCD_SANITY_TEST 1
 
 // return an array of n elements of b bits
@@ -187,6 +188,7 @@ uint64_t time_gcd_set(const uint32_t* rands, const int pairs,
   uint64_t start_time, end_time;
   int32_t g, u, v, m, n;
     
+#if (GCD_SANITY_TEST == 1)
   // sanity check first
   for (int i = 0; i < pairs; i++) {
     m = rands[(i << 1)  ];
@@ -196,6 +198,7 @@ uint64_t time_gcd_set(const uint32_t* rands, const int pairs,
       return -1;
     }
   }
+#endif
     
   // perform actual timing
   start_time = current_nanos();
@@ -217,6 +220,7 @@ uint64_t time_gcd_set(const uint64_t* rands, const int pairs,
   uint64_t start_time, end_time;
   int64_t g, u, v, m, n;
     
+#if (GCD_SANITY_TEST == 1)
   // sanity check first
   for (int i = 0; i < pairs; i++) {
     m = rands[(i << 1)  ];
@@ -226,6 +230,7 @@ uint64_t time_gcd_set(const uint64_t* rands, const int pairs,
       return -1;
     }
   }
+#endif
     
   // perform actual timing
   start_time = current_nanos();
