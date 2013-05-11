@@ -144,6 +144,31 @@ static inline void cond_swap3_s32(int32_t* u1,
   *v3 += d3;
 }
 
+/// Conditionally swap u with v if u4 < v4.
+static inline void cond_swap4_s32(int32_t* u1,
+				  int32_t* u2,
+				  int32_t* u3,
+				  int32_t* u4,
+				  int32_t* v1,
+				  int32_t* v2,
+				  int32_t* v3,
+				  int32_t* v4) {
+  uint32_t m;
+  int32_t d4 = sub_with_mask_s32(&m, *u4, *v4);
+  int32_t d1 = (*u1 - *v1) & m;
+  int32_t d2 = (*u2 - *v2) & m;
+  int32_t d3 = (*u3 - *v3) & m;
+  d4 &= m;
+  *u1 -= d1;
+  *u2 -= d2;
+  *u3 -= d3;
+  *u4 -= d4;
+  *v1 += d1;
+  *v2 += d2;
+  *v3 += d3;
+  *v4 += d4;
+}
+
 /// Negate using a mask. m must be either -1 or 0.
 static inline int32_t negate_using_mask_s32(const uint32_t m,
 					    const int32_t x) {
