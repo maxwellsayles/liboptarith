@@ -32,6 +32,11 @@ void xgcd_lehmer_s128_s64eea(s128_t* d, s128_t* u, s128_t* v,
 void xgcd_lehmer_s128_s64l2r(s128_t* d, s128_t* u, s128_t* v,
 			     const s128_t* in_m, const s128_t* in_n);
 
+/// Partial XGCD of the Lehmer with 64-bit EEA.
+void xgcd_shortpartial_lehmer_s128_eea64(s128_t* pR2, s128_t* pR1,
+					 int64_t* pC2, int64_t* pC1,
+					 const int64_t bound);
+
 /// Partial XGCD of the Lehmer with 64-bit brent binary.
 void xgcd_shortpartial_lehmer_s128_brent64(s128_t* pR2, s128_t* pR1,
 					   int64_t* pC2, int64_t* pC1,
