@@ -678,9 +678,9 @@ void xgcd_lehmer_s128_s64l2r(s128_t* d, s128_t* u, s128_t* v,
   *v = u2;
 }
 
-void xgcd_shortpartial_lehmer_s128_s64l2r(s128_t* pR2, s128_t* pR1,
-					  int64_t* pC2, int64_t* pC1,
-					  const int64_t bound) {
+void xgcd_shortpartial_lehmer_s128_brent64(s128_t* pR2, s128_t* pR1,
+					   int64_t* pC2, int64_t* pC1,
+					   const int64_t bound) {
   s128_t R2 = *pR2;
   s128_t R1 = *pR1;
   s128_t C2;
