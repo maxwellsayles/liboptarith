@@ -1,5 +1,6 @@
 #include "liboptarith/gcd_binary_l2r.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -8,9 +9,7 @@
 #include "liboptarith/math64.h"
 #include "liboptarith/s128_t.h"
 
-// trickery to swap two values
-#define swap(a,b) { (a)^=(b); (b)^=(a); (a)^=(b); }
-
+/// f1 * f2 + f3 * f4
 static inline void muladdmul_mixed(s128_t* res,
 				   const s128_t* f1,
 				   const int64_t f2,
@@ -22,13 +21,6 @@ static inline void muladdmul_mixed(s128_t* res,
   mul_s128_s128_s64(&t2, f3, f4);
   add_s128_s128(&t1, &t2);
   *res = t1;
-}
-
-static inline int is_equal_to_neg_s128_s128(const s128_t* a,
-					    const s128_t* b) {
-  s128_t n;
-  neg_s128_s128(&n, b);
-  return is_equal_s128_s128(a, &n);
 }
 
 /// Computes g = s*a + t*b where g=gcd(a,b).
@@ -250,6 +242,8 @@ void xgcd_brent_s128(s128_t* d,
 void xgcd_partial_brent_s32(int32_t* pR1, int32_t* pR0,
 			    int32_t* pC1, int32_t* pC0,
 			    const int32_t bound) {
+  assert(*pR1 >= 0);
+  assert(*pR0 >= 0);
   int32_t R1 = *pR1;
   int32_t R0 = *pR0;
   int32_t C1 = 0;
@@ -275,6 +269,8 @@ void xgcd_partial_brent_s32(int32_t* pR1, int32_t* pR0,
 void xgcd_partial_brent_s64(int64_t* pR1, int64_t* pR0,
 			    int64_t* pC1, int64_t* pC0,
 			    const int64_t bound) {
+  assert(*pR1 >= 0);
+  assert(*pR0 >= 0);
   int64_t R1 = *pR1;
   int64_t R0 = *pR0;
   int64_t C1 = 0;
@@ -315,6 +311,8 @@ static inline void cond_swap2_mixed(s128_t* R1, int64_t* C1,
 void xgcd_shortpartial_brent_s128(s128_t* pR1, s128_t* pR0,
 				  int64_t* pC1, int64_t* pC0,
 				  const int64_t bound) {
+  assert(cmp_s128_s64(pR1, 0) >= 0);
+  assert(cmp_s128_s64(pR0, 0) >= 0);
   s128_t R1 = *pR1;
   s128_t R0 = *pR0;
   int64_t C1 = 0;
