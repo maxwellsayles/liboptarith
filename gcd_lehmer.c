@@ -709,7 +709,7 @@ void xgcd_shortpartial_lehmer_s128_eea64(s128_t* pR2, s128_t* pR1,
     int64_t A1 = 1;
     int64_t B2 = 1;
     int64_t B1 = 0;
-    int i = 0;
+    int i = 1;
 
     cond_swap3_s64(&B2, &A2, &mm, &B1, &A1, &nn);
     while (nn > bb) {
