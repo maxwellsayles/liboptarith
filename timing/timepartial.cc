@@ -25,7 +25,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_shortpartial_lehmer_s128_eea64
+#define GCD_ROUTINE xgcd_shortpartial_mpz_s128
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128
 #define GCD_SIZE 128
@@ -268,7 +268,7 @@ int main(int argc, char** argv) {
       f << i << ", " << (double)res/(double)pairs << endl;
       f << flush;
     }		
-    i ++;
+    i += 2;
   }
   
   if (dump) {
