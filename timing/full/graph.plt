@@ -179,8 +179,24 @@ plot "pari-128.dat" with lines title 'Pari', \
 ###########
 
 set xrange [1:63]
-set output 'optimizations-64.eps'
+set output 'binary-xgcd-optimizations-64.eps'
 plot "binary_l2r_noopt-64.dat" with lines t 'No Opts', \
      "binary_l2r_msbtrick.dat" with lines t 'MSB Trick', \
      "binary_l2r_swaptrick-64.dat" with lines t 'MSB + Swap Tricks', \
      "binary_l2r-64.dat" with lines t 'MSB + Swap + Branch Free'
+
+set xrange [1:31]
+set output 'binary-xgcds-32.eps'
+plot 'shallit-32.dat' with lines t 'Shallit & Sorenson', \
+     'brent-32.dat' with lines t 'Brent', \
+     'binary_l2r-32.dat' with lines t 'Simplified L2R'
+set xrange [32:63]
+set output 'binary-xgcds-64.eps'
+plot 'shallit-64.dat' with lines t 'Shallit & Sorenson', \
+     'brent-64.dat' with lines t 'Brent', \
+     'binary_l2r-64.dat' with lines t 'Simplified L2R'
+set xrange [64:127]
+set output 'binary-xgcds-128.eps'
+plot 'shallit-128.dat' with lines t 'Shallit & Sorenson', \
+     'brent-128.dat' with lines t 'Brent', \
+     'binary_l2r-128.dat' with lines t 'Simplified L2R'     
