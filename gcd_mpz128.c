@@ -2,6 +2,8 @@
 
 #include <gmp.h>
 
+#include "liboptarith/math_mpz.h"
+#include "liboptarith/mpz_xgcd.h"
 #include "liboptarith/s128_t.h"
 
 int64_t xgcd_mpz_s64(int64_t* out_s, int64_t* out_t,
@@ -114,3 +116,37 @@ void xgcd_mpz_s128(s128_t* out_g, s128_t* out_s, s128_t* out_t,
   s128_from_mpz(out_t, t);
 }
 
+// NOTE: This function is not thread safe as it uses static variables.
+// NOTE: I would never abuse static like this in real life!
+void xgcd_shortpartial_mpz_s128(s128_t* R1, s128_t* R0,
+				int64_t* C1, int64_t* C0,
+				const int64_t bound) {
+  /// NOTE: BAD BAD! I admonish myself!
+  static mpz_xgcd_t xgcd;
+  static int init = 1;
+  static mpz_t zR1;
+  static mpz_t zR0;
+  static mpz_t zC1;
+  static mpz_t zC0;
+  static mpz_t zBound;
+  if (init) {
+    mpz_xgcd_init(&xgcd, 128);
+    mpz_init(zR1);
+    mpz_init(zR0);
+    mpz_init(zC1);
+    mpz_init(zC0);
+    mpz_init(zBound);
+    init = 0;
+  }
+
+  s128_to_mpz(R1, zR1);
+  s128_to_mpz(R0, zR0);
+  mpz_set_s64(zBound, bound);
+
+  mpz_xgcd_partial(&xgcd, zR1, zR0, zC1, zC0, zBound);
+
+  s128_from_mpz(R1, zR1);
+  s128_from_mpz(R0, zR0);
+  *C1 = mpz_get_s64(zC1);
+  *C0 = mpz_get_s64(zC0);
+}
