@@ -713,13 +713,11 @@ void xgcd_shortpartial_lehmer_s128_eea64(s128_t* pR2, s128_t* pR1,
 
     cond_swap3_s64(&B2, &A2, &mm, &B1, &A1, &nn);
     while (nn > bb) {
-      int64_t q = mm / nn;
-      mm = mm % nn;
-      A2 -= q * A1;
-      B2 -= q * B1;
-      swap_s64(&mm, &nn);
-      swap_s64(&A2, &A1);
-      swap_s64(&B2, &B1);
+      int64_t qq = mm / nn;
+      int64_t tt;
+      tt = mm - qq * nn; mm = nn; nn = tt;
+      tt = A2 - qq * A1; A2 = A1; A1 = tt;
+      tt = B2 - qq * B1; B2 = B1; B1 = tt;
 
       if (i&1) {
 	if ((nn < -B1) || (mm - nn < A1 - A2))
