@@ -173,30 +173,3 @@ plot "pari-128.dat" with lines title 'Pari', \
      "shallit-128.dat" with lines title 'Shallit and Sorenson (128-bit)' lt 4, \
      "binary_l2r-128.dat" with lines title 'Binary L2R (128-bit)' lt 7, \
      "lehmer64l2r-128.dat" with lines title 'Lehmer w/ 64-bit L2R (128-bit)' lt 5
-
-###########
-# DEFENCE #
-###########
-
-set xrange [1:63]
-set output 'binary-xgcd-optimizations-64.eps'
-plot "binary_l2r_noopt-64.dat" with lines t 'No Opts', \
-     "binary_l2r_msbtrick.dat" with lines t 'MSB Trick', \
-     "binary_l2r_swaptrick-64.dat" with lines t 'MSB + Swap Tricks', \
-     "binary_l2r-64.dat" with lines t 'MSB + Swap + Branch Free'
-
-set xrange [1:31]
-set output 'binary-xgcds-32.eps'
-plot 'shallit-32.dat' with lines t 'Shallit & Sorenson', \
-     'brent-32.dat' with lines t 'Brent', \
-     'binary_l2r-32.dat' with lines t 'Simplified L2R'
-set xrange [32:63]
-set output 'binary-xgcds-64.eps'
-plot 'shallit-64.dat' with lines t 'Shallit & Sorenson', \
-     'brent-64.dat' with lines t 'Brent', \
-     'binary_l2r-64.dat' with lines t 'Simplified L2R'
-set xrange [64:127]
-set output 'binary-xgcds-128.eps'
-plot 'shallit-128.dat' with lines t 'Shallit & Sorenson', \
-     'brent-128.dat' with lines t 'Brent', \
-     'binary_l2r-128.dat' with lines t 'Simplified L2R'     
