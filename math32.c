@@ -193,3 +193,52 @@ int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n) {
   return m;
 }
 
+void xgcd_partial_divrem_s32(int32_t* r1, int32_t* r0,
+			     int32_t* C1, int32_t* C0,
+			     int32_t bound) {
+  // bound should not be zero
+  if (bound == 0) {
+    bound = 1;
+  }
+#if defined(__x86_64)
+  asm("movl $0, %3\n\t" // C1 = 0;
+      "cmpl %6, %0\n\t"
+      "movl $-1, %2\n\t" // C0 = -1;
+      "jbe 9f\n\t"
+      
+      "xorl %%edx, %%edx\n\t"
+      "movl %1, %%eax\n\t"
+      "0:\n\t"
+      // the values to divide are loaded at the end of the loop
+      "divl %0\n\t"
+      "movl %0, %1\n\t"        // r1' = r0
+      "movl %%edx, %0\n\t"     // r0' = r1 % r0
+      "imull %2, %%eax\n\t"    // eax = (r1/r0)*C0
+      "subl %%eax, %3\n\t"     // C1 = C1 - (r1/r0)*C0
+      "xorl %%edx, %%edx\n\t"  // high word for divide
+      "cmpl %6, %0\n\t"        // r0 > bound ?
+      "xchgl %2, %3\n\t"       // C0'=C1, C1'=C0
+      "movl %1, %%eax\n\t"     // low word for divide
+      "ja 0b\n\t"
+      "9:\n\t"
+      : "=r"(*r0), "=rm"(*r1), "=&r"(*C0), "=&rm"(*C1)
+      : "0"(*r0), "1"(*r1), "r"(bound)
+      : "cc", "eax", "edx");
+#else
+  int32_t t, g;
+  (*C0) = -1;
+  (*C1) = 0;
+  
+  while ((*r0) > bound) {
+    g = (*r1) / (*r0);
+    
+    t = (*r0);
+    (*r0) = (*r1) - g*(*r0);
+    (*r1) = t;
+    
+    t = (*C0);
+    (*C0) = (*C1) - g*(*C0);
+    (*C1) = t;
+  }
+#endif
+}
