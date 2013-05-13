@@ -25,7 +25,7 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_shortpartial_divrem_s128
+#define GCD_ROUTINE xgcd_shortpartial_brent_s128
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 128
 #define GCD_SIZE 128
@@ -247,7 +247,7 @@ int main(int argc, char** argv) {
   int pairs = atoi(argv[2]);
 
   cout << "Priming CPU for 3 seconds." << endl;
-  //  full_cpu_load(3);
+  full_cpu_load(3);
 
   // Reinitialize the random number generator for testing.
   srand(atoi(argv[1]));
