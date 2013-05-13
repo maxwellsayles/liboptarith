@@ -220,9 +220,9 @@ int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n) {
  *  - C_i sequence from "Solving the Pell Equation" defined as
  *     C_{-1}=0, C_{1}=-1  C_i=C_{i-2}-q_i C_{i-1}
  */
-void xgcd_partial_divrem_s64(uint64_t* r1, uint64_t* r0,
+void xgcd_partial_divrem_s64(int64_t* r1, int64_t* r0,
 			     int64_t* C1, int64_t* C0,
-			     uint64_t bound) {
+			     int64_t bound) {
   // bound should not be zero
   if (bound == 0) {
     bound = 1;
