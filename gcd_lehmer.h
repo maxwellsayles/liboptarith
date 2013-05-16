@@ -42,4 +42,9 @@ void xgcd_shortpartial_lehmer_s128_brent64(s128_t* pR2, s128_t* pR1,
 					   int64_t* pC2, int64_t* pC1,
 					   const int64_t bound);
 
+/// Partial XGCD of the Lehmer with 64-bit simplified l2r binary.
+void xgcd_shortpartial_lehmer_s128_l2r64(s128_t* pR2, s128_t* pR1,
+					 int64_t* pC2, int64_t* pC1,
+					 const int64_t bound);
+
 #endif  // GCD_LEHMER__INCLUDED
