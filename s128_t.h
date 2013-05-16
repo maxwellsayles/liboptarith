@@ -535,12 +535,12 @@ static inline void cond_swap2_s128(s128_t* u1, s128_t* u2,
 }
 
 /// Conditionally swap u with v if u3 < v3.
-static inline void cond_swap3_s128(s128_t* u1,
-				   s128_t* u2,
-				   s128_t* u3,
-				   s128_t* v1,
-				   s128_t* v2,
-				   s128_t* v3) {
+static inline uint64_t cond_swap3_s128(s128_t* u1,
+				       s128_t* u2,
+				       s128_t* u3,
+				       s128_t* v1,
+				       s128_t* v2,
+				       s128_t* v3) {
   uint64_t m;
   s128_t d3;
   sub_with_mask_s128(&m, &d3, u3, v3);
@@ -560,6 +560,7 @@ static inline void cond_swap3_s128(s128_t* u1,
   add_s128_s128(v1, &d1);
   add_s128_s128(v2, &d2);
   add_s128_s128(v3, &d3);
+  return m;
 }
 
 /// Negate using a mask. m must be either -1 or 0.
