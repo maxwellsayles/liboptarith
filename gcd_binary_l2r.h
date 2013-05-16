@@ -66,5 +66,17 @@ int64_t xgcd_left_binary_l2r_s64(int64_t* s,
 void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
 			       const s128_t* a, const s128_t* b);
 
+uint32_t xgcd_partial_binary_l2r_s32(int32_t* r1, int32_t* r0,
+				     int32_t* c1, int32_t* c0,
+				     const int32_t bound);
+
+uint64_t xgcd_partial_binary_l2r_s64(int64_t* r1, int64_t* r0,
+				     int64_t* c1, int64_t* c0,
+				     const int64_t bound);
+
+uint64_t xgcd_shortpartial_binary_l2r_s128(s128_t* pr1, s128_t* pr0,
+					   int64_t* pc1, int64_t* pc0,
+					   const int64_t bound);
+
 #endif
 

@@ -609,3 +609,174 @@ void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
   *d = u3;
 }
 
+uint32_t xgcd_partial_binary_l2r_s32(int32_t* pr1, int32_t* pr0,
+				     int32_t* pc1, int32_t* pc0,
+				     const int32_t bound) {
+  assert(r1);
+  assert(r0);
+  assert(c1);
+  assert(c0);
+  assert(bound >= 0);
+  int32_t r1 = *pr1;
+  int32_t r0 = *pr0;
+  int32_t c1 = 0;
+  int32_t c0 = -1;
+  uint32_t s1 = r1 >> 31;
+  uint32_t s0 = r0 >> 31;
+  uint32_t cm = s1 ^ s0;
+  r1 = negate_using_mask_s32(s1, r1);
+  r0 = negate_using_mask_s32(s0, r0);
+  assert(r1 >= r0);
+  uint32_t z = 0;
+
+  // Swap u with v if u3 < v3.
+  z ^= cond_swap3_s32(&c1, (int32_t*)&s1, &r1, &c0, (int32_t*)&s0, &r0);
+  while (r0 != 0 && r0 > bound) {
+    int k = msb_u32(r1) - msb_u32(r0);
+
+    // Subtract 2^k times r0 from r1, make sure r1 >= r0 >= 0
+    uint32_t m;
+    r1 = sub_with_mask_s32(&m, r1, r0 << k);
+    c1 -= negate_using_mask_s32(cm, c0 << k);
+
+    r1 = negate_using_mask_s32(m, r1);
+    s1 ^= m;
+    cm ^= m;
+
+    z ^= cond_swap3_s32(&c1, (int32_t*)&s1, &r1, &c0, (int32_t*)&s0, &r0);
+  }
+
+  *pr1 = negate_using_mask_s32(s1, r1);
+  *pr0 = negate_using_mask_s32(s0, r0);
+  *pc1 = c1;
+  *pc0 = c0;
+  return z;
+}
+
+uint64_t xgcd_partial_binary_l2r_s64(int64_t* pr1, int64_t* pr0,
+				     int64_t* pc1, int64_t* pc0,
+				     const int64_t bound) {
+  assert(r1);
+  assert(r0);
+  assert(c1);
+  assert(c0);
+  assert(bound >= 0);
+  int64_t r1 = *pr1;
+  int64_t r0 = *pr0;
+  int64_t c1 = 0;
+  int64_t c0 = -1;
+  uint64_t s1 = r1 >> 63;
+  uint64_t s0 = r0 >> 63;
+  uint64_t cm = s1 ^ s0;
+  r1 = negate_using_mask_s64(s1, r1);
+  r0 = negate_using_mask_s64(s0, r0);
+  assert(r1 >= r0);
+  uint64_t z = 0;
+
+  // Swap u with v if u3 < v3.
+  z ^= cond_swap3_s64(&c1, (int64_t*)&s1, &r1, &c0, (int64_t*)&s0, &r0);
+  while (r0 != 0 && r0 > bound) {
+    int k = msb_u64(r1) - msb_u64(r0);
+
+    // Subtract 2^k times r0 from r1, make sure r1 >= r0 >= 0
+    uint64_t m;
+    r1 = sub_with_mask_s64(&m, r1, r0 << k);
+    c1 -= negate_using_mask_s64(cm, c0 << k);
+
+    r1 = negate_using_mask_s64(m, r1);
+    s1 ^= m;
+    cm ^= m;
+
+    z ^= cond_swap3_s64(&c1, (int64_t*)&s1, &r1, &c0, (int64_t*)&s0, &r0);
+  }
+
+  *pr1 = negate_using_mask_s64(s1, r1);
+  *pr0 = negate_using_mask_s64(s0, r0);
+  *pc1 = c1;
+  *pc0 = c0;
+  return z;
+}
+
+
+/// Conditionally swap R1 and C1 with R0 and C0 if R1 < R0.
+static inline uint64_t cond_swap3_mixed(
+    s128_t* R1, uint64_t* s1, int64_t* C1,
+    s128_t* R0, uint64_t* s0, int64_t* C0) {
+  uint64_t m;
+  s128_t d2;
+  sub_with_mask_s128(&m, &d2, R1, R0);
+  d2.v0 &= m;
+  d2.v1 &= m;
+  sub_s128_s128(R1, &d2);
+  add_s128_s128(R0, &d2);
+  int64_t d1 = (*C1 - *C0) & m;
+  *C1 -= d1;
+  *C0 += d1;
+  d1 = (*s1 - *s0) & m;
+  *s1 -= d1;
+  *s0 += d1;
+  return m;
+}
+
+
+uint64_t xgcd_shortpartial_binary_l2r_s128(s128_t* pr1, s128_t* pr0,
+					   int64_t* pc1, int64_t* pc0,
+					   const int64_t bound) {
+  assert(r1);
+  assert(r0);
+  assert(c1);
+  assert(c0);
+  assert(bound >= 0);
+  s128_t r1 = *pr1;
+  s128_t r0 = *pr0;
+  int64_t c1 = 0;
+  int64_t c0 = -1;
+  uint64_t s1 = mask_s128(&r1);
+  uint64_t s0 = mask_s128(&r0);
+  uint64_t cm = s1 ^ s0;
+  negate_using_mask_s128(s1, &r1);
+  negate_using_mask_s128(s0, &r0);
+  uint64_t z = 0;
+
+  z ^= cond_swap3_mixed(&r1, &s1, &c1, &r0, &s0, &c0);
+  while (cmp_s128_s64(&r0, bound) > 0 && !s128_is_s64(&r1)) {
+  //  while (cmp_s128_s64(&r0, bound) > 0 && cmpzero_s128(&r0) != 0) {
+    int k = msb_s128(&r1) - msb_s128(&r0);
+    uint64_t m;
+    s128_t t0 = r0;
+    shl_s128_int(&t0, k);
+    sub_with_mask_s128(&m, &r1, &r1, &t0);
+    c1 -= negate_using_mask_s64(cm, c0 << k);
+    negate_using_mask_s128(m, &r1);
+    s1 ^= m;
+    cm ^= m;
+    z ^= cond_swap3_mixed(&r1, &s1, &c1, &r0, &s0, &c0);
+  }
+
+  // Run 64-bit partial
+  int64_t rr1 = get_s64_from_s128(&r1);
+  int64_t rr0 = get_s64_from_s128(&r0);
+  z ^= cond_swap3_s64(&c1, (int64_t*)&s1, &rr1,
+		      &c0, (int64_t*)&s0, &rr0);
+  while (rr0 > bound && rr0 != 0) {
+    uint64_t m;
+    int k = msb_u64(rr1) - msb_u64(rr0);
+    rr1 = sub_with_mask_s64(&m, rr1, rr0 << k);
+    c1 -= negate_using_mask_s64(cm, c0 << k);
+    rr1 = negate_using_mask_s64(m, rr1);
+    s1 ^= m;
+    cm ^= m;
+    z ^= cond_swap3_s64(&c1, (int64_t*)&s1, &rr1,
+			&c0, (int64_t*)&s0, &rr0);
+  }
+  set_s128_s64(&r1, rr1);
+  set_s128_s64(&r0, rr0);
+
+  negate_using_mask_s128(s1, &r1);
+  negate_using_mask_s128(s0, &r0);
+  *pr1 = r1;
+  *pr0 = r0;
+  *pc1 = c1;
+  *pc0 = c0;
+  return z;
+}
