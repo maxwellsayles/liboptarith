@@ -12,6 +12,7 @@
 #include <sys/time.h>
 
 extern "C" {
+#include "liboptarith/gcd_binary_l2r.h"
 #include "liboptarith/gcd_brent.h"
 #include "liboptarith/gcd_lehmer.h"
 #include "liboptarith/gcd_mpz128.h"
@@ -25,10 +26,10 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_shortpartial_mpz_s128
+#define GCD_ROUTINE xgcd_partial_divrem_s32
 #define GCD_MIN_BITS_TO_TEST 1
-#define GCD_MAX_BITS_TO_TEST 128
-#define GCD_SIZE 128
+#define GCD_MAX_BITS_TO_TEST 32
+#define GCD_SIZE 32
 
 // return an array of n elements of b bits
 // caller must delete[] returned array
