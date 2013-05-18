@@ -30,9 +30,6 @@ set xrange [64:127]
 set output 'best-partial-128.eps'
 plot 'gmp-128.dat' with lines title 'GMP Lehmer w/ 64-bit EEA', \
      'divrem-128.dat' with lines title '128-bit EEA', \
-     'brent-128.dat' with lines title '128-bit Brent', \
      'binary_l2r-128.dat' with lines title 'Our 128-bit L2R', \
-     'lehmer-eea64-128.dat' with lines title '128-bit Lehmer w/ 64-bit EEA', \
-     'lehmer-brent64-128.dat' with lines title '128-bit Lehmer w/ 64-bit Brent', \
      'lehmer-l2r64-128.dat' with lines title '128-bit Lehmer w/ Our 64-bit L2R'
 
