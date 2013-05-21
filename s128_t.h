@@ -405,10 +405,14 @@ static inline void add_s128_s64(s128_t* a, int64_t in_b) {
 }
 
 static inline void sub_s128_s64(s128_t* a, int64_t in_b) {
+  // NOTE: We cannot simply subtract the 64-bits and then sbbq $0,
+  // since if y < 0 then is should be sbbq $-1.
   s128_t b;
   set_s128_s64(&b, in_b);
   sub_s128_s128(a, &b);
 }
+
+
 
 static inline void add_s128_u64(s128_t* a, uint64_t in_b) {
   s128_t b;
