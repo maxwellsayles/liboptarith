@@ -435,32 +435,6 @@ static inline int32_t mulmod_s32(const int32_t x,
 /// Compute the largest s such that s^2 <= x.
 uint32_t sqrt_u32(const uint32_t x);
 
-/// Compute the extended GCD using a divrem method.
-uint32_t xgcd_divrem_u32(int32_t* u, int32_t* v, uint32_t m, uint32_t n);
-
-/// Compute the extended GCD using a divrem method.
-int32_t xgcd_divrem_s32(int32_t* u, int32_t* v, int32_t m, int32_t n);
-
-/// Compute the extended GCD using a divrem method
-/// only computing the left argument.
-int32_t xgcd_left_divrem_s32(int32_t* u, int32_t m, int32_t n);
-
-/**
- * Partial Euclidean algorithm.
- * (for Book's version of NUCOMP, NUDUPL, and NUCUBE algorithm).
- *
- * Input:  R2 = R_{-1} , R1 = R_{0}, bound
- *  - R_i is the R - sequence from "Solving the Pell Equation"
- *    ( R_i = R_{i-2}-q_i R_{i-1} )
- * Output: R2 = R_{i-1}, R1 = R_i, C2 = C_{i-1}, C1 = C_i,
- *  - R_i = 0 or R_i <= bound < R_{i-1}
- *  - C_i sequence from "Solving the Pell Equation" defined as
- *     C_{-1}=0, C_{1}=-1  C_i=C_{i-2}-q_i C_{i-1}
- */
-void xgcd_partial_divrem_s32(int32_t* r1, int32_t* r0,
-			     int32_t* C1, int32_t* C0,
-			     int32_t bound);
-
 #endif
 
 

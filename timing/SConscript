@@ -21,8 +21,7 @@ Program(target='timegcd',
         LIBS=libs)
 
 Program(target='timepartial',
-        source=['timepartial.cc',
-                'gcd_divrem.c'] + sources,
+        source=['timepartial.cc'] + sources,
         CCFLAGS=['-Wall', '-DNDEBUG', '-O3'],
         CPPPATH='../..',
         LIBS=libs)
