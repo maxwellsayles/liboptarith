@@ -531,13 +531,6 @@ static inline int is_square_s64(const int64_t x) {
   return is_square_u64(abs_s64(x));
 }
 
-int64_t xgcd_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
-
-int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n);
-
-void xgcd_partial_divrem_s64(int64_t* r1, int64_t* r0,
-			     int64_t* C1, int64_t* C0, int64_t bound);
-
 /// compute a^e mod m using binary exponentiation
 uint64_t expmod_u64(uint64_t a, uint64_t e, uint64_t m);
 

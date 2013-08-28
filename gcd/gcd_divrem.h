@@ -21,6 +21,13 @@ void xgcd_partial_divrem_s32(int32_t* r1, int32_t* r0,
 			     int32_t* C1, int32_t* C0,
 			     int32_t bound);
 
+int64_t xgcd_divrem_s64(int64_t* u, int64_t* v, int64_t m, int64_t n);
+
+int64_t xgcd_left_divrem_s64(int64_t* u, int64_t m, int64_t n);
+
+void xgcd_partial_divrem_s64(int64_t* r1, int64_t* r0,
+			     int64_t* C1, int64_t* C0, int64_t bound);
+
 
 
 void xgcd_shortpartial_divrem_s128(s128_t* R1, s128_t* R0,

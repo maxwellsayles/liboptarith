@@ -60,10 +60,9 @@ int64_t full_cpu_load(const uint64_t secs) {
   int64_t sum = 0;
   const uint64_t start = current_nanos();
   while (current_nanos() - start < nanos) {
-    int64_t s, t, a, b;
-    a = rand_u64() % (1ULL<<59);
-    b = rand_u64() % (1ULL<<59);
-    sum += xgcd_divrem_s64(&s, &t, a, b);
+    int64_t a = rand_u64() % (1ULL<<59);
+    int64_t b = rand_u64() % (1ULL<<59);
+    sum += (a - b) / (1 + a + b);
   }
   return sum;
 }
