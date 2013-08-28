@@ -3,11 +3,7 @@
  * NOTE: It does not handle negative inputs for any of the GCDs.
  */
 
-#include <iostream>
-
 #include "liboptarith/s128_c.h"
-
-using namespace std;
 
 static void compute_u1(s128* u1,
 		       const s128& u2, const s128& u3,
@@ -43,6 +39,7 @@ void xgcd_blockstein2_s128(s128_t* out_d,
   int shift;
   bool swapped;
   s128 pre2[4];
+  assert(a >= 0 && b >= 0);
 
   // make sure none of the inputs are 0
   if (cmpzero_s128(in_a) == 0) {
@@ -147,7 +144,8 @@ void xgcd_blockstein3_s128(s128_t* out_d,
   bool swapped;
   s128 pre2[4];
   s128 pre3[8];
-
+  assert(a >= 0 && b >= 0);
+  
   // make sure none of the inputs are 0
   if (cmpzero_s128(in_a) == 0) {
     set_s128_s64(out_s, 0);
@@ -274,7 +272,8 @@ void xgcd_blockstein4_s128(s128_t* out_d,
   s128 pre2[4];
   s128 pre3[8];
   s128 pre4[16];
-
+  assert(a >= 0 && b >= 0);
+  
   // make sure none of the inputs are 0
   if (cmpzero_s128(in_a) == 0) {
     set_s128_s64(out_s, 0);
@@ -415,7 +414,8 @@ void xgcd_blockstein5_s128(s128_t* out_d,
   s128 pre3[8];
   s128 pre4[16];
   s128 pre5[32];
-
+  assert(a >= 0 && b >= 0);
+  
   // make sure none of the inputs are 0
   if (cmpzero_s128(in_a) == 0) {
     set_s128_s64(out_s, 0);

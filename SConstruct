@@ -12,7 +12,7 @@ env = Environment(CCFLAGS=ccflags,
                   CPPPATH='..')
 
 cfiles  = glob('*.c') + glob('gcd/*.c')
-ccfiles = glob('*.cc')
+ccfiles = glob('*.cc') + glob('gcd/*.cc')
 
 env.StaticLibrary(target='optarith',
                   source=cfiles)

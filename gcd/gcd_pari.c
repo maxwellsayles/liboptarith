@@ -1,4 +1,4 @@
-#include "gcd_pari.h"
+#include "liboptarith/gcd/gcd_pari.h"
 
 #include <pari/pari.h>
 #include <stdint.h>
@@ -83,7 +83,7 @@ static void to_s128(s128_t* x, GEN g) {
       neg_s128_s128(x, x);
     }
   } else {
-    assert(false);
+    assert(0);
   }
 }
 

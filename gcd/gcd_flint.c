@@ -23,6 +23,7 @@
 
 ******************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 
 typedef uint64_t mp_limb_t;
@@ -317,8 +318,12 @@ n_xgcd32(uint32_t* a, uint32_t* b, uint32_t x, uint32_t y)
     return u3;
 }
 
+/// This function wraps the above function to conform to liboptarith's
+/// xgcd interface.
 int32_t xgcd_flint_s32(int32_t* out_a, int32_t* out_b,
 		       int32_t x, int32_t y) {
+  assert(x >= 0);
+  assert(y >= 0);
   uint32_t g, a, b;
 
   if (x < y) {
@@ -334,8 +339,12 @@ int32_t xgcd_flint_s32(int32_t* out_a, int32_t* out_b,
   return g;
 }
 
+/// This function wraps the above function to conform to liboptarith's
+/// xgcd interface.
 int64_t xgcd_flint_s64(int64_t* out_a, int64_t* out_b,
 		       int64_t x, int64_t y) {
+  assert(x >= 0);
+  assert(y >= 0);
   uint64_t g, a, b;
 
   if (x < y) {

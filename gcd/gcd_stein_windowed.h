@@ -1,8 +1,16 @@
 /**
- * NOTE: This file is for timing purposes only.  It only handles
- * positive inputs correctly.
+ * NOTE: This file is for timing purposes only.
+ *
+ * NOTE: It only handles positive inputs correctly.
+ *
+ * NOTE: You will need to link with liboptarithxx.a since this file
+ *       uses C++.
  */
 #pragma once
+
+#ifndef __cplusplus
+#error "g++ is required."
+#endif
 
 #include "liboptarith/s128_c.h"
 

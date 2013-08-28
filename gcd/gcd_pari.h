@@ -1,5 +1,10 @@
 /**
- * A wrapper for Pari's XGCD.
+ * A wrapper for Pari's XGCD, namely the funciton 'bezout'.
+ *
+ * You will be required to link with libpari and to call pari_init before
+ * using these functions.
+ *
+ * NOTE: These are meant for testing purposes only.
  */
 #pragma once
 #ifndef GCD_PARI

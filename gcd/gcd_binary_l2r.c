@@ -612,10 +612,10 @@ void xgcd_left_binary_l2r_s128(s128_t* d, s128_t* s,
 uint32_t xgcd_partial_binary_l2r_s32(int32_t* pr1, int32_t* pr0,
 				     int32_t* pc1, int32_t* pc0,
 				     const int32_t bound) {
-  assert(r1);
-  assert(r0);
-  assert(c1);
-  assert(c0);
+  assert(pr1);
+  assert(pr0);
+  assert(pc1);
+  assert(pc0);
   assert(bound >= 0);
   int32_t r1 = *pr1;
   int32_t r0 = *pr0;
@@ -656,10 +656,10 @@ uint32_t xgcd_partial_binary_l2r_s32(int32_t* pr1, int32_t* pr0,
 uint64_t xgcd_partial_binary_l2r_s64(int64_t* pr1, int64_t* pr0,
 				     int64_t* pc1, int64_t* pc0,
 				     const int64_t bound) {
-  assert(r1);
-  assert(r0);
-  assert(c1);
-  assert(c0);
+  assert(pr1);
+  assert(pr0);
+  assert(pc1);
+  assert(pc0);
   assert(bound >= 0);
   int64_t r1 = *pr1;
   int64_t r0 = *pr0;
@@ -722,10 +722,10 @@ static inline uint64_t cond_swap3_mixed(
 uint64_t xgcd_shortpartial_binary_l2r_s128(s128_t* pr1, s128_t* pr0,
 					   int64_t* pc1, int64_t* pc0,
 					   const int64_t bound) {
-  assert(r1);
-  assert(r0);
-  assert(c1);
-  assert(c0);
+  assert(pr1);
+  assert(pr0);
+  assert(pc1);
+  assert(pc0);
   assert(bound >= 0);
   s128_t r1 = *pr1;
   s128_t r0 = *pr0;

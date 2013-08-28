@@ -11,24 +11,24 @@ else:
     libs.append('gmp')
 #sources.append('/usr/local/lib/libmpir.a')
 
+ccflags = ['-Wall', '-DNDEBUG', '-O3']
+#ccflags = ['-Wall', '-O3']
+
 Program(target='timegcd',
-        source=['timegcd.cc',
-                'gcd_flint.c',
-                'gcd_stein_windowed.cc',
-                'gcd_pari.c'] + sources,
-        CCFLAGS=['-Wall', '-DNDEBUG', '-O3'],
+        source=['timegcd.cc'] + sources,
+        CCFLAGS=ccflags,
         CPPPATH='../..',
         LIBS=libs)
 
 Program(target='timepartial',
         source=['timepartial.cc'] + sources,
-        CCFLAGS=['-Wall', '-DNDEBUG', '-O3'],
+        CCFLAGS=ccflags,
         CPPPATH='../..',
         LIBS=libs)
 
 Program(target='timepari',
         source=['timepari.cc'] + sources,
-        CCFLAGS=['-Wall', '-DNDEBUG', '-O3'],
+        CCFLAGS=ccflags,
         CPPPATH='../..',
         LIBS=libs)
 
