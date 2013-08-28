@@ -1,4 +1,4 @@
-#include "liboptarith/gcd_binary_l2r.h"
+#include "liboptarith/gcd/gcd_binary_l2r.h"
 
 #include <stdio.h>
 #include <stdint.h>

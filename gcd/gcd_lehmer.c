@@ -2,7 +2,7 @@
  * Lehmer's GCD for 32bit and 64bit signed integers.
  * This isn't very fast.
  */
-#include "liboptarith/gcd_lehmer.h"
+#include "liboptarith/gcd/gcd_lehmer.h"
 
 #include <assert.h>
 #include <gmp.h>

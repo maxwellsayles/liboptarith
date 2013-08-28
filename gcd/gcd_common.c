@@ -1,4 +1,4 @@
-#include "liboptarith/gcd_common.h"
+#include "liboptarith/gcd/gcd_common.h"
 
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"

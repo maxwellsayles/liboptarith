@@ -1,4 +1,4 @@
-#include "liboptarith/gcd_common.h"
+#include "liboptarith/gcd/gcd_common.h"
 
 #include <gmp.h>
 

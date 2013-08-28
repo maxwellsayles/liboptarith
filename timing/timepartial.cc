@@ -12,10 +12,10 @@
 #include <sys/time.h>
 
 extern "C" {
-#include "liboptarith/gcd_binary_l2r.h"
-#include "liboptarith/gcd_brent.h"
-#include "liboptarith/gcd_lehmer.h"
-#include "liboptarith/gcd_mpz128.h"
+#include "liboptarith/gcd/gcd_binary_l2r.h"
+#include "liboptarith/gcd/gcd_brent.h"
+#include "liboptarith/gcd/gcd_lehmer.h"
+#include "liboptarith/gcd/gcd_mpz128.h"
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"
 #include "liboptarith/math_mpz.h"

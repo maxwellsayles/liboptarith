@@ -11,11 +11,14 @@ if uname[0] == 'Darwin' and uname[4] == 'i386':
 env = Environment(CCFLAGS=ccflags,
                   CPPPATH='..')
 
+cfiles  = glob('*.c') + glob('gcd/*.c')
+ccfiles = glob('*.cc')
+
 env.StaticLibrary(target='optarith',
-                  source=glob('*.c'))
+                  source=cfiles)
     
 env.StaticLibrary(target='optarithxx',
-                  source=glob('*.c') + glob('*.cc'))
+                  source=cfiles + ccfiles)
 
 SConscript(dirs=['tests', 'timing'])
 

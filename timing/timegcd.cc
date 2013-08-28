@@ -12,23 +12,23 @@
 #include <sys/time.h>
 
 extern "C" {
-#include "gcd_pari.h"
-#include "liboptarith/gcd_binary_l2r.h"
-#include "liboptarith/gcd_brent.h"
-#include "liboptarith/gcd_lehmer.h"
-#include "liboptarith/gcd_mpz128.h"
-#include "liboptarith/gcd_shallit.h"
-#include "liboptarith/gcd_smallq_case.h"
-#include "liboptarith/gcd_smallq_loop.h"
-#include "liboptarith/gcd_stein.h"
+#include "liboptarith/gcd/gcd_binary_l2r.h"
+#include "liboptarith/gcd/gcd_brent.h"
+#include "liboptarith/gcd/gcd_lehmer.h"
+#include "liboptarith/gcd/gcd_mpz128.h"
+#include "liboptarith/gcd/gcd_shallit.h"
+#include "liboptarith/gcd/gcd_smallq_case.h"
+#include "liboptarith/gcd/gcd_smallq_loop.h"
+#include "liboptarith/gcd/gcd_stein.h"
 #include "liboptarith/math32.h"
 #include "liboptarith/math64.h"
 #include "liboptarith/math_mpz.h"
 #include "liboptarith/s128_t.h"
 #include "liboptarith/timing/gcd_flint.h"
+#include "liboptarith/timing/gcd_pari.h"
 }
 
-#include "gcd_stein_windowed.h"
+#include "liboptarith/timing/gcd_stein_windowed.h"
 
 using namespace std;
 

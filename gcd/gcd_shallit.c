@@ -1,4 +1,4 @@
-#include "liboptarith/gcd_shallit.h"
+#include "liboptarith/gcd/gcd_shallit.h"
 
 #include <stdint.h>
 

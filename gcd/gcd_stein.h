@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 
-#include "s128_t.h"
+#include "liboptarith/s128_t.h"
 
 /// Compute the GCD of u and v using a binary GCD method.
 int32_t gcd_stein_s32(int32_t u, int32_t v);

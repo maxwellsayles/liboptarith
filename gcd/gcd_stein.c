@@ -1,4 +1,4 @@
-#include "liboptarith/gcd_stein.h"
+#include "liboptarith/gcd/gcd_stein.h"
 
 #include <stdint.h>
 

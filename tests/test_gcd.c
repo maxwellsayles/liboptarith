@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "liboptarith/gcd_binary_l2r.h"
+#include "liboptarith/gcd/gcd_binary_l2r.h"
 #include "liboptarith/math64.h"
 
 /// Compute the extended gcd of a and b and
