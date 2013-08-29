@@ -1,3 +1,8 @@
+/**
+ * Case out small quotients, otherwise use divrem.
+ *
+ * NOTE: This expects the input to be non-negative.
+ */
 #pragma once
 
 #include <stdint.h>

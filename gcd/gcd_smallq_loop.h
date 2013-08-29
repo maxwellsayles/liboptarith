@@ -1,3 +1,8 @@
+/**
+ * Handle small inputs separately. Otherwise use divrem.
+ *
+ * NOTE: Expects the input to be non-negative.
+ */
 #pragma once
 
 #include <stdint.h>
