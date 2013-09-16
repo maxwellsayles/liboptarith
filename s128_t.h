@@ -13,16 +13,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "liboptarith/math64.h"
 #include "liboptarith/u128_t.h"
 
 #ifndef NO_GMP
 #include <gmp.h>
-#endif // NO_GMP
+#endif
 
 typedef struct {
-  uint64_t v0; // low 64 bits
-  int64_t v1; // high 64 bits
+  uint64_t v0;  // low 64 bits
+  int64_t v1;   // high 64 bits
 } s128_t;
 
 int to_decstr_s128(char* buffer, int buffer_size, const s128_t* x);
@@ -204,6 +203,8 @@ static inline void add_s128_s128(s128_t* x, const s128_t* y) {
       : "=rm"(x->v0), "=rm"(x->v1)
       : "0"(x->v0), "1"(x->v1), "r"(y->v0), "r"(y->v1)
       : "cc");
+#else
+#error "Unsupported platform"
 #endif
 }
 
@@ -382,7 +383,10 @@ static inline long lsb_s128(const s128_t* x) {
 void mul_s128_s128_s128(s128_t* res, const s128_t* a, const s128_t* b);
 void divrem_s128_s128_s128_s128(s128_t* q, s128_t* r, const s128_t* n, const s128_t* d);
 
-static inline void mul_s128_s64_s64(s128_t* res, const int64_t in_a, const int64_t in_b) {
+static inline
+void mul_s128_s64_s64(s128_t* res,
+		      const int64_t in_a,
+		      const int64_t in_b) {
 #if defined(__i386)
   s128_t a;
   s128_t b;
@@ -627,12 +631,14 @@ static inline int is_divisible_s128_u64(const s128_t* x, const uint64_t in_y) {
   return is_zero_s128(&r);
 }
 
-static inline void div_s128_s128_s128(s128_t* q, const s128_t* n, const s128_t* d) {
+static inline
+void div_s128_s128_s128(s128_t* q, const s128_t* n, const s128_t* d) {
   s128_t r;
   divrem_s128_s128_s128_s128(q, &r, n, d);
 }
 
-static inline void div_s128_s128_s64(s128_t* out_q, const s128_t* in_n, const int64_t in_d) {
+static inline
+void div_s128_s128_s64(s128_t* out_q, const s128_t* in_n, const int64_t in_d) {
   u128_t n;
   uint64_t d;
   int neg;
@@ -663,16 +669,14 @@ static inline void mod_s128_s128_s128(s128_t* out_r, const s128_t* in_n, const s
   divrem_s128_s128_s128_s128(&q, out_r, in_n, in_d);
 }
 
-// We have to forward declare abs_s64 because of cyclic dependencies in headers.
-static inline uint64_t abs_s64(int64_t);
-
 /// Compute the nearest remainder to zero (not necessarily positive).
 static inline int64_t mod_s64_s128_s64(const s128_t* in_n, const int64_t in_d) {
   int64_t r;
   u128_t n;
   uint64_t d;
 
-  d = abs_s64(in_d);
+  uint64_t m = in_d >> 63;
+  d = (in_d ^ m) - m;  // d = abs(in_d)
   abs_s128_s128((s128_t*)&n, in_n);
   mod_u64_u128_u64((uint64_t*)&r, &n, d);
   if (is_negative_s128(in_n)) {

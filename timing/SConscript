@@ -1,14 +1,21 @@
 import os
 
 libs = ['rt']
-sources = ['../liboptarithxx.a', '/usr/local/lib/libpari.a']
+sources = ['../liboptarithxx.a']
+
+if os.path.isfile('/usr/local/lib/libpari.a'):
+   sources.append('usr/local/lib/libpari.a')
+elif os.path.isfile('/usr/lib/libpari.a'):
+   sources.append('/usr/lib/libpari.a')
+else:
+   libs.append('pari')
     
 if os.path.isfile('/usr/local/lib/libgmp.a'):
-    sources.append('/usr/local/lib/libgmp.a')
+   sources.append('/usr/local/lib/libgmp.a')
 elif os.path.isfile('/usr/lib/libgmp.a'):
-    sources.append('/usr/lib/libgmp.a')
+   sources.append('/usr/lib/libgmp.a')
 else:
-    libs.append('gmp')
+   libs.append('gmp')
 #sources.append('/usr/local/lib/libmpir.a')
 
 ccflags = ['-Wall', '-DNDEBUG', '-O3']

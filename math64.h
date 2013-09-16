@@ -43,7 +43,7 @@ static inline int64_t sub_with_mask_u64(uint64_t* m,
   //  return r;
   //#else
   //*m = a < b ? -1 : 0;
-  *m = (a >= b) - 1;
+  *m = (a >= b) - 1;  // a < b ? -1 : 0;
   return a - b;
   //#endif
 }

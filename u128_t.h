@@ -13,11 +13,11 @@
 
 #ifndef NO_GMP
 #include <gmp.h>
-#endif // NO_GMP
+#endif
 
 typedef struct {
-  uint64_t v0; // low 64 bits
-  uint64_t v1; // high 64 bits
+  uint64_t v0;  // low 64 bits
+  uint64_t v1;  // high 64 bits
 } u128_t;
 
 static inline int u128_is_u64(const u128_t* x) {
