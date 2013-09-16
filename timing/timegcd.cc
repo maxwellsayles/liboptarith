@@ -33,39 +33,41 @@ extern "C" {
 
 using namespace std;
 
-#define GCD_ROUTINE xgcd_smallq4_loop_s64
+#define GCD_ROUTINE xgcd_binary_l2r_s64
 #define GCD_ROUTINE_STR ""
 #define GCD_MIN_BITS_TO_TEST 1
 #define GCD_MAX_BITS_TO_TEST 64
 #define GCD_SIZE 64
 #define GCD_SANITY_TEST 1
 
-// return an array of n elements of b bits
-// caller must delete[] returned array
+// Return an array of n random elements of b bits each.
+// Caller must delete[] returned array.
 uint32_t* rands_u32(const int n, const int b) {
   uint32_t m = (1<<b)-1;
   if (b == 32) m = -1;
   uint32_t* res = new uint32_t[n];
   for (int i = 0;  i < n;  i++) {
     res[i] = rand_u32() & m;
+    res[i] = setbit_u32(res[i], b - 1);
   }
   return res;
 }
 
-// return an array of n elements of b bits
-// caller must delete[] returned array
+// Return an array of n random elements of b bits each.
+// Caller must delete[] returned array.
 uint64_t* rands_u64(const int n, const int b) {
   uint64_t m = (1ULL<<b)-1;
   if (b == 64) m = -1;
   uint64_t* res = new uint64_t[n];
   for (int i = 0;  i < n;  i++) {
     res[i] = rand_u64() & m;
+    res[i] = setbit_u64(res[i], b - 1);
   }
   return res;
 }
 
-// return an array of n elements of b bits
-// caller must delete[] returned array
+// Return an array of n random elements of b bits each..
+// Caller must delete[] returned array.
 u128_t* rands_u128(const int n, const int b) {
   uint64_t m = (1ULL<<(b&63))-1;
   if (b == 64 || b == 128) m = -1;
@@ -78,6 +80,7 @@ u128_t* rands_u128(const int n, const int b) {
       res[i].v1 = 0;
       res[i].v0 &= m;
     }
+    setbit_u128(&res[i], b);
   }
   return res;
 }

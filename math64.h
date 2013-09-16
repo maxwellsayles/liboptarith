@@ -230,6 +230,17 @@ static inline int lsb_s64(int64_t x) {
 #endif
 }
 
+/// Set the i^th bit.
+static inline uint64_t setbit_u64(const uint64_t x, const int i) {
+  return x | (1 << i);
+}
+
+/// Clear the i^th bit.
+static inline uint64_t clrbit_u64(const uint64_t x, const int i) {
+  return x & ~(1 << i);
+}
+
+
 /// the number of bits in x, i.e. the smallest k such that 2^k > x
 static inline int numbits_s64(int64_t x) {
   return msb_u64((uint64_t)abs_s64(x)) + 1;

@@ -258,6 +258,16 @@ static inline int lsb_s32(int32_t x) {
 #endif
 }
 
+/// Set the i^th bit.
+static inline uint32_t setbit_u32(const uint32_t x, const int i) {
+  return x | (1 << i);
+}
+
+/// Clear the i^th bit.
+static inline uint32_t clrbit_u32(const uint32_t x, const int i) {
+  return x & ~(1 << i);
+}
+
 /// Return the number of bits in x, i.e. the
 /// smallest k such that 2^k > x.
 static inline int numbits_u32(uint32_t x) {
