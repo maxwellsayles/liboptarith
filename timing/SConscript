@@ -4,7 +4,7 @@ libs = ['rt']
 sources = ['../liboptarithxx.a']
 
 if os.path.isfile('/usr/local/lib/libpari.a'):
-   sources.append('usr/local/lib/libpari.a')
+   sources.append('/usr/local/lib/libpari.a')
 elif os.path.isfile('/usr/lib/libpari.a'):
    sources.append('/usr/lib/libpari.a')
 else:
