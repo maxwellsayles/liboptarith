@@ -5,7 +5,9 @@
 #include <gmp.h>
 #include <inttypes.h>
 #include <math.h>
+#if !defined(NO_PARI)
 #include <pari/pari.h>
+#endif
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +20,9 @@ extern "C" {
 #include "liboptarith/gcd/gcd_flint.h"
 #include "liboptarith/gcd/gcd_lehmer.h"
 #include "liboptarith/gcd/gcd_mpz128.h"
+#if !defined(NO_PARI)
 #include "liboptarith/gcd/gcd_pari.h"
+#endif
 #include "liboptarith/gcd/gcd_shallit.h"
 #include "liboptarith/gcd/gcd_smallq_case.h"
 #include "liboptarith/gcd/gcd_smallq_loop.h"
@@ -324,7 +328,9 @@ int main(int argc, char** argv) {
     }
   }
 
+#if !defined(NO_PARI)
   pari_init(1<<24, 1<<20);
+#endif
 
   // Set rand seed.
   srand(atoi(argv[1]));
